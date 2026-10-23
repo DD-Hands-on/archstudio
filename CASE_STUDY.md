@@ -1,6 +1,6 @@
 # ArchStudio: a practice studio for system and enterprise architecture
 
-**Role:** product owner and designer · **Timeline:** three days, more than 20 published iterations · **Status:** working prototype, not yet tested with learners
+**By:** Divya Dubey **Role:** product owner and designer · **Timeline:** three days, more than 20 published iterations · **Status:** working prototype, not yet tested with learners
 
 ![ArchStudio blueprint step](docs/screenshots/04-blueprint-flow.png)
 
