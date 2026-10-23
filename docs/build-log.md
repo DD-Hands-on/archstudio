@@ -1,0 +1,49 @@
+# Build log
+
+How ArchStudio evolved, in the order changes were made.
+
+## Foundations
+
+- **First prototype.** Five steps: brief, technology-neutral blueprint, competing outcomes, comparison and an enterprise view. Each building block offered open source and commercial options with a short rationale and a link.
+- **Senior-architect features.** Decision records with Markdown export, availability and cost modelling, an evolution timeline, brownfield migration, a STRIDE threat model, catalogue signals, a mentor layer and a simulated review board.
+- **Free-text briefs.** Named styles such as Netflix, Walmart, Uber and multi-agent systems became reference models.
+
+## Learning experience
+
+- **Ten learning aids from an entry-level review:**
+  - follow-a-request animation
+  - "what breaks without it" toggles
+  - plain-language glossary
+  - visible working for every number
+  - guided mode with predictions
+  - fix-it links
+  - skill levels
+  - worked example
+  - real incidents
+  - checkpoints
+- **Enterprise implementations.** SAP S/4HANA, HR, CRM, ITSM and procurement models, with programme phases, cutover drills and segregation-of-duties checks.
+- **AI as a design dimension.** No AI, AI-enabled or AI-native posture changes the building blocks, request flow, rules, drills, governance and review.
+
+## Interaction and accuracy
+
+- **Platform-aware defaults.** Embedded AI and the user experience follow the design's core platform, after SAP tools appeared in a ServiceNow design.
+- **UX review.** A chat-style brief interpreted by Claude, and a flowchart with typed arrows before the layered view.
+- **Standalone app.** Moved out of the design canvas, which blocks Claude calls, so the brief could use Claude.
+
+## Enterprise depth (v1.8)
+
+- Steps aligned to the TOGAF ADM: principles, vision and stakeholders, a design canvas, gap analysis and roadmap, an architecture contract and change classification.
+- An AI review board, a saved portfolio and a team mode.
+
+## v1.9
+
+- The whole journey shown as chevrons in the header.
+- A first-principles Workload step: sizing, the working, and the building blocks the numbers require.
+- Agentic ITSM: event correlation, runbook automation, triage and remediation patterns, and an alert-storm drill.
+
+## v2.0
+
+- **Design lens.** System first or enterprise portfolio first, which changes the path, the brief, the blueprint, the comparison, the drills and the review.
+- **Neutral standards by default.** No products are pre-selected and no vendor is preferred. Labelled example libraries follow a written rule.
+- More model providers, so no single vendor is the only managed option.
+- A clearer Guide panel.
