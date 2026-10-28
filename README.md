@@ -46,7 +46,7 @@ Choose how to practise on the first screen, or any time from **View**:
 | Outcomes and Compare | Build competing designs and compare their trade-offs |
 | Gap and roadmap | Plan transition architectures from baseline to target |
 | Drill | Run failure scenarios tied to real incidents, and a STRIDE threat model |
-| AI board and Review | Defend the design and sign the architecture contract |
+| AI board and Review | Defend the design to an SRE lead, CISO, FinOps lead and enterprise architect, then sign the architecture contract once they approve |
 
 ## Screenshots
 

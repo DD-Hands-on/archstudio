@@ -1436,6 +1436,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <sc-for list="{{contract.devs}}" as="x" hint-placeholder-count="2"><div style="font-size: 13px; color: var(--ink-2)"><strong>{{x.c}}:</strong> {{x.t}}</div></sc-for>
 </div>
 </sc-if>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><span style="font-size: 14px; font-weight: 600">AI board decision</span><span style="font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: {{contract.bbg}}; color: {{contract.bfg}}">{{contract.board}}</span></span>
+<sc-if value="{{contract.hasConds}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--ink-2)">Conditions carried into this contract:</span>
+<sc-for list="{{contract.conds}}" as="c" hint-placeholder-count="2"><div style="display: flex; gap: 8px; font-size: 13px; color: var(--ink-2)"><span aria-hidden="true">›</span><span>{{c.t}}</span></div></sc-for>
+</sc-if>
+<sc-if value="{{contract.hasGate}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: var(--ink-3)">{{contract.gateLine}}</span></sc-if>
+</div>
 <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
 <button type="button" id="step-action" class="{{contract.signCls}}" onClick="{{contract.sign}}" style="scroll-margin-top: 80px">{{contract.signLabel}}</button>
 <span style="font-size: 13px; color: var(--ink-3)">{{contract.note}}</span>
@@ -1790,11 +1798,20 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div>
 <div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phase G · AI review board</div>
 <h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">Defend your design to the board</h1>
-<p style="margin: 0; color: var(--ink-3); max-width: 760px">{{brd.who}} sits as a board drawn from your stakeholders. It reads your actual blocks, products, connections, principles and roadmap, then questions the choices you made. Answer in your own words. Each answer gets feedback and, if it is thin, one follow-up.</p>
+<p style="margin: 0; color: var(--ink-3); max-width: 760px">{{brd.who}} plays the board below. Each member reads your actual blocks, products, Workload numbers, principles and roadmap, and questions you from their own lens. A thin answer gets a sharper follow-up, up to three rounds. A strong answer names the trade-off you accepted and the evidence for it. Your architecture contract unlocks when the board approves.</p>
 </div>
 <sc-if value="{{brd.ready}}" hint-placeholder-val="{{true}}">
 <button type="button" id="step-action" class="{{conveneCls}}" onClick="{{brd.convene}}" style="scroll-margin-top: 80px">{{brd.conveneLabel}}</button>
 </sc-if>
+</div>
+<div role="list" aria-label="The board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px">
+<sc-for list="{{brd.panel}}" as="m" hint-placeholder-count="5">
+<div role="listitem" style="background: var(--surface); border: 1px solid var(--hair-soft); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px">
+<span style="font-weight: 700; font-size: 14px">{{m.n}}</span>
+<span style="font-size: 12px; font-weight: 600; color: var(--accent-ink)">{{m.f}}</span>
+<span style="font-size: 12px; color: var(--ink-3); line-height: 1.45">{{m.d}}</span>
+</div>
+</sc-for>
 </div>
 <sc-if value="{{brd.isBusy}}" hint-placeholder-val="{{false}}">
 <div role="status" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--fill); border-radius: var(--r-md); padding: 10px 14px">
@@ -2121,6 +2138,13 @@ function applyFit(o, notes) {
   const s2 = o.s.slice(); notes.forEach(f => { s2[f.d] = Math.max(1, Math.min(5, s2[f.d] + f.v)); });
   return Object.assign({}, o, { s: s2, s0: o.s, fit: notes });
 }
+
+const BOARD_ROLES = [
+  ['SRE lead', 'Reliability and operations', 'failure modes, the availability chain, observability, on-call load and recovery targets, tested against the Drill results and the Workload numbers'],
+  ['CISO', 'Security, data and AI risk', 'trust boundaries, identity, regulated data and residency, and for AI: prompt injection, guardrails and human oversight'],
+  ['FinOps lead', 'Cost at your numbers', 'run cost at the Workload numbers: per-request and per-token pricing, licences, reserved capacity and what grows fastest'],
+  ['Enterprise architect', 'Standards and roadmap', 'fit with the estate: standards and deviations, integration, what retires, and whether each transition architecture can run the business']
+];
 
 const TRACKS = {
   interview: { n: 'System design interview', t: 'About 30 minutes', lens: 'system',
@@ -3664,13 +3688,22 @@ class Component extends DCLogic {
     // Architecture contract
     const r = this.checkDesign(ds.comps, c => ds.picks[c]);
     const signed = !!st.contractSigned;
+    const bv = st.boardVerdict; const aiBoard = !!this._sample;
+    const passed = !!bv && (bv.decision === 'approve' || bv.decision === 'conditional');
+    const locked = aiBoard && !passed && !signed; const rejected = !!bv && bv.decision === 'reject';
+    const bLabel = bv ? { approve: 'Approved', conditional: 'Approved with conditions', reject: 'Not approved' }[bv.decision] : '';
     const contract = { status: signed ? 'Signed, submitted for review' : 'Draft', sbg: signed ? 'var(--good-soft)' : 'var(--fill)', sfg: signed ? 'var(--good)' : 'var(--ink-2)',
-      facts: [{ l: 'Scope', v: sc ? sc.n + '. ' + sc.scopeIn.join('; ') + '.' : A.n }, { l: 'Baseline to target', v: cnt('New') + ' new, ' + cnt('Change') + ' changed, ' + cnt('Keep') + ' kept, ' + cnt('Retire') + ' retired' }, { l: 'Standards', v: this.libNone() ? 'No pattern library set: products are chosen on their trade-offs' : r.conf == null ? 'No products chosen yet' : r.conf + '% of chosen blocks follow the approved pattern library' }, { l: 'Design source', v: ds.src === 'canvas' ? 'Design canvas' : 'Selected outcome' }, { l: 'AI board', v: st.boardVerdict ? ({ approve: 'Approved', conditional: 'Approved with conditions: ' + st.boardVerdict.conditions.join('; '), reject: 'Not approved' }[st.boardVerdict.decision]) : 'Not yet convened' }],
+      facts: [{ l: 'Scope', v: sc ? sc.n + '. ' + sc.scopeIn.join('; ') + '.' : A.n }, { l: 'Baseline to target', v: cnt('New') + ' new, ' + cnt('Change') + ' changed, ' + cnt('Keep') + ' kept, ' + cnt('Retire') + ' retired' }, { l: 'Standards', v: this.libNone() ? 'No pattern library set: products are chosen on their trade-offs' : r.conf == null ? 'No products chosen yet' : r.conf + '% of chosen blocks follow the approved pattern library' }, { l: 'Design source', v: ds.src === 'canvas' ? 'Design canvas' : 'Selected outcome' }],
       prin: adoptedP.map(p => ({ n: p.n, cl: p.cl, cbg: p.cbg, cfg: p.cfg, ct: p.ct })),
       devs: r.checks.filter(x => x.st === 'dev' || x.st === 'review').map(x => ({ c: x.c, t: x.t })), hasDev: r.devN > 0,
-      signLabel: signed ? 'Withdraw signature' : 'Sign and submit for review', signCls: signed ? 'as-secondary' : 'as-primary', signBg: signed ? 'var(--ink-3)' : 'var(--good)',
-      note: signed ? 'The design is now marked ready for review in your portfolio' + (this._db ? ' and is saved to your portfolio.' : '.') : 'Signing moves the design to ready for review' + (this._db ? ' and saves it to your portfolio.' : '.'),
-      sign: () => { if (signed) this.setState({ contractSigned: false }); else { this.setState({ contractSigned: true }); if (this._db) this.saveDesign('review'); } } };
+      board: bv ? bLabel + (bv.conditions && bv.conditions.length ? ' (' + bv.conditions.length + ' condition' + (bv.conditions.length === 1 ? '' : 's') + ')' : '') : aiBoard ? 'Not yet given' : 'No AI board in this view',
+      bbg: !bv ? 'var(--fill)' : passed ? (bv.decision === 'approve' ? 'var(--good-soft)' : 'var(--warn-soft)') : 'var(--bad-soft)', bfg: !bv ? 'var(--ink-2)' : passed ? (bv.decision === 'approve' ? 'var(--good)' : 'var(--warn)') : 'var(--bad)',
+      conds: passed && bv.conditions ? bv.conditions.map(t => ({ t })) : [], hasConds: passed && !!bv.conditions && bv.conditions.length > 0,
+      locked, gateLine: locked ? (rejected ? 'The board did not approve this design. Address the risks it raised, then convene a new board.' : 'The contract unlocks when the AI board approves the design, with or without conditions.') : !aiBoard && !bv ? 'Without an AI model the board cannot sit here, so you sign on your own review. Connect a model to have the board decide first.' : '',
+      hasGate: locked || (!aiBoard && !bv),
+      signLabel: signed ? 'Withdraw signature' : locked ? 'Go to the AI board' : 'Sign and submit for review', signCls: signed || locked ? 'as-secondary' : 'as-primary', signBg: signed ? 'var(--ink-3)' : 'var(--good)',
+      note: locked ? 'Locked until the board approves.' : signed ? 'The design is now marked ready for review in your portfolio' + (this._db ? ' and is saved to your portfolio.' : '.') : 'Signing moves the design to ready for review' + (this._db ? ' and saves it to your portfolio.' : '.'),
+      sign: () => { if (signed) this.setState({ contractSigned: false }); else if (locked) go('board')(); else { this.setState({ contractSigned: true }); if (this._db) this.saveDesign('review'); } } };
 
     return { principles: prin, prinStats, vision, entScen, hasScenario: !!sc, clearScenario: () => this.setState({ scenario: null, chg: {}, stake: null }), gap, changes, contract };
   }
@@ -3699,6 +3732,10 @@ class Component extends DCLogic {
     const g = this.admVals(() => () => {}, {}).gap;
     lines.push('GAP ANALYSIS: ' + g.stats.map(x => x.t).join(', ') + '. Retiring: ' + (g.rows.filter(r => r.gap === 'Retire').map(r => r.base).join('; ') || 'nothing') + '.');
     lines.push('ROADMAP: ' + g.plateaus.map(p => p.n + ' (' + p.items.length + ' work packages)').join('; '));
+    const Nw = this.wlNums();
+    lines.push('WORKLOAD (from the Workload step): peak ' + fmtW(Nw.peakRps) + ' requests/s (average ' + fmtW(Nw.avgRps) + '); ' + fmtW(Nw.readRps) + ' reads/s and ' + fmtW(Nw.writeRps) + ' writes/s at peak; ' + fmtGBW(Nw.store3) + ' stored after 3 years; latency budget ' + Nw.lat + ' ms; ' + Nw.cons + ' consistency; main pattern ' + Nw.pattern + (Nw.tokensDay ? '; about ' + fmtW(Nw.tokensDay) + ' AI tokens a day' : '') + '.');
+    const fitFlags = []; ds.comps.forEach(c => { const p = ds.picks[c]; const cc = D.cat[c]; if (p == null || !cc || !cc.o[p]) return; fitFor(c, cc.o[p], Nw).forEach(f => fitFlags.push(cc.o[p].n + ': ' + f.why)); });
+    lines.push('WORKLOAD FIT FLAGS: ' + (fitFlags.length ? fitFlags.filter((x, i, a) => a.indexOf(x) === i).join(' ') : 'none, every chosen product is within its comfortable range.'));
     lines.push('DESIGN LENS: ' + (st.lens === 'enterprise' ? 'enterprise portfolio first. Weigh capability gaps, application rationalisation, standards and the roadmap above technical detail.' : 'system first. Weigh building blocks, non-functional qualities and operations.'));
     lines.push('LEARNER LEVEL: ' + st.level + '.');
     return lines.join('\n');
@@ -3708,6 +3745,7 @@ class Component extends DCLogic {
     return 'You are an enterprise architecture review board inside ArchStudio, a studio where architects practise designing system and enterprise architectures using the TOGAF ADM. ' +
       'Be rigorous and specific: refer to the actual building blocks, products, connections, principles and gaps in the design. Never ask generic textbook questions. ' +
       'Pitch difficulty to the learner level: beginner gets clear, single-issue questions; advanced gets questions that combine trade-offs across layers. ' +
+      'A strong answer names the trade-off the architect accepted and gives evidence from the design: a Workload number, a product choice, a decision record or a drill result. Adjectives without evidence are weak. ' +
       'Use British spelling. Do not use em dashes. Keep sentences short and plain.';
   }
 
@@ -3728,14 +3766,23 @@ class Component extends DCLogic {
     }
   }
 
+  boardPanel() {
+    const sc = this.scen(); const st = this.state;
+    const stake = sc ? sc.stake.filter(x => x[1] === 'h').map(x => [x[0], x[3]]) : [];
+    const lead = stake[0] || (st.lens === 'enterprise' ? ['Business owner', 'whether the change delivers the capability it promises, on time'] : null);
+    return { roles: BOARD_ROLES, stake: lead };
+  }
+
   convene() {
-    const sc = this.scen(); const members = sc ? sc.stake.filter(s => s[1] === 'h').map(s => s[0]) : ['Executive sponsor', 'Security office', 'Finance'];
-    const prompt = this.boardRules() + '\n\nThe board has a chair (Chief architect) and these members: ' + members.join(', ') + '.\n\n' + this.boardContext() + '\n\n' +
-      'Convene the board. Write a one or two sentence opening from the chair, then exactly 4 questions. Spread them across different members and different concerns: at least one on a principle that is at risk or a deviation if there is one, one on resilience or operations, one on the roadmap or migration, and one on a stakeholder concern. ' +
-      'Reply with only one JSON object: {"opening": "...", "questions": [{"member": "one of the names above or Chief architect", "question": "one question, max 40 words, naming specific blocks or products", "why": "what the board is testing, max 15 words", "focus": "the block, principle or plateau it targets, max 5 words"}]}';
+    const P = this.boardPanel(); const names = P.roles.map(r => r[0]).concat(P.stake ? [P.stake[0]] : []);
+    const prompt = this.boardRules() + '\n\nThe board has a chair (Chief architect) and these members, each with one lens:\n' +
+      P.roles.map(r => '- ' + r[0] + ' (' + r[1] + '): probes ' + r[2] + '.').join('\n') + (P.stake ? '\n- ' + P.stake[0] + ' (stakeholder): cares about ' + P.stake[1] + '.' : '') + '\n\n' + this.boardContext() + '\n\n' +
+      'Convene the board. Write a one or two sentence opening from the chair, then exactly ' + names.length + ' questions: one from each member, in the order listed, each strictly from that member\'s lens. ' +
+      'Aim each question at the weakest point in this design for that lens: a principle at risk, a deviation, a workload fit flag, a drill gap or a roadmap risk. ' +
+      'Reply with only one JSON object: {"opening": "...", "questions": [{"member": "exact member name", "question": "one question, max 40 words, naming specific blocks, products or numbers", "why": "what the board is testing, max 15 words", "focus": "the block, principle, number or plateau it targets, max 5 words"}]}';
     this.setState({ board: { questions: [], verdict: null, opening: '', busy: '', err: '' } });
     this.boardCall(prompt, 'The board is reading your design...', r => {
-      const qs = (Array.isArray(r.questions) ? r.questions : []).filter(q => q && q.question).slice(0, 4).map(q => ({ member: String(q.member || 'Chief architect').slice(0, 60), q: String(q.question).slice(0, 400), why: String(q.why || '').slice(0, 160), focus: String(q.focus || '').slice(0, 60), draft: '', rounds: [] }));
+      const qs = (Array.isArray(r.questions) ? r.questions : []).filter(q => q && q.question).slice(0, names.length).map((q, k) => ({ member: String(names.find(n => String(q.member || '').toLowerCase().indexOf(n.toLowerCase()) >= 0) || q.member || names[k] || 'Chief architect').slice(0, 60), q: String(q.question).slice(0, 400), why: String(q.why || '').slice(0, 160), focus: String(q.focus || '').slice(0, 60), draft: '', rounds: [] }));
       if (!qs.length) { this.setState({ board: Object.assign({}, this.state.board, { err: 'The board did not return questions. Try convening again.' }) }); return; }
       this.setState({ board: Object.assign({}, this.state.board, { opening: String(r.opening || '').slice(0, 400), questions: qs, verdict: null }) });
     });
@@ -3750,11 +3797,12 @@ class Component extends DCLogic {
     const prompt = this.boardRules() + '\n\n' + this.boardContext() + '\n\nYou are ' + q.member + ' on the board. ' + (history ? 'Earlier exchange on this question:\n' + history + '\n\n' : '') +
       'Your question: ' + lastQ + '\nThe architect answered: ' + a + '\n\n' +
       'Judge the answer against the design above. Credit specifics that match the design; call out claims that contradict it. ' +
-      (round >= 1 ? 'This was the follow-up, so do not ask another. ' : 'If the answer is partial or weak, ask one sharp follow-up; otherwise leave follow empty. ') +
+      'This is round ' + (round + 1) + ' of at most 3 on this question. Stay in your own lens. ' +
+      (round >= 2 ? 'This was the final round, so do not ask another follow-up. ' : 'If the answer is partial or weak, ask one sharper follow-up that pins down the missing trade-off or evidence; if it is strong, leave follow empty. ') +
       'Reply with only one JSON object: {"score": "strong|partial|weak", "feedback": "2 or 3 sentences, specific to their answer and the design", "follow": "one follow-up question or empty string"}';
     this.boardCall(prompt, q.member + ' is considering your answer...', r => {
       const score = ['strong', 'partial', 'weak'].indexOf(r.score) >= 0 ? r.score : 'partial';
-      const follow = round >= 1 ? '' : String(r.follow || '').slice(0, 400);
+      const follow = round >= 2 || score === 'strong' ? '' : String(r.follow || '').slice(0, 400);
       const nb = this.state.board;
       this.setState({ board: Object.assign({}, nb, { questions: nb.questions.map((x, k) => k === i ? Object.assign({}, x, { draft: '', needText: false, rounds: x.rounds.concat([{ a, score, fb: String(r.feedback || '').slice(0, 600), follow }]) }) : x) }) });
     });
@@ -3764,7 +3812,7 @@ class Component extends DCLogic {
     const b = this.state.board; if (!b) return;
     const transcript = b.questions.map((q, i) => (i + 1) + '. ' + q.member + ': ' + q.q + '\n' + q.rounds.map((r, k) => '   Answer: ' + r.a + '\n   Board (' + r.score + '): ' + r.fb + (r.follow ? '\n   Follow-up: ' + r.follow : '')).join('\n')).join('\n');
     const prompt = this.boardRules() + '\n\n' + this.boardContext() + '\n\nBOARD TRANSCRIPT:\n' + transcript + '\n\n' +
-      'Give the board\'s decision. Approve only if the design is sound and the answers held up. Use conditional approval when the design is sound but specific issues must be fixed. Reject if a core principle fails or answers did not hold up. ' +
+      'Give the board\'s decision. Each member\'s concern must be resolved in the answers or carried as a condition. Approve only if the design is sound and the answers held up. Use conditional approval when the design is sound but specific issues must be fixed. Reject if a core principle fails or answers did not hold up. ' +
       'Reply with only one JSON object: {"decision": "approve|conditional|reject", "summary": "2 or 3 sentences", "conditions": ["specific actions, max 4, empty if approve"], "strengths": ["max 3"], "risks": ["max 3"], "learn": "one sentence on what the architect should practise next"}';
     this.boardCall(prompt, 'The board is deciding...', r => {
       const list = v => (Array.isArray(v) ? v : []).map(x => String(x).slice(0, 300)).filter(Boolean).slice(0, 4);
@@ -3779,10 +3827,10 @@ class Component extends DCLogic {
     const st = this.state; const b = st.board || { questions: [], verdict: null, opening: '', busy: '', err: '' };
     const sc = { strong: ['Strong', 'var(--good-soft)', 'var(--good)'], partial: ['Partial', 'var(--warn-soft)', 'var(--warn)'], weak: ['Weak', 'var(--bad-soft)', 'var(--bad)'] };
     const qs = b.questions.map((q, i) => {
-      const last = q.rounds[q.rounds.length - 1]; const open = !q.rounds.length || (q.rounds.length === 1 && !!last.follow);
+      const last = q.rounds[q.rounds.length - 1]; const open = !q.rounds.length || (q.rounds.length < 3 && !!last.follow);
       return { n: i + 1, member: q.member, q: q.q, why: q.why, focus: q.focus, hasFocus: !!q.focus, id: 'board-a-' + i,
         rounds: q.rounds.map(r => ({ a: r.a, fb: r.fb, sl: sc[r.score][0], sbg: sc[r.score][1], sfg: sc[r.score][2], hasFollow: !!r.follow, follow: r.follow })),
-        open: open && !b.verdict, draft: q.draft || '', prompt: q.rounds.length ? 'Answer the follow-up' : 'Your answer', needText: !!q.needText,
+        open: open && !b.verdict, draft: q.draft || '', prompt: q.rounds.length === 2 ? 'Answer the final follow-up' : q.rounds.length ? 'Answer the follow-up (round ' + (q.rounds.length + 1) + ' of 3)' : 'Your answer', needText: !!q.needText,
         onDraft: e => { const nb = this.state.board; this.setState({ board: Object.assign({}, nb, { questions: nb.questions.map((x, k) => k === i ? Object.assign({}, x, { draft: e.target.value, needText: false }) : x) }) }); },
         send: () => this.answer(i), done: !open };
     });
@@ -3793,6 +3841,7 @@ class Component extends DCLogic {
       convene: () => this.convene(), conveneLabel: qs.length ? 'Convene a new board' : 'Convene the board', stop: () => { if (this._bctl) this._bctl.abort(); },
       progress: answered + ' of ' + qs.length + ' questions answered', canVerdict: answered === qs.length && qs.length > 0 && !v && !b.busy, verdictBtn: () => this.askVerdict(),
       hasVerdict: !!v, v: v ? { label: dec[0], c: dec[1], summary: v.summary, conditions: v.conditions.map(t => ({ t })), hasCond: v.conditions.length > 0, strengths: v.strengths.map(t => ({ t })), risks: v.risks.map(t => ({ t })), learn: v.learn, hasLearn: !!v.learn } : { label: '', c: '', summary: '', conditions: [], hasCond: false, strengths: [], risks: [], learn: '', hasLearn: false },
+      panel: this.boardPanel().roles.map(r => ({ n: r[0], f: r[1], d: 'Probes ' + r[2] + '.' })).concat(this.boardPanel().stake ? [{ n: this.boardPanel().stake[0], f: 'Your most powerful stakeholder', d: 'Cares about ' + this.boardPanel().stake[1] + '.' }] : []),
       notReady: !this._sample, who: this.aiName(), canSetup: !this._host, setup: () => { this.setState({ showAI: true, aiTest: '' }); try { window.scrollTo({ top: 0 }); } catch (e) {} },
       notReadyLine: this._host ? 'The AI board needs this page opened in Claude, where it asks once for permission to use Claude. The simulated board in the Review step works anywhere.' : 'The AI board needs an AI model. Connect your own, or use the simulated board in the Review step, which works without one.',
       saveNote: v ? (this._db && st.savedId ? 'The verdict is saved with this design in your portfolio, ready to show a mentor or manager.' : 'Save the design to your portfolio to keep this verdict and show it to a mentor or manager.') : '' } };
@@ -4751,7 +4800,7 @@ class Component extends DCLogic {
         canvas: !st.canvasAgreed && 'Review the canvas and use it',
         outcomes: !(base.g && base.g.done) && 'Make every decision for this outcome',
         compare: st.chosen == null && 'Select an outcome',
-        review: !st.contractSigned && 'Sign the architecture contract',
+        review: !st.contractSigned && (this._sample && !(st.boardVerdict && st.boardVerdict.decision !== 'reject') ? 'Get the AI board\'s approval, then sign the contract' : 'Sign the architecture contract'),
         change: doneChanges < nChanges && 'Classify every change',
         board: !!this._sample && !st.boardVerdict && (st.board && st.board.questions && st.board.questions.length ? 'Answer the board, then ask for its decision' : 'Convene the board') }[stp] || '';
       if (work) { base.showQuiz = false; base.nextCls = 'as-float-quiet'; base.nextVerb = 'Skip to'; base.hasTodo = true; base.todoLine = 'Left to do: ' + work.charAt(0).toLowerCase() + work.slice(1); base.todoGo = toAction; }
