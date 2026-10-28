@@ -47,3 +47,11 @@ How ArchStudio evolved, in the order changes were made.
 - **Neutral standards by default.** No products are pre-selected and no vendor is preferred. Labelled example libraries follow a written rule.
 - More model providers, so no single vendor is the only managed option.
 - A clearer Guide panel.
+
+## v2.1
+
+Changes made after an external review of the repository.
+
+- **Works fully outside Claude.** Designs save to browser storage when Claude's shared store is not available.
+- **Bring your own model.** Briefs and the AI review board can use Anthropic, OpenAI, Gemini or a local Ollama model, called directly from the browser. Keys are kept in memory unless the user chooses to remember them.
+- **Safer links.** The renderer already escaped all text and attributes; links now must use https, http or mailto, or they are blocked.

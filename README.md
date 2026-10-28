@@ -8,12 +8,20 @@ A practice studio for designing system and enterprise architectures, from a plai
 
 ## Try it
 
-Open [`app/index.html`](app/index.html) in any modern browser. Nothing to install.
+**[Open ArchStudio in your browser](https://dd-hands-on.github.io/archstudio/app/)**, or download [`app/index.html`](app/index.html) and open it. Nothing to install, no account needed.
 
-Running the file directly, ArchStudio reads briefs with keyword matching and keeps your work in the page only. Inside Claude, two more features switch on:
+| | In your browser | Inside Claude |
+|---|---|---|
+| Every design step, drill and check | Yes | Yes |
+| Free-form briefs read by AI | Connect your own model (below); otherwise keyword matching | Claude |
+| AI review board | With your own model | Claude |
+| Saved portfolio | In this browser only | Shared, with team mode |
 
-- Claude interprets free-form briefs and sits as the AI review board.
-- Designs can be saved to a shared portfolio.
+### Connect your own AI model (optional)
+
+Open **View options → AI model** and choose Anthropic, OpenAI, Google Gemini or a local model through Ollama. ArchStudio calls the provider straight from your browser. It has no server, so your key never reaches this repository or anyone else. The key is forgotten when you close the tab unless you choose to remember it on your device. Use a key with a spending limit.
+
+For Ollama, start it with `OLLAMA_ORIGINS` set to the site's address (for example `https://dd-hands-on.github.io`) so the browser is allowed to call it.
 
 ## What it covers
 

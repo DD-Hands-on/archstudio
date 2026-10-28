@@ -232,7 +232,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="8.5" y="14" width="7" height="7" rx="1"></rect><path d="M6.5 10v2h11v-2M12 12v2"></path></svg>
 </div>
 <span style="font-weight: 600; font-size: 15px; letter-spacing: -0.01em">ArchStudio</span>
-<span class="as-hide-xs" style="font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--ink-3)">v2.0</span>
+<span class="as-hide-xs" style="font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--ink-3)">v2.1</span>
 <span class="as-brief" style="font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 10px; margin-left: 4px; border-left: 1px solid var(--hair)">{{briefLine}}</span>
 <span style="flex: 1 1 auto"></span>
 <button type="button" class="as-ghost as-hide-sm" onClick="{{toggleFw}}" aria-expanded="{{fwExpanded}}">Frameworks</button>
@@ -258,6 +258,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--hair); font-size: 14px">
 <span style="font-weight: 500">Checkpoints</span><span style="color: var(--ink-3); font-variant-numeric: tabular-nums">{{quizScore}}</span>
 </div>
+<sc-if value="{{canSetupAI}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--hair)">
+<span style="font-size: 14px; font-weight: 500">AI model</span><span style="font-size: 12px; color: var(--ink-3)">{{aiStatus}}</span>
+<button type="button" class="as-secondary" onClick="{{openAI}}" style="align-self: flex-start; min-height: 34px; font-size: 13px">{{aiBtnLabel}}</button>
+</div>
+</sc-if>
 <button type="button" class="as-ghost as-show-sm" onClick="{{toggleFw}}" style="justify-content: flex-start">Frameworks</button>
 </div>
 </sc-if>
@@ -359,6 +365,34 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 </sc-if>
 
+<sc-if value="{{showAI}}" hint-placeholder-val="{{false}}">
+<section aria-label="AI model settings" style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 760px"><h2 style="margin: 0; font-size: 18px">Connect an AI model</h2><span style="font-size: 13px; color: var(--ink-3)">Outside Claude, ArchStudio can use a model you choose to read free-form briefs and to sit as the AI review board. Without one, briefs use keyword matching and every other step works as normal.</span></div>
+<button type="button" onClick="{{closeAI}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Close</button>
+</div>
+<div role="group" aria-label="Provider" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{aiProv}}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="min-height: 36px; padding: 4px 14px; border-radius: 999px; border: 1px solid {{p.bd}}; background: {{p.bg}}; color: {{p.fg}}; font-size: 13px; font-weight: 500">{{p.n}}</button>
+</sc-for>
+</div>
+<span style="font-size: 13px; color: var(--ink-2); max-width: 760px">{{aiHelp}} <a href="{{aiKeyLink}}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-ink)">{{aiLinkLabel}}</a></span>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-if value="{{aiNeedsKey}}" hint-placeholder-val="{{true}}"><label style="flex: 2 1 280px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">API key<input type="password" autocomplete="off" spellcheck="false" value="{{aiKey}}" onInput="{{onAIKey}}" placeholder="Paste your key" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label></sc-if>
+<sc-if value="{{aiNeedsUrl}}" hint-placeholder-val="{{false}}"><label style="flex: 2 1 260px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">Ollama address<input type="text" spellcheck="false" value="{{aiUrl}}" onInput="{{onAIUrl}}" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label></sc-if>
+<label style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">Model<input type="text" spellcheck="false" value="{{aiModel}}" onInput="{{onAIModel}}" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label>
+</div>
+<sc-if value="{{aiNeedsKey}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; gap: 10px"><button type="button" role="switch" class="as-switch" onClick="{{toggleRemember}}" aria-checked="{{aiRemember}}" aria-label="Remember the key on this device"><span></span></button><span style="font-size: 13px; color: var(--ink-2)">Remember the key on this device. When off, the key is forgotten when you close the tab.</span></div>
+<span style="font-size: 12px; color: var(--ink-3); max-width: 760px">The key goes only from this browser to {{aiProvName}}. ArchStudio has no server and never sees it. Use a key with a spending limit, and do not remember it on a shared computer.</span>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<button type="button" class="as-primary" onClick="{{aiConnect}}">{{aiConnectLabel}}</button>
+<sc-if value="{{aiConnected}}" hint-placeholder-val="{{false}}"><button type="button" class="as-secondary" onClick="{{disconnectAI}}">Disconnect</button></sc-if>
+</div>
+<sc-if value="{{hasAITest}}" hint-placeholder-val="{{false}}"><div role="status" style="font-size: 13px; padding: 8px 12px; border-radius: var(--r-sm); background: {{aiTestBg}}; color: {{aiTestFg}}">{{aiTest}}</div></sc-if>
+</section>
+</sc-if>
 <sc-if value="{{showFw}}" hint-placeholder-val="{{false}}">
 <section aria-label="Frameworks" style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
@@ -558,7 +592,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <textarea id="brief-input" rows="2" value="{{text}}" onChange="{{onText}}" onKeyDown="{{onKey}}" placeholder="{{composerHint}}" style="flex: 1 1 360px; min-height: 52px; padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 15px; line-height: 1.4; color: var(--ink); background: var(--surface); box-sizing: border-box; resize: vertical; font-family: inherit"></textarea>
 <button type="button" class="as-send" data-ready="{{sendReady}}" onClick="{{send}}">Send</button>
 </div>
-<div style="padding: 0 16px 12px; font-size: 12px; color: var(--ink-3)">{{aiModeLine}}</div>
+<div style="padding: 0 16px 12px; font-size: 12px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center"><span style="flex: 1 1 280px">{{aiModeLine}}</span><sc-if value="{{canSetupAI}}" hint-placeholder-val="{{false}}"><button type="button" class="as-ghost" onClick="{{openAI}}" style="min-height: 30px; font-size: 12.5px; color: var(--accent-ink)">{{aiBtnLabel}}</button></sc-if></div>
 </div>
 
 <aside style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 14px">
@@ -1715,7 +1749,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div>
 <div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phase G · AI review board</div>
 <h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">Defend your design to the board</h1>
-<p style="margin: 0; color: var(--ink-3); max-width: 760px">Claude sits as a board drawn from your stakeholders. It reads your actual blocks, products, connections, principles and roadmap, then questions the choices you made. Answer in your own words. Each answer gets feedback and, if it is thin, one follow-up.</p>
+<p style="margin: 0; color: var(--ink-3); max-width: 760px">{{brd.who}} sits as a board drawn from your stakeholders. It reads your actual blocks, products, connections, principles and roadmap, then questions the choices you made. Answer in your own words. Each answer gets feedback and, if it is thin, one follow-up.</p>
 </div>
 <sc-if value="{{brd.ready}}" hint-placeholder-val="{{true}}">
 <button type="button" id="step-action" class="{{conveneCls}}" onClick="{{brd.convene}}" style="scroll-margin-top: 80px">{{brd.conveneLabel}}</button>
@@ -1792,7 +1826,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 </sc-if>
 <sc-if value="{{brd.notReady}}" hint-placeholder-val="{{false}}">
-<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; font-size: 14px; color: var(--ink-2)">The AI board needs this page opened in Claude, where it asks once for permission to use Claude. The simulated board in the Review step works anywhere.</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; font-size: 14px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center"><span style="flex: 1 1 320px">{{brd.notReadyLine}}</span><sc-if value="{{brd.canSetup}}" hint-placeholder-val="{{false}}"><button type="button" class="as-secondary" onClick="{{brd.setup}}">Connect an AI model</button></sc-if></div>
 </sc-if>
 </section>
 </sc-if>
@@ -1898,7 +1932,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         if (typeof fn === 'function') { handlers.push(fn); attrs += ' data-h-' + EVENTS[low] + '="' + (handlers.length - 1) + '"'; }
         continue;
       }
-      const val = interp(a.value, scope);
+      const raw = interp(a.value, scope);
+      const val = (low === 'href' || low === 'src') && raw && !/^(https?:|mailto:|#)/i.test(raw.trim()) ? '#' : raw;
       if (tag === 'textarea' && low === 'value') { textareaValue = val; continue; }
       if ((low === 'marker-start' || low === 'marker-end') && !val) continue;
       attrs += ' ' + name + '="' + escA(val) + '"';
@@ -1947,6 +1982,102 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </script>
 <script>
 
+// ---------- Standalone support: browser storage and bring-your-own model ----------
+function localStore() {
+  const KEY = 'archstudio.store.v1';
+  let data = { portfolio: {}, docs: {} };
+  try { const raw = window.localStorage.getItem(KEY); if (raw) { const p = JSON.parse(raw); if (p && typeof p === 'object') data = { portfolio: p.portfolio || {}, docs: p.docs || {} }; } } catch (e) {}
+  const subs = [];
+  const clone = v => v == null ? v : JSON.parse(JSON.stringify(v));
+  const persist = () => {
+    try { window.localStorage.setItem(KEY, JSON.stringify(data)); }
+    catch (e) { const er = new Error('storage'); er.code = /quota/i.test(String(e && (e.name || e.message))) ? 'quota_exceeded' : 'storage_unavailable'; throw er; }
+  };
+  const emit = () => subs.slice().forEach(f => { try { f(); } catch (e) {} });
+  const sub = f => { subs.push(f); f(); return () => { const i = subs.indexOf(f); if (i >= 0) subs.splice(i, 1); }; };
+  const docRef = path => {
+    const parts = path.split('/'); const col = parts[0]; const id = parts[1];
+    const get = () => col === 'portfolio' ? data.portfolio[id] : data.docs[path];
+    const put = v => { if (col === 'portfolio') { if (v == null) delete data.portfolio[id]; else data.portfolio[id] = v; } else { if (v == null) delete data.docs[path]; else data.docs[path] = v; } };
+    return { id,
+      set: async body => { const prev = clone(get()); put(clone(body)); try { persist(); } catch (e) { put(prev); throw e; } emit(); },
+      delete: async () => { const prev = clone(get()); put(null); try { persist(); } catch (e) { put(prev); throw e; } emit(); },
+      onSnapshot: cb => sub(() => { const v = get(); cb({ exists: v != null, data: () => clone(v) }); }) };
+  };
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const snap = () => ({ docs: Object.keys(data.portfolio).map(id => ({ id, at: String(data.portfolio[id].savedAt || ''), data: () => clone(data.portfolio[id]) })).sort((a, b) => b.at.localeCompare(a.at)) });
+  return { local: true, doc: docRef,
+    collection: name => ({ doc: () => docRef(name + '/' + newId()), orderBy: () => ({ limit: () => ({ onSnapshot: cb => sub(() => cb(snap())) }) }) }) };
+}
+
+const AI_PROVIDERS = {
+  anthropic: { n: 'Anthropic', s: 'Claude', model: 'claude-sonnet-5-5', key: true, link: 'https://console.anthropic.com/settings/keys',
+    help: 'Uses Claude through the Anthropic API. You need an API key from the Anthropic Console; API usage is billed by Anthropic.' },
+  openai: { n: 'OpenAI', s: 'OpenAI', model: 'gpt-5-mini', key: true, link: 'https://platform.openai.com/api-keys',
+    help: 'Uses the OpenAI API. You need an API key from the OpenAI platform; usage is billed by OpenAI.' },
+  gemini: { n: 'Google Gemini', s: 'Gemini', model: 'gemini-2.5-flash', key: true, link: 'https://aistudio.google.com/apikey',
+    help: 'Uses the Gemini API. You can create a key in Google AI Studio; usage follows your Google plan.' },
+  ollama: { n: 'Ollama (local)', s: 'Ollama', model: 'llama3.1', key: false, url: 'http://localhost:11434', link: 'https://ollama.com/download',
+    help: 'Runs an open model on your own computer, so nothing leaves it. Start Ollama with OLLAMA_ORIGINS set to this site\'s address, otherwise the browser blocks the call. Smaller models follow the format less reliably.' }
+};
+
+function aiErr(code, detail) { const e = new Error(detail || code); e.code = code; e.detail = detail || ''; return e; }
+
+function parseModelJSON(t) {
+  let s = String(t || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+  try { return JSON.parse(s); } catch (e) {}
+  const a = s.indexOf('{'), b = s.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { return JSON.parse(s.slice(a, b + 1)); } catch (e) {} }
+  throw aiErr('bad_json');
+}
+
+function makeLLM(cfg) {
+  const p = cfg.provider; const model = cfg.model; const key = String(cfg.key || '').trim();
+  return { provider: p, json: async (prompt, opts) => {
+    opts = opts || {};
+    const hd = { 'content-type': 'application/json' }; let url, body, pick;
+    if (p === 'anthropic') {
+      url = 'https://api.anthropic.com/v1/messages';
+      Object.assign(hd, { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' });
+      body = { model, max_tokens: 8000, messages: [{ role: 'user', content: prompt }] };
+      pick = j => (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+    } else if (p === 'openai') {
+      url = 'https://api.openai.com/v1/chat/completions'; hd.authorization = 'Bearer ' + key;
+      body = { model, messages: [{ role: 'system', content: 'Reply with one JSON object only.' }, { role: 'user', content: prompt }], response_format: { type: 'json_object' } };
+      pick = j => (((j.choices || [])[0] || {}).message || {}).content || '';
+    } else if (p === 'gemini') {
+      url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent'; hd['x-goog-api-key'] = key;
+      body = { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } };
+      pick = j => ((((j.candidates || [])[0] || {}).content || {}).parts || []).map(x => x.text || '').join('');
+    } else {
+      url = String(cfg.url || 'http://localhost:11434').replace(/\/+$/, '') + '/api/chat';
+      body = { model, messages: [{ role: 'user', content: prompt }], stream: false, format: 'json' };
+      pick = j => (j.message && j.message.content) || '';
+    }
+    let r;
+    try { r = await fetch(url, { method: 'POST', headers: hd, body: JSON.stringify(body), signal: opts.signal }); }
+    catch (e) { if (e && e.name === 'AbortError') throw aiErr('cancelled'); throw aiErr('network'); }
+    if (!r.ok) {
+      let d = '';
+      try { const j = await r.json(); d = (j.error && (j.error.message || (typeof j.error === 'string' ? j.error : ''))) || j.message || ''; } catch (e) {}
+      throw aiErr(r.status === 401 || r.status === 403 ? 'bad_key' : r.status === 429 ? 'rate_limited' : 'provider_error', String(d).slice(0, 200));
+    }
+    let j;
+    try { j = await r.json(); } catch (e) { if (e && e.name === 'AbortError') throw aiErr('cancelled'); throw aiErr('bad_json'); }
+    if (typeof opts.onText === 'function') { try { opts.onText(''); } catch (e) {} }
+    return parseModelJSON(pick(j));
+  } };
+}
+
+function loadAICfg() { try { const raw = window.localStorage.getItem('archstudio.ai'); const c = raw ? JSON.parse(raw) : null; return c && AI_PROVIDERS[c.provider] ? c : null; } catch (e) { return null; } }
+function saveAICfg(c) {
+  try {
+    const keep = { provider: c.provider, model: c.model, url: c.url || '', remember: !!c.remember, connected: !!c.connected };
+    if (c.remember && c.key) keep.key = c.key;
+    window.localStorage.setItem('archstudio.ai', JSON.stringify(keep));
+  } catch (e) {}
+}
+
 class Component extends DCLogic {
   state = { step: 'tour', level: 'beginner', plain: true, term: null, tourIdx: 0,
     app: 'ecom', text: '', custom: null, interp: null, interpMiss: false, scale: '1M', reg: false, cloud: 'aws', field: 'green', lens: 'system', avail: '99.95', ai: 'enabled',
@@ -1956,12 +2087,22 @@ class Component extends DCLogic {
     mode: 'learn', teamView: 'flight', std: null, appr: {}, apprLocal: {}, openCard: null, showSamples: true, isLead: true, canWrite: true, uid: null,
     scenario: null, principles: null, stake: null, chg: {}, contractSigned: false,
     canvas: null, canvasSel: null, linkFrom: null, linkType: 'sync', palQ: '',
-    board: null, boardVerdict: null, portfolio: [], names: {}, savedId: null, showPort: false, showFw: false, showMenu: false, showSide: false, portMsg: '', portErr: false, confirmDel: null, teamMsg: '' };
+    board: null, boardVerdict: null, portfolio: [], names: {}, savedId: null, showPort: false, showFw: false, showMenu: false, showSide: false, portMsg: '', portErr: false, confirmDel: null, teamMsg: '',
+    showAI: false, aiCfg: { provider: 'anthropic', model: 'claude-sonnet-5-5', key: '', url: '', remember: false }, aiSrc: 'none', aiTest: '', aiTestOk: null, aiTesting: false };
 
   componentDidMount() {
+    this._host = !!(window.claude && typeof window.claude.use === 'function');
     try {
-      if (window.claude && typeof window.claude.use === 'function') {
-        window.claude.use('sample').then(s => { this._sample = s || null; this.setState({ aiReady: !!s }); }).catch(() => { this._sample = null; });
+      if (this._host) {
+        window.claude.use('sample').then(s => { this._sample = s || null; this.setState({ aiReady: !!s, aiSrc: s ? 'claude' : 'none' }); }).catch(() => { this._sample = null; });
+      } else {
+        const c = loadAICfg();
+        if (c) {
+          const cfg = Object.assign({ key: '', url: '' }, c);
+          const ok = cfg.connected && (!AI_PROVIDERS[cfg.provider].key || cfg.key);
+          if (ok) this._sample = makeLLM(cfg);
+          this.setState({ aiCfg: cfg, aiSrc: ok ? 'byo' : 'none', aiReady: !!ok });
+        }
       }
     } catch (e) { this._sample = null; }
     document.addEventListener('pointerdown', e => this.onPointerDown(e));
@@ -1973,6 +2114,68 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() { if (this._t) clearInterval(this._t); if (this._ctl) this._ctl.abort(); (this._unsubs || []).forEach(u => { try { u(); } catch (e) {} }); }
+
+  aiName() { const c = this.state.aiCfg || {}; return this.state.aiSrc === 'byo' && AI_PROVIDERS[c.provider] ? AI_PROVIDERS[c.provider].s : 'Claude'; }
+
+  byoErr(e, prov) {
+    const c = this.state.aiCfg || {}; const id = prov || c.provider; const P = AI_PROVIDERS[id] || AI_PROVIDERS.anthropic; const n = P.n; const code = e && e.code; const d = e && e.detail ? ' (' + e.detail + ')' : '';
+    if (code === 'bad_key') return n + ' did not accept the API key' + d + '. Check it in AI model settings.';
+    if (code === 'network') return id === 'ollama' ? 'Could not reach Ollama. Check it is running at the address given and that OLLAMA_ORIGINS allows this site.' : 'Could not reach ' + n + '. Check your connection and try again.';
+    if (code === 'rate_limited') return n + ' is busy or your usage limit was reached' + d + '. Try again later.';
+    if (code === 'bad_json') return 'The model replied in an unexpected format. Try again, or choose a stronger model.';
+    if (code === 'provider_error') return n + ' returned an error' + d + '. Check the model name.';
+    return n + ' could not answer just now. Try again.';
+  }
+
+  setAICfg(patch) {
+    const c = Object.assign({}, this.state.aiCfg, patch);
+    if (patch.provider && patch.provider !== this.state.aiCfg.provider) { c.model = AI_PROVIDERS[patch.provider].model; c.url = AI_PROVIDERS[patch.provider].url || ''; }
+    this.setState({ aiCfg: c, aiTest: '' });
+    if ('remember' in patch && this.state.aiSrc === 'byo') saveAICfg(Object.assign({}, c, { connected: true }));
+  }
+
+  async connectAI() {
+    if (this.state.aiTesting) return;
+    const c = Object.assign({}, this.state.aiCfg); const P = AI_PROVIDERS[c.provider] || AI_PROVIDERS.anthropic;
+    c.model = String(c.model || P.model).trim() || P.model; c.key = String(c.key || '').trim(); if (P.url) c.url = String(c.url || P.url).trim() || P.url;
+    if (P.key && !c.key) { this.setState({ aiTest: 'Paste an API key first.', aiTestOk: false }); return; }
+    this.setState({ aiTesting: true, aiTest: 'Checking the connection...', aiTestOk: null });
+    const llm = makeLLM(c); const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 45000);
+    try {
+      const r = await llm.json('Reply with only this JSON object and nothing else: {"ok": true}', { signal: ctl.signal });
+      if (!r || typeof r !== 'object') throw aiErr('bad_json');
+      c.connected = true; this._sample = llm; saveAICfg(c);
+      this.setState({ aiCfg: c, aiSrc: 'byo', aiReady: true, aiTesting: false, aiTestOk: true, aiTest: 'Connected to ' + P.n + ' (' + c.model + '). Briefs and the AI board now use it.' });
+    } catch (e) {
+      const msg = e && e.code === 'cancelled' ? 'No reply after 45 seconds. Check the address and model, then try again.' : this.byoErr(e, c.provider);
+      this.setState({ aiTesting: false, aiTestOk: false, aiTest: msg });
+    } finally { clearTimeout(t); }
+  }
+
+  disconnectAI() {
+    const c = Object.assign({}, this.state.aiCfg, { key: '', connected: false });
+    this._sample = null; saveAICfg(c);
+    this.setState({ aiCfg: c, aiSrc: 'none', aiReady: false, aiTestOk: true, aiTest: 'Disconnected. The key is removed from this browser. Briefs use keyword matching.' });
+  }
+
+  aiVals() {
+    const st = this.state; const c = st.aiCfg || {}; const cur = AI_PROVIDERS[c.provider] ? c.provider : 'anthropic'; const P = AI_PROVIDERS[cur];
+    const byo = st.aiSrc === 'byo';
+    return { canSetupAI: !this._host, showAI: !!st.showAI && !this._host,
+      openAI: () => { this.setState({ showAI: true, showMenu: false, aiTest: '' }); try { window.scrollTo({ top: 0 }); } catch (e) {} },
+      closeAI: () => this.setState({ showAI: false }),
+      aiBtnLabel: byo ? 'Change AI model' : 'Connect an AI model',
+      aiStatus: st.aiSrc === 'claude' ? 'Claude, through this page' : byo ? AI_PROVIDERS[c.provider].n + ' · ' + c.model : 'Not connected. Briefs use keyword matching.',
+      aiProv: Object.keys(AI_PROVIDERS).map(id => { const on = id === cur; return { n: AI_PROVIDERS[id].n, on: on ? 'true' : 'false', pick: () => this.setAICfg({ provider: id }),
+        bd: on ? 'var(--accent)' : 'var(--hair)', bg: on ? 'var(--accent-soft)' : 'var(--surface)', fg: on ? 'var(--accent-ink)' : 'var(--ink)' }; }),
+      aiHelp: P.help, aiProvName: P.n, aiKeyLink: P.link, aiLinkLabel: P.key ? 'Get a key' : 'Download Ollama',
+      aiNeedsKey: !!P.key, aiNeedsUrl: !!P.url, aiKey: c.key || '', aiModel: c.model || P.model, aiUrl: c.url || P.url || '',
+      onAIKey: e => this.setAICfg({ key: e.target.value }), onAIModel: e => this.setAICfg({ model: e.target.value }), onAIUrl: e => this.setAICfg({ url: e.target.value }),
+      aiRemember: c.remember ? 'true' : 'false', toggleRemember: () => this.setAICfg({ remember: !c.remember }),
+      aiConnect: () => this.connectAI(), aiConnectLabel: st.aiTesting ? 'Checking...' : byo ? 'Save and test again' : 'Connect and test',
+      aiConnected: byo, disconnectAI: () => this.disconnectAI(),
+      hasAITest: !!st.aiTest, aiTest: st.aiTest || '', aiTestBg: st.aiTestOk === false ? 'var(--bad-soft)' : st.aiTestOk ? 'var(--good-soft)' : 'var(--fill)', aiTestFg: st.aiTestOk === false ? 'var(--bad)' : st.aiTestOk ? 'var(--good)' : 'var(--ink-2)' };
+  }
 
   buildPrompt(chat) {
     const D = this.data();
@@ -2015,7 +2218,7 @@ class Component extends DCLogic {
       if (code === 'cancelled') { this.setState({ thinking: false, chat: chat.concat([{ role: 'note', text: 'Stopped. Send again when ready.' }]) }); return; }
       const gone = ['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].indexOf(code) >= 0;
       if (gone) { this._sample = null; this.setState({ aiReady: false }); }
-      const why = gone ? 'Claude is not available in this view, so I used keyword matching.' : code === 'rate_limited' ? 'Claude is busy or your usage limit was reached, so I used keyword matching. Try again later.' : 'Claude could not answer just now, so I used keyword matching. You can send again.';
+      const why = this.state.aiSrc === 'byo' && code !== 'cancelled' ? this.byoErr(e) + ' I used keyword matching for now.' : gone ? 'Claude is not available in this view, so I used keyword matching.' : code === 'rate_limited' ? 'Claude is busy or your usage limit was reached, so I used keyword matching. Try again later.' : 'Claude could not answer just now, so I used keyword matching. You can send again.';
       this.setState({ thinking: false });
       this.interpret(allUser, 'Keyword matching', chat.concat([{ role: 'note', text: why }]));
     }
@@ -2044,10 +2247,10 @@ class Component extends DCLogic {
     pick('avail', ['99.9','99.95','99.99'], v => v + '% availability');
     const lastUser = chat.filter(m => m.role === 'user').slice(-1)[0];
     const title = String(r.title || (lastUser ? lastUser.text : 'Custom design')).slice(0, 70);
-    const custom = Object.assign({}, base, { n: title, d: 'Interpreted by Claude from your brief.', c, flows, req: r.request ? String(r.request).slice(0, 90) : base.req });
+    const custom = Object.assign({}, base, { n: title, d: 'Interpreted by ' + this.aiName() + ' from your brief.', c, flows, req: r.request ? String(r.request).slice(0, 90) : base.req });
     const understanding = String(r.understanding || '').slice(0, 600);
     const msg = { role: 'studio', title, understanding, base: baseKey ? base.n : 'A custom design', comps: c.map(x => D.cat[x].l).join(', '), applied: applied.join(', ') || 'none',
-      assumptions: list(r.assumptions).slice(0, 3), gaps: list(r.notCovered).slice(0, 4), questions: list(r.questions).slice(0, 2), mode: 'Interpreted by Claude',
+      assumptions: list(r.assumptions).slice(0, 3), gaps: list(r.notCovered).slice(0, 4), questions: list(r.questions).slice(0, 2), mode: 'Interpreted by ' + this.aiName(),
       summary: title + '. ' + understanding + ' Components: ' + c.join(', ') + '. Settings: ' + (applied.join(', ') || 'unchanged') + '.' };
     this.setState(Object.assign({ app: 'custom', custom, chat: chat.concat([msg]), thinking: false, interp: null,
       outcomes: [], outcomesApp: null, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null, flowSel: null }, flags));
@@ -3336,7 +3539,7 @@ class Component extends DCLogic {
   }
 
   async boardCall(prompt, label, apply) {
-    if (!this._sample) { this.setState({ board: Object.assign({}, this.state.board || {}, { err: 'The AI board needs this page opened in Claude, where it can ask for your permission to use Claude.' }) }); return; }
+    if (!this._sample) { this.setState({ board: Object.assign({}, this.state.board || {}, { err: this._host ? 'The AI board needs this page opened in Claude, where it can ask for your permission to use Claude.' : 'The AI board needs an AI model. Connect one from the options menu.' }) }); return; }
     const ctl = new AbortController(); this._bctl = ctl;
     this.setState({ board: Object.assign({}, this.state.board || {}, { busy: label, err: '' }) });
     try {
@@ -3347,7 +3550,7 @@ class Component extends DCLogic {
       const code = e && e.code;
       const gone = ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].indexOf(code) >= 0;
       if (gone) { this._sample = null; this.setState({ aiReady: false }); }
-      const err = code === 'cancelled' ? 'Stopped. Try again when ready.' : gone ? 'Claude is not available in this view, so the AI board cannot sit.' : code === 'rate_limited' ? 'Claude is busy or your usage limit was reached. Try again later.' : 'The board could not respond just now. Try again.';
+      const err = code === 'cancelled' ? 'Stopped. Try again when ready.' : this.state.aiSrc === 'byo' ? this.byoErr(e) : gone ? 'Claude is not available in this view, so the AI board cannot sit.' : code === 'rate_limited' ? 'Claude is busy or your usage limit was reached. Try again later.' : 'The board could not respond just now. Try again.';
       this.setState({ board: Object.assign({}, this.state.board || {}, { busy: '', err }) });
     }
   }
@@ -3417,16 +3620,19 @@ class Component extends DCLogic {
       convene: () => this.convene(), conveneLabel: qs.length ? 'Convene a new board' : 'Convene the board', stop: () => { if (this._bctl) this._bctl.abort(); },
       progress: answered + ' of ' + qs.length + ' questions answered', canVerdict: answered === qs.length && qs.length > 0 && !v && !b.busy, verdictBtn: () => this.askVerdict(),
       hasVerdict: !!v, v: v ? { label: dec[0], c: dec[1], summary: v.summary, conditions: v.conditions.map(t => ({ t })), hasCond: v.conditions.length > 0, strengths: v.strengths.map(t => ({ t })), risks: v.risks.map(t => ({ t })), learn: v.learn, hasLearn: !!v.learn } : { label: '', c: '', summary: '', conditions: [], hasCond: false, strengths: [], risks: [], learn: '', hasLearn: false },
-      notReady: !this._sample, saveNote: v ? (this._db && st.savedId ? 'The verdict is saved with this design in your portfolio, ready to show a mentor or manager.' : 'Save the design to your portfolio to keep this verdict and show it to a mentor or manager.') : '' } };
+      notReady: !this._sample, who: this.aiName(), canSetup: !this._host, setup: () => { this.setState({ showAI: true, aiTest: '' }); try { window.scrollTo({ top: 0 }); } catch (e) {} },
+      notReadyLine: this._host ? 'The AI board needs this page opened in Claude, where it asks once for permission to use Claude. The simulated board in the Review step works anywhere.' : 'The AI board needs an AI model. Connect your own, or use the simulated board in the Review step, which works without one.',
+      saveNote: v ? (this._db && st.savedId ? 'The verdict is saved with this design in your portfolio, ready to show a mentor or manager.' : 'Save the design to your portfolio to keep this verdict and show it to a mentor or manager.') : '' } };
   }
 
   // ---------- Persistence ----------
   async initStore() {
     try {
-      if (!window.claude || typeof window.claude.use !== 'function') return;
-      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      let db = null, user = null;
+      if (!window.claude || typeof window.claude.use !== 'function') { db = localStore(); this._local = true; }
+      else [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
       this._db = db || null; this._user = user || null;
-      let uid = null, lead = true, canW = null;
+      let uid = this._local ? 'local' : null, lead = true, canW = null;
       if (user) { uid = await user.id(); lead = await user.canEdit(); canW = await user.can('data.write'); }
       this.setState({ dbReady: !!db, uid, isLead: !!lead || !user, canWrite: canW !== false });
       if (!db) return;
@@ -3446,7 +3652,8 @@ class Component extends DCLogic {
 
   dbErr(e) {
     const code = e && e.code;
-    if (code === 'quota_exceeded') return 'The shared store is full. Delete old designs to save new ones.';
+    if (code === 'quota_exceeded') return this._local ? 'Browser storage is full. Delete old designs to save new ones.' : 'The shared store is full. Delete old designs to save new ones.';
+    if (code === 'storage_unavailable') return 'This browser is blocking storage (private window or site data turned off), so designs cannot be saved here.';
     if (code === 'invalid_argument') return 'You can view this page but not save to it. Ask the owner for Contributor access.';
     if (code === 'resource_exhausted') return 'Too many saves in a short time. Wait a moment and try again.';
     return 'Could not save just now. Try again in a moment.';
@@ -3508,7 +3715,7 @@ class Component extends DCLogic {
     const ready = !!this._db;
     return { showPort: !!st.showPort, togglePort: () => this.setState({ showPort: !st.showPort, portMsg: '' }), portExpanded: st.showPort ? 'true' : 'false', portCount: ready ? '· ' + mine.length : '',
       portBg: st.showPort ? 'var(--accent-soft)' : 'var(--surface)', portBd: st.showPort ? 'var(--accent)' : 'var(--hair)', portFg: st.showPort ? 'var(--accent-ink)' : 'var(--ink)',
-      portNote: ready ? (st.canWrite ? 'Designs you save stay in your portfolio.' : 'You can view designs here. Saving needs Contributor access.') : 'Saving works when this page is opened in Claude while signed in.',
+      portNote: ready && this._local ? 'Designs are saved in this browser only. Clearing site data removes them.' : ready ? (st.canWrite ? 'Designs you save stay in your portfolio.' : 'You can view designs here. Saving needs Contributor access.') : 'Saving works when this page is opened in Claude while signed in.',
       canSave: ready && st.canWrite !== false, saveLabel: st.savedId ? 'Save changes' : 'Save current design', saveDesign: () => this.saveDesign(),
       hasPortMsg: !!st.portMsg, portMsg: st.portMsg || '', portMsgBg: st.portErr ? 'var(--bad-soft)' : 'var(--good-soft)', portMsgFg: st.portErr ? 'var(--bad)' : 'var(--good)',
       portEmpty: ready && !mine.length, myPort };
@@ -4296,7 +4503,7 @@ class Component extends DCLogic {
       chat: chatView, chatEmpty: st.chat.length === 0, thinking: st.thinking, thinkingLabel: st.thinkStarted ? 'Writing the brief...' : 'Thinking about your brief...',
       stopThinking: () => { if (this._ctl) this._ctl.abort(); },
       composerHint: st.chat.length ? 'Refine it: "make it AI-native", "add payroll", "we are on Azure", "it is for 2,000 employees"...' : 'Describe what you want to build...',
-      aiModeLine: st.aiReady ? 'Claude reads your brief and maps it to the studio catalogue. It uses your Claude usage, and asks permission the first time.' : 'Using keyword matching here. Open this canvas in the Claude app or claude.ai to have Claude interpret free-form briefs.',
+      aiModeLine: st.aiSrc === 'byo' ? this.aiName() + ' (' + (st.aiCfg.model || '') + ') reads your brief and maps it to the studio catalogue. ' + (st.aiCfg.provider === 'ollama' ? 'It runs on your computer.' : 'Calls go from your browser to ' + AI_PROVIDERS[st.aiCfg.provider].n + ' using your key.') : st.aiReady ? 'Claude reads your brief and maps it to the studio catalogue. It uses your Claude usage, and asks permission the first time.' : this._host ? 'Using keyword matching here. Open this canvas in the Claude app or claude.ai to have Claude interpret free-form briefs.' : 'Using keyword matching. Connect an AI model to have any brief interpreted, not just keywords.',
       glance, showCtx: st.showCtx, ctxExpanded: st.showCtx ? 'true' : 'false', ctxLabel: st.showCtx ? 'Hide constraints' : 'Adjust constraints', toggleCtx: () => this.setState({ showCtx: !st.showCtx }),
       showTpl: st.showTpl, tplExpanded: st.showTpl ? 'true' : 'false', tplLabel: st.showTpl ? 'Hide templates' : 'Browse templates', toggleTpl: () => this.setState({ showTpl: !st.showTpl }),
       stepPos: 'Step ' + (si + 1) + ' of ' + vis.length + ': ' + vis[si][1],
@@ -4388,7 +4595,7 @@ class Component extends DCLogic {
       base.playCls = played ? 'as-secondary' : 'as-primary'; base.playLabel = played ? 'Replay' : 'Play the request';
       if (st.reqStep >= 0 && !st.reqPlayed) setTimeout(() => this.setState({ reqPlayed: true }), 0);
     }
-    return Object.assign(base, this.admVals(go, stepNames), this.fwVals(go), this.canvasVals(), this.portVals(), this.boardVals(), this.teamVals(qRight, qTotal));
+    return Object.assign(base, this.admVals(go, stepNames), this.fwVals(go), this.canvasVals(), this.portVals(), this.boardVals(), this.teamVals(qRight, qTotal), this.aiVals());
   }
 }
 

@@ -1,6 +1,6 @@
 # ArchStudio: a practice studio for system and enterprise architecture
 
-**By:** Divya Dubey **Role:** product owner and designer · **Timeline:** three days, more than 20 published iterations · **Status:** working prototype, not yet tested with learners
+**By:** Divya Dubey · **Role:** product owner and designer · **Timeline:** three days, more than 20 published iterations · **Status:** working prototype, not yet tested with learners
 
 ![ArchStudio blueprint step](docs/screenshots/04-blueprint-flow.png)
 
@@ -51,4 +51,4 @@ Two lenses change the path. **System first** suits solution architects. **Enterp
 
 ## How it was built
 
-I set the direction, requirements and design judgement, and reviewed every iteration. Claude (Anthropic) was my build partner for code and content. The app is one self-contained HTML file with no backend; features that need Claude or saved portfolios work when it is opened inside Claude.
+I set the direction, requirements and design judgement, and reviewed every iteration. Claude (Anthropic) was my build partner for code and content. The app is one self-contained HTML file with no backend. It runs in any browser, can use an AI model of the learner's choice, and adds a shared team portfolio when opened inside Claude.
