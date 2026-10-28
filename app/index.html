@@ -732,6 +732,23 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 </sc-for>
 </div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0; font-size: 18px">What these numbers mean for products</h2>
+<span style="font-size: 13px; color: var(--ink-3)">Product scores are curated for a typical load. At your numbers, these move. Outcomes and Compare use the adjusted scores, so change a number above and watch them shift.</span>
+<sc-if value="{{wFitNone}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--ink-2); padding-top: 8px">Every product offered for this design's building blocks is within its comfortable range at these numbers. Try a bigger scale or a 20x peak.</span>
+</sc-if>
+<sc-for list="{{wFit}}" as="f" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 0; border-top: 1px solid var(--hair)">
+<div style="flex: 0 0 210px; display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 600; font-size: 14px">{{f.n}}</span>
+<span style="font-size: 12px; color: var(--ink-3)">{{f.blk}}</span>
+</div>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{f.cbg}}; color: {{f.cfg}}">{{f.chg}}</span>
+<span style="flex: 1 1 280px; font-size: 13px; color: var(--ink-2)">{{f.why}}</span>
+</div>
+</sc-for>
+</div>
 </section>
 </sc-if>
 
@@ -1009,6 +1026,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <span style="align-self: flex-start; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: {{o.stdBg}}; color: {{o.stdFg}}">{{o.stdLabel}}</span>
 </sc-if>
 <span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{o.scoreLine}}</span>
+<sc-if value="{{o.hasFit}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: var(--ink-2)"><strong style="font-weight: 600">At your workload:</strong> {{o.fitLine}}</span>
+</sc-if>
 <sc-if value="{{o.hasSignal}}" hint-placeholder-val="{{false}}">
 <span style="font-size: 12px; color: var(--warn)">Catalogue signal: {{o.signal}}</span>
 </sc-if>
@@ -2031,6 +2051,77 @@ function localStore() {
     collection: name => ({ doc: () => docRef(name + '/' + newId()), orderBy: () => ({ limit: () => ({ onSnapshot: cb => sub(() => cb(snap())) }) }) }) };
 }
 
+// ---------- Workload fit: how a product's curated scores shift at the user's numbers ----------
+// Each rule: building block, product name, test on workload numbers N, score changes and the reason shown to the learner.
+// Dimensions: 0 Scale, 1 Cost, 2 Ops ease, 3 Portability, 4 Speed. Thresholds are rules of thumb, stated in the reason.
+const fmtW = n => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : n >= 10 ? String(Math.round(n)) : n.toFixed(1);
+const fmtGBW = g => g >= 1000 ? fmtW(g / 1000) + ' TB' : Math.round(g) + ' GB';
+const FIT_RULES = [
+  ['db', 'PostgreSQL', N => N.writeRps > 20000, { 0: -2 }, N => 'One primary takes every write; ' + fmtW(N.writeRps) + ' writes/s means sharding (Citus or similar).'],
+  ['db', 'PostgreSQL', N => N.writeRps > 5000 && N.writeRps <= 20000, { 0: -1 }, N => fmtW(N.writeRps) + ' writes/s is near what one primary handles comfortably (about 5k); plan partitioning early.'],
+  ['db', 'PostgreSQL', N => N.store3 > 20000, { 2: -1 }, N => fmtGBW(N.store3) + ' to back up, vacuum and restore on servers you run.'],
+  ['db', 'Amazon Aurora PostgreSQL', N => N.writeRps > 50000, { 0: -1 }, N => 'Still a single writer instance; beyond tens of thousands of writes/s (you have ' + fmtW(N.writeRps) + ') you shard.'],
+  ['db', 'Amazon Aurora PostgreSQL', N => N.writeRps > 5000, { 1: -1 }, N => 'Standard tier charges per I/O; at ' + fmtW(N.writeRps) + ' writes/s choose I/O-Optimized or budget for it.'],
+  ['db', 'MongoDB Atlas', N => N.store3 > 50000, { 1: -1 }, N => fmtGBW(N.store3) + ' needs a large cluster tier; Atlas pricing rises with storage and tier.'],
+  ['nosql', 'Apache Cassandra', N => N.peakRps < 1000 && N.store3 < 1000, { 2: -1 }, N => 'At least three nodes to run for ' + fmtW(N.peakRps) + ' requests/s and ' + fmtGBW(N.store3) + ': more machinery than the load needs.'],
+  ['nosql', 'Amazon DynamoDB', N => N.avgRps > 10000, { 1: -1 }, N => 'On-demand pricing at ' + fmtW(N.avgRps) + ' requests/s sustained; switch to provisioned capacity with reservations.'],
+  ['nosql', 'Azure Cosmos DB', N => N.avgRps > 10000, { 1: -1 }, N => 'Request-unit cost at ' + fmtW(N.avgRps) + ' requests/s sustained; reserve capacity.'],
+  ['search', 'Algolia', N => N.readRps > 1000, { 1: -2 }, N => 'Priced per search request; ' + fmtW(N.readRps) + ' reads/s at peak is expensive.'],
+  ['search', 'Algolia', N => N.readRps > 100 && N.readRps <= 1000, { 1: -1 }, N => 'Priced per search request; ' + fmtW(N.readRps) + ' reads/s at peak adds up.'],
+  ['search', 'Algolia', N => N.store3 > 1000, { 0: -1 }, N => 'Record limits and price climb with ' + fmtGBW(N.store3) + ' of data.'],
+  ['search', 'OpenSearch', N => N.store3 > 20000, { 2: -1 }, N => 'Shard sizing, rebalancing and upgrades for ' + fmtGBW(N.store3) + ' on clusters you run.'],
+  ['search', 'Elastic Cloud', N => N.store3 > 50000, { 1: -1 }, N => fmtGBW(N.store3) + ' of indexed data needs large deployments.'],
+  ['mq', 'RabbitMQ', N => N.events > 50000, { 0: -2 }, N => 'Built for routing work, not firehoses; ' + fmtW(N.events) + ' events/s needs a partitioned log such as Kafka.'],
+  ['mq', 'RabbitMQ', N => N.events > 10000 && N.events <= 50000, { 0: -1 }, N => fmtW(N.events) + ' events/s needs careful clustering and quorum queues.'],
+  ['mq', 'Apache Kafka', N => N.events < 200, { 2: -1 }, N => 'A Kafka cluster is a lot to run for ' + fmtW(N.events) + ' events/s; a simpler broker or a managed service fits.'],
+  ['mq', 'Confluent Cloud', N => N.events > 50000, { 1: -1 }, N => 'Throughput-based pricing at ' + fmtW(N.events) + ' events/s.'],
+  ['gw', 'Amazon API Gateway', N => N.avgRps > 20000, { 1: -2 }, N => 'Charged per request: ' + fmtW(N.avgRps) + '/s on average is about ' + fmtW(N.avgRps * 86400) + ' requests a day.'],
+  ['gw', 'Amazon API Gateway', N => N.avgRps > 2000 && N.avgRps <= 20000, { 1: -1 }, N => 'Charged per request: about ' + fmtW(N.avgRps * 86400) + ' requests a day.'],
+  ['gw', 'Amazon API Gateway', N => N.peakRps > 10000, { 0: -1 }, N => 'Default account limit is 10,000 requests/s; raise it before ' + fmtW(N.peakRps) + '/s peaks.'],
+  ['gw', 'Azure API Management', N => N.peakRps > 20000, { 1: -1 }, N => 'Throughput is bought in scale units; ' + fmtW(N.peakRps) + '/s needs several premium units.'],
+  ['app', 'AWS Lambda', N => !N.impl && N.avgRps > 5000, { 1: -2 }, N => 'Steady ' + fmtW(N.avgRps) + ' requests/s costs more per invocation than always-on containers.'],
+  ['app', 'AWS Lambda', N => !N.impl && N.avgRps > 500 && N.avgRps <= 5000, { 1: -1 }, N => 'At ' + fmtW(N.avgRps) + ' requests/s sustained, containers usually cost less.'],
+  ['app', 'AWS Lambda', N => !N.impl && N.inflight > 1000, { 0: -1 }, N => fmtW(N.inflight) + ' requests in flight exceeds the default 1,000 concurrent executions; request a quota rise.'],
+  ['app', 'AWS Lambda', N => !N.impl && N.lat <= 200 && N.pattern === 'interactive', { 2: -1 }, N => 'Cold starts can break a 200 ms budget; plan provisioned concurrency.'],
+  ['app', 'Kubernetes', N => !N.impl && N.peakRps < 50, { 2: -1 }, N => 'A cluster to run for ' + fmtW(N.peakRps) + ' requests/s at peak; a managed container service is simpler.'],
+  ['llm', 'vLLM', N => N.tokensDay > 0 && N.tokensDay < 20e6, { 1: -1 }, N => 'GPUs sit idle at ' + fmtW(N.tokensDay) + ' tokens a day; per-token APIs cost less.'],
+  ['llm', 'vLLM', N => N.tokensDay > 2e9, { 1: +1 }, N => 'At ' + fmtW(N.tokensDay) + ' tokens a day, owned GPUs can beat per-token prices.'],
+  ['llm', '*hosted', N => N.tokensDay > 2e9, { 1: -1 }, N => fmtW(N.tokensDay) + ' tokens a day: per-token spend dominates; negotiate committed throughput and route simple calls to smaller models.'],
+  ['stream', 'Spark Structured Streaming', N => N.pattern === 'realtime' && N.lat <= 1000, { 0: -1 }, N => 'Micro-batches add delay; for a ' + (N.lat >= 1000 ? (N.lat / 1000) + ' s' : N.lat + ' ms') + ' budget, event-by-event processing fits better.'],
+  ['lake', 'Apache Iceberg', N => N.store3 < 1000, { 2: -1 }, N => 'Spark and Iceberg are heavy for ' + fmtGBW(N.store3) + '; a warehouse or Postgres may do.'],
+  ['lake', 'Snowflake', N => N.store3 > 100000, { 1: -1 }, N => 'Compute and storage spend at ' + fmtGBW(N.store3) + '; model it before committing.'],
+  ['lake', 'Databricks', N => N.store3 > 100000, { 1: -1 }, N => 'Compute and storage spend at ' + fmtGBW(N.store3) + '; model it before committing.'],
+  ['obs', 'Datadog', N => !N.impl && N.inst > 50, { 1: -2 }, N => 'Per-host and per-GB pricing across about ' + N.inst + ' instances adds up fast.'],
+  ['obs', 'Datadog', N => !N.impl && N.inst > 10 && N.inst <= 50, { 1: -1 }, N => 'Per-host and per-GB pricing across about ' + N.inst + ' instances.'],
+  ['idp', 'Okta', N => !N.impl && N.users >= 5e7, { 1: -2 }, N => 'Customer identity is priced per monthly active user; ' + fmtW(N.users) + ' users is a large bill.'],
+  ['idp', 'Okta', N => !N.impl && N.users >= 1e6 && N.users < 5e7, { 1: -1 }, N => 'Customer identity is priced per monthly active user; budget for ' + fmtW(N.users) + ' users.'],
+  ['idp', 'Microsoft Entra ID', N => !N.impl && N.users >= 5e7, { 1: -1 }, N => 'External ID is priced per monthly active user beyond the free tier; ' + fmtW(N.users) + ' users.'],
+  ['idp', 'Keycloak', N => !N.impl && N.users >= 5e7, { 2: -1 }, N => 'Running identity for ' + fmtW(N.users) + ' users yourself needs a strong platform team and careful session scaling.'],
+  ['geo', 'Amazon Location Service', N => N.peakRps > 1000, { 1: -1 }, N => 'Charged per request at ' + fmtW(N.peakRps) + '/s at peak.'],
+  ['tsdb', 'TimescaleDB', N => N.writeRps > 50000, { 0: -1 }, N => 'Single-primary writes at ' + fmtW(N.writeRps) + '/s; consider multi-node or a purpose-built store.'],
+  ['ingest', 'AWS IoT Core', N => N.writeRps > 50000, { 1: -1 }, N => 'Per-message pricing at ' + fmtW(N.writeRps) + ' messages/s.'],
+  ['ingest', 'Azure IoT Hub', N => N.writeRps > 50000, { 1: -1 }, N => 'Priced in units of messages a day; ' + fmtW(N.writeRps) + ' messages/s needs many units.']
+];
+
+function fitFor(cid, o, N) {
+  const notes = [];
+  if (!N) return notes;
+  FIT_RULES.forEach(([c, name, test, d, why]) => {
+    if (c !== cid) return;
+    const hit = name === '*hosted' ? o.t.indexOf('gpu') < 0 : o.n.indexOf(name) === 0;
+    if (!hit) return;
+    let ok = false; try { ok = !!test(N); } catch (e) {}
+    if (ok) Object.keys(d).forEach(k => notes.push({ d: +k, v: d[k], why: why(N) }));
+  });
+  return notes;
+}
+
+function applyFit(o, notes) {
+  if (!notes.length) return o;
+  const s2 = o.s.slice(); notes.forEach(f => { s2[f.d] = Math.max(1, Math.min(5, s2[f.d] + f.v)); });
+  return Object.assign({}, o, { s: s2, s0: o.s, fit: notes });
+}
+
 const TRACKS = {
   interview: { n: 'System design interview', t: 'About 30 minutes', lens: 'system',
     d: 'Clarify the brief, size it from first principles, sketch the blueprint, then defend it when something fails.',
@@ -2298,6 +2389,28 @@ class Component extends DCLogic {
     if (c.indexOf('integ') >= 0 && c.indexOf('lake') >= 0) { d.pattern = 'batch'; d.growth = 100000; d.lat = 5000; }
     if (c.indexOf('itsm') >= 0) d.peak = 20;
     return d;
+  }
+
+  wlNums() {
+    const st = this.state; const A = this.getApp(); const impl = A.kind === 'impl';
+    const saved = st.wl && st.wl.key === A.n ? st.wl.v : {};
+    const W = Object.assign(this.wlDefaults(A), saved);
+    const users = { '10k': 1e4, '1M': 1e6, '50M': 5e7 }[st.scale] || 1e6;
+    const dau = users * (impl ? 0.7 : 0.2);
+    const avgRps = dau * W.actions / 86400; const peakRps = avgRps * W.peak;
+    const rN = { '1:10': 0.1, '1:1': 1, '10:1': 10, '100:1': 100 }[W.ratio] || 10;
+    const writeRps = peakRps / (rN + 1); const readRps = peakRps * rN / (rN + 1);
+    const tokensDay = st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) * 3000 : 0;
+    return { users, impl, avgRps, peakRps, readRps, writeRps, events: W.pattern === 'realtime' ? peakRps : writeRps, store3: W.growth * 9, lat: W.lat, cons: W.cons, pattern: W.pattern,
+      inflight: peakRps * W.lat / 1000, inst: Math.ceil(peakRps / 400) + 1, tokensDay,
+      key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join('|') };
+  }
+
+  // The catalogue options for a building block, with scores adjusted to the current workload
+  fitOpts(cid) {
+    const N = this.wlNums(); const cache = this._fitCache && this._fitCache.key === N.key ? this._fitCache : (this._fitCache = { key: N.key, m: {} });
+    if (!cache.m[cid]) cache.m[cid] = this.data().cat[cid].o.map(o => applyFit(o, fitFor(cid, o, N)));
+    return cache.m[cid];
   }
 
   editComps(cid, add) {
@@ -2991,7 +3104,7 @@ class Component extends DCLogic {
   }
 
   pickIdx(kind, cid, picks) {
-    const opts = this.data().cat[cid].o; const cloud = this.state.cloud;
+    const opts = this.fitOpts(cid); const cloud = this.state.cloud;
     const plat = this.platformOf(picks || {});
     const byName = s => opts.findIndex(o => o.n.indexOf(s) >= 0);
     if (cid === 'embai') return byName({ sap: 'Joule', salesforce: 'Agentforce', servicenow: 'Now Assist', microsoft: 'Copilot Studio', other: 'Copilot Studio' }[plat]);
@@ -3036,8 +3149,9 @@ class Component extends DCLogic {
 
   evalOut(o) {
     const D = this.data(); const st = this.state; const comps = this.comps();
-    const picks = comps.filter(c => o.picks[c] != null).map(c => ({ c, p: D.cat[c].o[o.picks[c]] }));
+    const picks = comps.filter(c => o.picks[c] != null && D.cat[c].o[o.picks[c]]).map(c => ({ c, p: this.fitOpts(c)[o.picks[c]] }));
     const get = c => { const x = picks.find(q => q.c === c); return x ? x.p : null; };
+    const fitted = picks.filter(q => q.p.fit);
     const avg = [0,1,2,3,4].map(i => picks.length ? picks.reduce((a, q) => a + q.p.s[i], 0) / picks.length : 0);
     const issues = [];
     const add = (cat, text, cid, tip) => issues.push({ cat, text, cid, tip });
@@ -3077,6 +3191,8 @@ class Component extends DCLogic {
     if (ai !== 'none' && llm && llm.k !== 'OSS' && st.scale === '50M') add('Non-functional', 'Token spend grows with every user and agent step; set budgets per task, cache prompts and route simple calls to smaller models.', gwP ? 'aigw' : 'llm', 'Pick an AI gateway that enforces budgets and caching.');
     if (ai !== 'none' && st.reg && !get('aigov')) add('Non-functional', 'Regulated AI use: classify each use case (for example under the EU AI Act), keep human oversight, and log model inputs, outputs and approvals.', comps.indexOf('aigov') >= 0 ? 'aigov' : null, 'Choose an AI governance platform and record each use case\'s risk class in an ADR.');
     if (ai === 'native' && llm && !get('guard') && comps.indexOf('guard') >= 0) add('Non-functional', 'Agents act without guardrails or evaluation: wrong or manipulated actions go unchecked.', 'guard', 'Pick a guardrail and evaluation option before agents touch real systems.');
+    fitted.forEach(q => q.p.fit.filter(f => f.v <= -2).forEach(f => add('Non-functional', q.p.n + ' at your workload: ' + f.why, q.c, 'Pick an option that fits the Workload numbers, or record in an ADR why this one is still right.')));
+    if (llm && this.comps().indexOf('llm') >= 0) { const Nw = this.wlNums(); if (Nw.lat <= 200 && Nw.pattern === 'interactive') add('Non-functional', 'A model call takes from half a second to several seconds, but the latency budget is 200 ms. Keep AI off the request path: stream, precompute or answer asynchronously.', 'llm', 'Raise the latency budget for AI features in the Workload step, or design AI as a background task.'); }
     const saas = picks.filter(q => q.p.t.indexOf('saas') >= 0);
     if (st.reg && saas.length) add('Non-functional', saas.length + ' SaaS service(s) (' + saas.map(q => q.p.n).join(', ') + ') touch regulated data: confirm residency, GxP validation and exit terms.', saas[0].c, 'Pick a self-hosted or region-pinned option for regulated data.');
     if (st.scale === '50M') { const low = picks.filter(q => q.p.s[0] < 4); if (low.length) add('Non-functional', low.map(q => q.p.n).join(', ') + ' may cap out at 50M users.', low[0].c, 'Pick an option with scale 4 or 5.'); }
@@ -3096,7 +3212,7 @@ class Component extends DCLogic {
     const realIssues = issues.filter(i => i.cat !== 'Functional').length;
     const overall = Math.max(0, Math.min(100, Math.round(base - realIssues * 4 - missing.length * 6)));
     const chain = crit.map(q => q.p.n + ' ' + (avOf(q.p) * 100).toFixed(2) + '%');
-    return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, heavy, saas, missing, base, realIssues, chain };
+    return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, heavy, saas, missing, base, realIssues, chain, fitted };
   }
 
   // ---------- ADM content ----------
@@ -4167,6 +4283,12 @@ class Component extends DCLogic {
         hasAct: !!act, actL: act ? act[0] : '', act: act ? act[1] : () => {}, flag: (x.verdict === 'need' && !ib && !hidden) || (x.verdict === 'no' && (ib || hidden)) };
     });
     const wMis = wDerived.filter(x => x.flag).length;
+    const wDimN = ['Scale', 'Cost', 'Ops ease', 'Portability', 'Speed'];
+    const wFit = [];
+    comps.forEach(cid => this.fitOpts(cid).forEach(o => { if (o.fit) wFit.push({ n: o.n, blk: C[cid].l, up: o.fit.every(f => f.v > 0),
+      chg: o.fit.map(f => wDimN[f.d] + ' ' + (f.v > 0 ? '+' : '−') + Math.abs(f.v)).filter((x, k, a) => a.indexOf(x) === k).join(' · '),
+      why: o.fit.map(f => f.why).filter((x, k, a) => a.indexOf(x) === k).join(' '), cbg: o.fit.every(f => f.v > 0) ? 'var(--good-soft)' : 'var(--warn-soft)', cfg: o.fit.every(f => f.v > 0) ? 'var(--good)' : 'var(--warn)' }); }));
+    const wFitNone = !wFit.length;
     const wSummary = wMis ? wMis + ' mismatch' + (wMis === 1 ? '' : 'es') + ' between the numbers and the blueprint' : 'The blueprint matches what the numbers need';
     const wLaws = [
       { t: 'Little\'s law', d: 'Requests in flight = arrival rate × time each takes: ' + fmtN(peakRps) + '/s × ' + latS + ' ≈ ' + fmtN(inflight) + '. Connection and worker pools need at least that many slots, plus headroom.' },
@@ -4301,10 +4423,10 @@ class Component extends DCLogic {
     const card = cid => {
       const cc = C[cid]; const cur = outs[active].picks[cid]; const isFocus = focus && focus.cid === cid;
       return { label: cc.l, layer: D.layerNames[cc.layer], need: cc.need, an: cc.an, showAn: st.plain, cardBorder: isFocus ? '2px solid var(--orange)' : '1px solid ' + LINE,
-        opts: cc.o.map((o, j) => {
+        opts: this.fitOpts(cid).map((o, j) => {
           const on = cur === j; const signal = D.signals[o.n] || '';
           const sd = stdM[cid]; const isStd = !!sd && sd.status !== 'none' && sd.i >= 0 && sd.i === j;
-          return { n: o.n, k: o.k, w: o.w, u: o.u, sel: on, signal, hasSignal: !!signal, isStd, stdLabel: sd && sd.status === 'approved' ? 'Enterprise standard' : 'Proposed standard, under review', stdBg: sd && sd.status === 'approved' ? 'var(--good-soft)' : 'var(--warn-soft)', stdFg: sd && sd.status === 'approved' ? 'var(--good)' : 'var(--warn)', scoreLine: o.s.map((v, i) => dimNames[i] + ' ' + v).join(' · '),
+          return { n: o.n, k: o.k, w: o.w, u: o.u, sel: on, signal, hasSignal: !!signal, isStd, stdLabel: sd && sd.status === 'approved' ? 'Enterprise standard' : 'Proposed standard, under review', stdBg: sd && sd.status === 'approved' ? 'var(--good-soft)' : 'var(--warn-soft)', stdFg: sd && sd.status === 'approved' ? 'var(--good)' : 'var(--warn)', scoreLine: o.s.map((v, i) => dimNames[i] + ' ' + (o.s0 && o.s0[i] !== v ? o.s0[i] + '→' + v : v)).join(' · '), hasFit: !!o.fit, fitLine: o.fit ? o.fit.map(f => f.why).filter((x, i, a) => a.indexOf(x) === i).join(' ') : '', fitUp: !!o.fit && o.fit.every(f => f.v > 0),
             pick: () => { const n = this.cloneOuts(); if (n[active].picks[cid] === j) delete n[active].picks[cid]; else n[active].picks[cid] = j; this.setOuts(n); },
             bg: on ? SOFT : 'var(--surface)', bd: on ? ACC : LINE, ring: on ? '0 0 0 1px ' + ACC : 'none',
             kbg: o.k === 'OSS' ? 'var(--good-soft)' : 'var(--warn-soft)', kfg: o.k === 'OSS' ? 'var(--good)' : 'var(--warn)' };
@@ -4323,7 +4445,7 @@ class Component extends DCLogic {
     g.progress = activeName + ': decision ' + Math.min(filledN + 1, comps.length) + ' of ' + comps.length;
     g.pct = Math.round(filledN / comps.length * 100) + '%';
     if (nextCid) {
-      const opts = C[nextCid].o; const mx = Math.max.apply(null, opts.map(o => o.s[qd]));
+      const opts = this.fitOpts(nextCid); const mx = Math.max.apply(null, opts.map(o => o.s[qd]));
       const bestNames = opts.filter(o => o.s[qd] === mx).map(o => o.n);
       const answered = pAns !== undefined; const right = answered && opts[pAns].s[qd] === mx;
       g = Object.assign(g, { ask: true, label: C[nextCid].l, need: C[nextCid].need, q: 'Before you choose: which option do you expect to score best on ' + qLabel + '?',
@@ -4353,6 +4475,7 @@ class Component extends DCLogic {
     const cards = evals.map((e, i) => {
       const isChosen = st.chosen === i; const showWork = !!st.work[i];
       const work = [
+        { h: 'WORKLOAD FIT', t: e.fitted.length ? e.fitted.map(q => q.p.n + ': ' + q.p.fit.map(f => dimNames[f.d] + ' ' + q.p.s0[f.d] + '→' + q.p.s[f.d]).filter((x, k, a) => a.indexOf(x) === k).join(', ') + '. ' + q.p.fit.map(f => f.why).filter((x, k, a) => a.indexOf(x) === k).join(' ')).join('\n') : 'Every chosen product is within its comfortable range at the Workload numbers, so no score was adjusted.' },
         { h: 'QUALITY AVERAGE', t: dimNames.map((n, d) => n + ' ' + e.avg[d].toFixed(1)).join(' + ') + '\n÷ 5 × 20 = ' + Math.round(e.base) + ' base points' },
         { h: 'PENALTIES', t: e.realIssues + ' shortcoming(s) × 4 = −' + (e.realIssues * 4) + '\n' + e.missing.length + ' unchosen component(s) × 6 = −' + (e.missing.length * 6) },
         { h: 'OVERALL', t: Math.round(e.base) + ' − ' + (e.realIssues * 4 + e.missing.length * 6) + ' = ' + e.overall + ' (capped 0 to 100)' },
@@ -4567,7 +4690,7 @@ class Component extends DCLogic {
       journey, hasLockedChev: lockedSteps.length > 0, lockedNum: lockedSteps.length, lockedNext, lockedClick, lockedTip,
       lensOpts, briefIntro, libOpts, libNote, land, showLandscape: ent, guideStep: step === 'tour' ? 'Start here' : vis[si][1],
       flowHead: ent ? '2. Inside the solution: how the parts talk' : '1. How the parts talk to each other', reqHead: ent ? '3. Follow a request and inspect the structure' : '2. Follow a request and inspect the structure',
-      wQs, wFig, wCalc, wLaws, wDerived, wSummary, wSumFg: wMis ? 'var(--warn)' : 'var(--good)', wBasis, wImplNote: isImplApp,
+      wQs, wFig, wCalc, wLaws, wDerived, wFit, wFitNone, hasWFit: wFit.length > 0, wSummary, wSumFg: wMis ? 'var(--warn)' : 'var(--good)', wBasis, wImplNote: isImplApp,
       flow, flowList, flowListTitle, flowHasSel: !!sel0, flowClear: () => this.setState({ flowSel: null }),
       chat: chatView, chatEmpty: st.chat.length === 0, thinking: st.thinking, thinkingLabel: st.thinkStarted ? 'Writing the brief...' : 'Thinking about your brief...',
       stopThinking: () => { if (this._ctl) this._ctl.abort(); },

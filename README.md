@@ -71,4 +71,4 @@ TOGAF Standard (10th Edition), ArchiMate, ISO/IEC/IEEE 42010, architecture decis
 
 ## Notes
 
-Product scores are curated judgements to support learning, not benchmarks. Product names belong to their owners; no vendor endorses this project.
+Product scores are curated judgements to support learning, not benchmarks. They shift with the Workload numbers through stated rules of thumb (for example, about 5,000 writes a second for one Postgres primary), and every shift shows its reason. Product names belong to their owners; no vendor endorses this project.
