@@ -1,0 +1,47 @@
+<sc-if value="{{isEvolve}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Evolve</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">{{evolveTitle}}</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">{{evolveIntro}}</p>
+</div>
+<div role="tablist" aria-label="Growth stage" style="display: flex; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r-md); padding: 4px; align-self: flex-start">
+<sc-for list="{{stages}}" as="s" hint-placeholder-count="4">
+<button type="button" role="tab" aria-selected="{{s.on}}" onClick="{{s.pick}}" style="min-height: 44px; padding: 8px 18px; border-radius: var(--r-sm); border: none; background: {{s.bg}}; color: {{s.fg}}; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: flex-start">
+<span>{{s.l}}</span><span style="font-size: 11px; font-weight: 400">{{s.sub}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 999 1 560px; min-width: 0; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-weight: 600; margin-bottom: 8px">{{stageSummary}}</div>
+<sc-for list="{{evoRows}}" as="r" hint-placeholder-count="6">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--hair)">
+<div style="flex: 1 1 220px"><div style="font-weight: 600; font-size: 14px; color: {{r.fg}}">{{r.n}}</div><div style="font-size: 12px; color: var(--ink-3)">{{r.c}}</div></div>
+<span style="font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; background: {{r.bg}}; color: {{r.tag}}">{{r.s}}</span>
+</div>
+</sc-for>
+</div>
+<aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px">
+<div style="background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 16px; color: var(--accent-ink)">What changes at this stage</h2>
+<sc-for list="{{stageMoves}}" as="m" hint-placeholder-count="4">
+<div style="font-size: 14px; display: flex; gap: 8px"><span aria-hidden="true" style="color: var(--accent)">+</span><span>{{m.t}}</span></div>
+</sc-for>
+</div>
+<sc-if value="{{isBrown}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 1px solid var(--warn-line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">Brownfield migration path</h2>
+<sc-for list="{{migration}}" as="m" hint-placeholder-count="4">
+<div style="display: flex; gap: 10px">
+<span style="flex: 0 0 26px; height: 26px; border-radius: 13px; background: var(--inverse); color: var(--on-accent); font-size: 12px; display: flex; align-items: center; justify-content: center">{{m.n}}</span>
+<div><div style="font-weight: 600; font-size: 14px">{{m.t}}</div><div style="font-size: 13px; color: var(--ink-3)">{{m.d}}</div></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</aside>
+</div>
+</section>
+</sc-if>
+

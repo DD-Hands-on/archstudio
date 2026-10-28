@@ -1,0 +1,77 @@
+<sc-if value="{{isTour}}" hint-placeholder-val="{{true}}">
+<section style="display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="as-eyebrow">Start here · Choose how to practise</span>
+<div role="group" aria-label="Practice track" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+<sc-for list="{{trackOpts}}" as="tk" hint-placeholder-count="3">
+<button type="button" onClick="{{tk.pick}}" aria-pressed="{{tk.on}}" style="text-align: left; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid {{tk.bd}}; box-shadow: {{tk.ring}}; background: {{tk.bg}}; color: var(--ink); display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: baseline"><span style="font-weight: 700; font-size: 15px">{{tk.n}}</span><span style="font-size: 12px; color: var(--ink-3)">{{tk.t}}</span></span>
+<span style="font-size: 13px; color: var(--ink-2)">{{tk.d}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{tk.path}}</span>
+</button>
+</sc-for>
+</div>
+<span style="font-size: 12.5px; color: var(--ink-3)">Short on time? A track shows only the steps it needs. You can switch tracks any time from View, and the full journey keeps your work.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid var(--hair)">
+<span class="as-eyebrow">Worked example</span>
+<h1 style="margin: 0; font-size: 30px; line-height: 1.15">{{tourTitle}}</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 680px; line-height: 1.55">{{tourIntro}}</p>
+</div>
+<div class="as-tour">
+<article class="as-tour-card">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+<span style="font-size: 13px; font-weight: 600; color: var(--accent-ink); font-variant-numeric: tabular-nums">{{tour.pos}}</span>
+<div class="as-segs" role="group" aria-label="Walkthrough parts">
+<sc-for list="{{tourSegs}}" as="g" hint-placeholder-count="9">
+<button type="button" class="as-seg" data-state="{{g.state}}" onClick="{{g.go}}" aria-label="{{g.aria}}" title="{{g.aria}}"></button>
+</sc-for>
+</div>
+</div>
+<h2 style="margin: 4px 0 0; font-size: 26px; line-height: 1.2">{{tour.t}}</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.65; color: var(--ink-2); max-width: 640px">{{tour.b}}</p>
+<sc-if value="{{tour.hasChips}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+<span style="font-size: 12px; color: var(--ink-4); margin-right: 2px">Adds</span>
+<sc-for list="{{tour.chips}}" as="c" hint-placeholder-count="2">
+<span style="padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); font-size: 13px; font-weight: 500; color: var(--accent-ink)">{{c.n}}</span>
+</sc-for>
+</div>
+</sc-if>
+<div style="border-left: 3px solid var(--accent); padding: 2px 0 2px 14px; display: flex; flex-direction: column; gap: 2px">
+<span class="as-eyebrow">Senior note</span>
+<span style="font-size: 15px; line-height: 1.5">{{tour.note}}</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-top: 18px; border-top: 1px solid var(--hair)">
+<sc-if value="{{tourHasPrev}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-ghost" onClick="{{tourPrev}}">&#8249; Back</button>
+</sc-if>
+<span style="flex: 1 1 auto"></span>
+<sc-if value="{{tourMore}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-primary" onClick="{{tourNext}}">{{tourNextLabel}}</button>
+</sc-if>
+<sc-if value="{{tourEnd}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{quizDone}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 14px; color: var(--good); font-weight: 500">&#10003; Walkthrough complete</span>
+</sc-if>
+<sc-if value="{{quizOpen}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-primary" onClick="{{toCheckpoint}}">Check your understanding</button>
+</sc-if>
+</sc-if>
+</div>
+</article>
+<aside class="as-tour-side" aria-label="The design so far">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 600">The design so far</span>
+<span style="font-size: 12px; color: var(--ink-4)">Builds as you go. Nothing to fill in.</span>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px">
+<sc-for list="{{tourMap}}" as="m" hint-placeholder-count="8">
+<li class="as-built" data-state="{{m.state}}"><span class="as-built-dot" aria-hidden="true"></span><span>{{m.n}}</span></li>
+</sc-for>
+</ol>
+</aside>
+</div>
+</section>
+</sc-if>
+

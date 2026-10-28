@@ -1,0 +1,181 @@
+<sc-if value="{{isBlueprint}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 24px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Blueprint</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">{{appName}}: logical architecture</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">Each box is a capability the system needs, not a product. Start with how the parts interact, then follow a request through them or switch a box off to see what breaks.</p>
+</div>
+<sc-if value="{{showLandscape}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div>
+<h2 style="margin: 0; font-size: 20px">1. The solution in its landscape</h2>
+<p style="margin: 4px 0 0; font-size: 14px; color: var(--ink-3); max-width: 720px">Portfolio first: see what the solution connects to and which capabilities it serves before looking inside. Integration styles come from the template; TIME ratings come from the Business step.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center">
+<div style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{land.left}}" as="n" hint-placeholder-count="3">
+<div style="border: 1px solid var(--hair-strong); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; background: var(--surface)">
+<span style="font-weight: 600; font-size: 14px">{{n.n}}</span>
+<span style="font-size: 12.5px; color: var(--ink-3)">{{n.d}}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px"><span style="color: var(--accent-ink); font-weight: 600">&#8644; {{n.p}}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{n.tbg}}; color: {{n.tfg}}; font-weight: 600">{{n.time}}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="flex: 1 1 260px; min-width: 0; background: var(--accent-soft); border: 2px solid var(--accent); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink)">Your solution</span>
+<span style="font-weight: 700; font-size: 17px">{{appName}}</span>
+<span style="font-size: 12.5px; color: var(--ink-2)">Serves these capabilities</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{land.caps}}" as="c" hint-placeholder-count="4"><span style="padding: 3px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--accent-line); font-size: 12.5px">{{c.n}}</span></sc-for>
+</div>
+<span style="font-size: 12.5px; color: var(--ink-2)">{{land.retire}}</span>
+</div>
+<div style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{land.right}}" as="n" hint-placeholder-count="3">
+<div style="border: 1px solid var(--hair-strong); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; background: var(--surface)">
+<span style="font-weight: 600; font-size: 14px">{{n.n}}</span>
+<span style="font-size: 12.5px; color: var(--ink-3)">{{n.d}}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px"><span style="color: var(--accent-ink); font-weight: 600">&#8644; {{n.p}}</span><span style="padding: 1px 8px; border-radius: 999px; background: {{n.tbg}}; color: {{n.tfg}}; font-weight: 600">{{n.time}}</span></span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start">
+<div>
+<h2 style="margin: 0; font-size: 20px">{{flowHead}}</h2>
+<p style="margin: 4px 0 0; font-size: 14px; color: var(--ink-3); max-width: 640px">Click any component to highlight its connections and list them below. Columns run from the people using the system on the left to the data on the right; shared services sit underneath.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px" aria-label="Legend">
+<div style="display: flex; align-items: center; gap: 8px"><svg width="56" height="10" aria-hidden="true"><line x1="4" y1="5" x2="52" y2="5" style="stroke: var(--accent); stroke-width: 2"></line><path style="fill: var(--accent)" d="M0 5 L7 1 L7 9 z"></path><path style="fill: var(--accent)" d="M56 5 L49 1 L49 9 z"></path></svg><span>Request and response (two-way, waits for the answer)</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><svg width="56" height="10" aria-hidden="true"><line x1="0" y1="5" x2="50" y2="5" style="stroke: var(--orange); stroke-width: 2; stroke-dasharray: 7 5"></line><path style="fill: var(--orange)" d="M56 5 L49 1 L49 9 z"></path></svg><span>Event or message (one-way, does not wait)</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><svg width="56" height="10" aria-hidden="true"><line x1="0" y1="5" x2="50" y2="5" style="stroke: var(--ink-3); stroke-width: 2.4; stroke-dasharray: 1 5; stroke-linecap: round"></line><path style="fill: var(--ink-3)" d="M56 5 L49 1 L49 9 z"></path></svg><span>Batch or scheduled (one-way, in bulk)</span></div>
+</div>
+</div>
+<div style="overflow-x: auto; border: 1px solid var(--hair); border-radius: var(--r-md); background: var(--fill-1)">
+<div style="position: relative; width: {{flow.w}}px; height: {{flow.h}}px">
+<sc-for list="{{flow.heads}}" as="h" hint-placeholder-count="4">
+<span style="position: absolute; left: {{h.x}}px; top: 12px; width: 188px; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em">{{h.n}}</span>
+</sc-for>
+<sc-for list="{{flow.edges}}" as="e" hint-placeholder-count="8">
+<svg width="{{e.w}}" height="{{e.h}}" aria-hidden="true" style="position: absolute; left: {{e.l}}px; top: {{e.t}}px; overflow: visible; pointer-events: none; opacity: {{e.op}}"><defs><marker id="{{e.mid}}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill: {{e.color}}"></path></marker></defs><path d="{{e.d}}" marker-end="{{e.mEnd}}" marker-start="{{e.mStart}}" style="fill: none; stroke: {{e.color}}; stroke-width: {{e.sw}}; stroke-dasharray: {{e.dash}}; stroke-linecap: round"></path></svg>
+</sc-for>
+<sc-if value="{{flow.hasBottom}}" hint-placeholder-val="{{true}}">
+<span style="position: absolute; left: 24px; top: {{flow.busY}}px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em">Shared services</span>
+</sc-if>
+<sc-for list="{{flow.nodes}}" as="n" hint-placeholder-count="8">
+<button type="button" onClick="{{n.pick}}" aria-pressed="{{n.on}}" style="position: absolute; left: {{n.x}}px; top: {{n.y}}px; width: 188px; height: 64px; box-sizing: border-box; border-radius: 999px; border: {{n.border}}; background: {{n.bg}}; color: var(--ink); font-size: 13px; font-weight: 600; line-height: 1.25; padding: 6px 10px; text-align: center; display: flex; align-items: center; justify-content: center; opacity: {{n.op}}">{{n.label}}</button>
+</sc-for>
+<sc-for list="{{flow.labels}}" as="b" hint-placeholder-count="3">
+<span style="position: absolute; left: {{b.x}}px; top: {{b.y}}px; padding: 1px 6px; border-radius: var(--r-xs); background: var(--surface); border: 1px solid {{b.color}}; color: var(--ink); font-size: 11px; white-space: nowrap; pointer-events: none">{{b.t}}</span>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center">
+<span style="font-weight: 600; font-size: 14px">{{flowListTitle}}</span>
+<sc-if value="{{flowHasSel}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{flowClear}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">Show all</button>
+</sc-if>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{flowList}}" as="r" hint-placeholder-count="6">
+<div style="flex: 1 1 280px; border: 1px solid var(--hair); border-left: 4px solid {{r.color}}; border-radius: var(--r-sm); padding: 8px 12px; font-size: 13px; display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 600">{{r.from}} {{r.arrow}} {{r.to}}</span>
+<span style="color: var(--ink-2)">{{r.label}} · {{r.kind}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<h2 style="margin: 8px 0 0; font-size: 20px">{{reqHead}}</h2>
+
+
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<div>
+<h2 style="margin: 0; font-size: 18px">Follow a request: {{req}}</h2>
+<div style="font-size: 14px; color: var(--ink-2)">{{reqSummary}}</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" id="step-action" class="{{playCls}}" onClick="{{reqPlay}}" style="scroll-margin-top: 80px">{{playLabel}}</button>
+<button type="button" onClick="{{reqNext}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Next hop</button>
+<button type="button" onClick="{{reqReset}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Reset</button>
+<sc-if value="{{hasCache}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{toggleHit}}" aria-pressed="{{hitPressed}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 14px">{{hitLabel}}</button>
+</sc-if>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch">
+<sc-for list="{{hops}}" as="h" hint-placeholder-count="7">
+<div style="flex: 1 1 150px; border-radius: var(--r-md); border: 1px solid {{h.bd}}; background: {{h.bg}}; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: var(--mono); font-size: 11px; color: {{h.tag}}">{{h.num}} · {{h.status}}</span>
+<span style="font-weight: 600; font-size: 13px; color: {{h.fg}}">{{h.label}}</span>
+<span style="font-size: 12px; color: var(--ink-2)">{{h.act}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{h.ms}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+<sc-for list="{{layers}}" as="L" hint-placeholder-count="5">
+<sc-if value="{{L.notFirst}}" hint-placeholder-val="{{true}}">
+<div aria-hidden="true" style="height: 20px; display: flex; justify-content: center"><div style="width: 2px; background: var(--ink-4)"></div></div>
+</sc-if>
+<div style="background: {{L.bg}}; border: 1px {{L.border}} var(--hair-strong); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+<div style="flex: 0 0 150px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; padding-top: 4px">{{L.name}}</div>
+<div style="flex: 1 1 400px; display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{L.comps}}" as="c" hint-placeholder-count="3">
+<div style="flex: 1 1 210px; background: {{c.bg}}; border: 1px {{c.bstyle}} {{c.bd}}; border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 600; color: {{c.fg}}">{{c.label}}</div>
+<div style="font-size: 13px; color: var(--ink-3)">{{c.need}}</div>
+<sc-if value="{{c.showAn}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 13px; color: var(--accent-ink)">Think of it as: {{c.an}}</div>
+</sc-if>
+<sc-if value="{{c.isOff}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 13px; color: var(--warn); font-weight: 500">Without it: {{c.wo}}</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; margin-top: auto">
+<span style="font-family: var(--mono); font-size: 12px; color: var(--accent)">{{c.count}}</span>
+<sc-if value="{{c.canToggle}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{c.toggle}}" aria-pressed="{{c.offPressed}}" style="min-height: 36px; padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 12px">{{c.toggleLabel}}</button>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{hasSig}}" hint-placeholder-val="{{false}}">
+<div style="margin-top: 24px; background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px">Signature patterns to borrow</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{sig}}" as="p" hint-placeholder-count="4">
+<div style="flex: 1 1 240px; border: 1px solid var(--ink-2); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">{{p.t}}</span>
+<span style="font-size: 13px; color: var(--hair)">{{p.d}}</span>
+<a href="{{p.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--on-inverse-accent)">Source</a>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+<aside style="flex: 1 1 300px; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 18px">Reference shelf</h2>
+<p style="margin: 0; font-size: 13px; color: var(--ink-3)">Patterns in this blueprint draw on these sources.</p>
+<sc-for list="{{shelf}}" as="r" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 2px; padding-top: 10px; border-top: 1px solid var(--hair)">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase">{{r.k}}</span>
+<a href="{{r.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 14px; font-weight: 500">{{r.t}}</a>
+</div>
+</sc-for>
+</aside>
+</div>
+</section>
+</sc-if>
+

@@ -1,0 +1,28 @@
+<sc-if value="{{showAI}}" hint-placeholder-val="{{false}}">
+<section aria-label="AI model settings" style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 760px"><h2 style="margin: 0; font-size: 18px">Connect an AI model</h2><span style="font-size: 13px; color: var(--ink-3)">Outside Claude, ArchStudio can use a model you choose to read free-form briefs and to sit as the AI review board. Without one, briefs use keyword matching and every other step works as normal.</span></div>
+<button type="button" onClick="{{closeAI}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Close</button>
+</div>
+<div role="group" aria-label="Provider" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{aiProv}}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.on}}" style="min-height: 36px; padding: 4px 14px; border-radius: 999px; border: 1px solid {{p.bd}}; background: {{p.bg}}; color: {{p.fg}}; font-size: 13px; font-weight: 500">{{p.n}}</button>
+</sc-for>
+</div>
+<span style="font-size: 13px; color: var(--ink-2); max-width: 760px">{{aiHelp}} <a href="{{aiKeyLink}}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-ink)">{{aiLinkLabel}}</a></span>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-if value="{{aiNeedsKey}}" hint-placeholder-val="{{true}}"><label style="flex: 2 1 280px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">API key<input type="password" autocomplete="off" spellcheck="false" value="{{aiKey}}" onInput="{{onAIKey}}" placeholder="Paste your key" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label></sc-if>
+<sc-if value="{{aiNeedsUrl}}" hint-placeholder-val="{{false}}"><label style="flex: 2 1 260px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">Ollama address<input type="text" spellcheck="false" value="{{aiUrl}}" onInput="{{onAIUrl}}" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label></sc-if>
+<label style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 500">Model<input type="text" spellcheck="false" value="{{aiModel}}" onInput="{{onAIModel}}" style="min-height: 40px; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 14px; font-weight: 400"></label>
+</div>
+<sc-if value="{{aiNeedsKey}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; align-items: center; gap: 10px"><button type="button" role="switch" class="as-switch" onClick="{{toggleRemember}}" aria-checked="{{aiRemember}}" aria-label="Remember the key on this device"><span></span></button><span style="font-size: 13px; color: var(--ink-2)">Remember the key on this device. When off, the key is forgotten when you close the tab.</span></div>
+<span style="font-size: 12px; color: var(--ink-3); max-width: 760px">The key goes only from this browser to {{aiProvName}}. ArchStudio has no server and never sees it. Use a key with a spending limit, and do not remember it on a shared computer.</span>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<button type="button" class="as-primary" onClick="{{aiConnect}}">{{aiConnectLabel}}</button>
+<sc-if value="{{aiConnected}}" hint-placeholder-val="{{false}}"><button type="button" class="as-secondary" onClick="{{disconnectAI}}">Disconnect</button></sc-if>
+</div>
+<sc-if value="{{hasAITest}}" hint-placeholder-val="{{false}}"><div role="status" style="font-size: 13px; padding: 8px 12px; border-radius: var(--r-sm); background: {{aiTestBg}}; color: {{aiTestFg}}">{{aiTest}}</div></sc-if>
+</section>
+</sc-if>

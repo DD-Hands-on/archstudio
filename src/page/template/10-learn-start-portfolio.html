@@ -1,0 +1,34 @@
+<sc-if value="{{isLearnMode}}" hint-placeholder-val="{{true}}">
+<sc-if value="{{showPort}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 18px">Your portfolio</h2><span style="font-size: 13px; color: var(--ink-3)">{{portNote}}</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-if value="{{canSave}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{saveDesign}}" style="min-height: 40px; padding: 6px 16px; border-radius: 999px; border: none; background: var(--accent); color: var(--on-accent); font-size: 14px; font-weight: 600">{{saveLabel}}</button>
+</sc-if>
+<button type="button" onClick="{{togglePort}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Close</button>
+</div>
+</div>
+<sc-if value="{{hasPortMsg}}" hint-placeholder-val="{{false}}">
+<div role="status" style="font-size: 13px; padding: 8px 12px; border-radius: var(--r-sm); background: {{portMsgBg}}; color: {{portMsgFg}}">{{portMsg}}</div>
+</sc-if>
+<sc-if value="{{portEmpty}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 14px; color: var(--ink-3)">Nothing saved yet. Save a design to keep it, reopen it later and share it with a mentor or manager.</span>
+</sc-if>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px">
+<sc-for list="{{myPort}}" as="d" hint-placeholder-count="2">
+<div style="border: 1px solid {{d.bd}}; border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600; font-size: 14px">{{d.title}}</span>
+<span style="font-size: 12px; color: var(--ink-3)">{{d.meta}}</span>
+<span style="font-size: 12px; color: {{d.confC}}; font-weight: 600">{{d.confLine}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{d.open}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--accent-line); background: var(--surface); color: var(--accent-ink); font-size: 13px; font-weight: 600">{{d.openLabel}}</button>
+<button type="button" onClick="{{d.del}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{d.delBd}}; background: {{d.delBg}}; color: {{d.delFg}}; font-size: 13px">{{d.delLabel}}</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+

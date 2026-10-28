@@ -1,0 +1,25 @@
+<sc-if value="{{isChange}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phase H · Architecture change management</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">When things change, how big a change is it?</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">TOGAF sorts change into three kinds. A simple change is handled by normal change management. An incremental change revisits some phases. Re-architecting starts a new ADM cycle. Classify each trigger before you see the answer.</p>
+</div>
+<div id="step-action" style="display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 80px">
+<sc-for list="{{changes}}" as="c" hint-placeholder-count="3">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 16px; font-weight: 600">{{c.t}}</span>
+<div role="group" aria-label="Classify: {{c.t}}" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{c.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: var(--ink); font-size: 13px">{{o.l}}</button>
+</sc-for>
+</div>
+<sc-if value="{{c.answered}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 14px; color: var(--ink-2)"><strong style="color: {{c.vfg}}">{{c.verdict}}</strong> {{c.why}}</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+

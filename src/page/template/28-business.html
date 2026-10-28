@@ -1,0 +1,89 @@
+<sc-if value="{{isEnterprise}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Enterprise view</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">{{eaName}} in the enterprise</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">Your solution in TOGAF-style layers, with the capabilities it serves, the portfolio it joins and the standards it must meet. Click capabilities and systems to assess them.</p>
+<sc-if value="{{eaDefaulted}}" hint-placeholder-val="{{false}}">
+<p style="margin: 8px 0 0; font-size: 13px; color: var(--warn)">Showing the recommended outcome. Select one in Compare to change it.</p>
+</sc-if>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 999 1 720px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 0 0 130px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase">Business capabilities</div>
+<div style="flex: 1 1 400px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{eaCaps}}" as="b" hint-placeholder-count="4">
+<button type="button" onClick="{{b.cycle}}" style="min-height: 44px; padding: 8px 14px; border-radius: var(--r-sm); background: {{b.bg}}; border: 1px solid {{b.bd}}; color: var(--ink); font-size: 14px; text-align: left; display: flex; flex-direction: column">
+<span>{{b.n}}</span><span style="font-family: var(--mono); font-size: 11px; color: {{b.fg}}">Maturity: {{b.lvl}}</span>
+</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: var(--ink-3)">Click a capability to set its current maturity. Low-maturity capabilities are where this solution should land first.</span>
+</div>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 0 0 130px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase">Application portfolio</div>
+<div style="flex: 1 1 400px; display: flex; flex-direction: column; gap: 12px">
+<div style="border: 2px solid var(--accent); background: var(--accent-soft); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-weight: 700">Your solution: {{appName}}</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{eaPicks}}" as="p" hint-placeholder-count="6">
+<span style="padding: 4px 10px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--accent-line); font-size: 13px">{{p.n}}</span>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{eaNb}}" as="n" hint-placeholder-count="5">
+<div style="flex: 1 1 190px; border: 1px solid var(--hair-strong); border-radius: var(--r-md); padding: 12px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600; font-size: 14px">{{n.n}}</span>
+<span style="font-size: 13px; color: var(--ink-3)">{{n.d}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--accent)">Integrates via {{n.p}}</span>
+<button type="button" onClick="{{n.cycle}}" style="align-self: flex-start; min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{n.bd}}; background: {{n.bg}}; color: {{n.fg}}; font-size: 12px; font-weight: 600">TIME: {{n.time}}</button>
+</div>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: var(--ink-3)">{{portfolioLine}}</span>
+</div>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 0 0 130px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase">Data</div>
+<div style="flex: 1 1 400px; display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{eaDom}}" as="d" hint-placeholder-count="5">
+<span style="padding: 8px 14px; border-radius: var(--r-sm); background: var(--good-soft); border: 1px solid var(--good-line); font-size: 14px">{{d.n}}</span>
+</sc-for>
+</div>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px">
+<div style="flex: 0 0 130px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase">Technology</div>
+<div style="flex: 1 1 400px; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{eaTech}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-3)">{{g.layer}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{g.items}}" as="t" hint-placeholder-count="3">
+<span style="padding: 6px 12px; border-radius: var(--r-sm); background: var(--fill); border: 1px solid var(--hair); font-size: 13px; display: flex; flex-direction: column">
+<span><span style="color: var(--ink-3)">{{t.c}}:</span> <span style="font-weight: 600">{{t.n}}</span></span>
+<sc-if value="{{t.shared}}" hint-placeholder-val="{{false}}"><span style="font-family: var(--mono); font-size: 11px; color: var(--warn)">Usually an enterprise standard: check before choosing</span></sc-if>
+</span>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<aside style="flex: 1 1 280px; background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 18px">Governance and standards</h2>
+<sc-for list="{{eaGov}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 4px; padding-top: 12px; border-top: 1px solid var(--ink-2)">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2); text-transform: uppercase">{{g.h}}</span>
+<span style="font-size: 14px">{{g.t}}</span>
+</div>
+</sc-for>
+</aside>
+</div>
+</section>
+</sc-if>
+

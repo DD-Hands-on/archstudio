@@ -1,0 +1,32 @@
+<sc-if value="{{isDecisions}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Decisions</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">Decision records for {{eaName}}</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">One architecture decision record (ADR) per choice, generated from your selections. Take the Markdown into your repository or wiki.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 999 1 620px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{adrs}}" as="a" hint-placeholder-count="4">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+<h2 style="margin: 0; font-size: 16px"><span style="font-family: var(--mono); color: var(--ink-3)">{{a.id}}</span> {{a.title}}</h2>
+<span style="font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn)">Proposed</span>
+</div>
+<div style="font-size: 14px"><strong>Context.</strong> {{a.ctx}}</div>
+<div style="font-size: 14px"><strong>Decision.</strong> {{a.dec}}</div>
+<div style="font-size: 14px"><strong>Alternatives.</strong> {{a.alts}}</div>
+<div style="font-size: 14px; color: var(--good)"><strong>Gains.</strong> {{a.plus}}</div>
+<div style="font-size: 14px; color: var(--warn)"><strong>Costs.</strong> {{a.minus}}</div>
+</div>
+</sc-for>
+</div>
+<aside style="flex: 1 1 340px; background: var(--inverse); color: var(--on-inverse); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; color: var(--on-accent)">Markdown export</h2>
+<p style="margin: 0; font-size: 13px; color: var(--on-inverse-2)">Select and copy into docs/adr in your repository.</p>
+<pre style="margin: 0; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; max-height: 640px; overflow: auto; background: var(--inverse-2); padding: 12px; border-radius: var(--r-sm)">{{adrMd}}</pre>
+</aside>
+</div>
+</section>
+</sc-if>
+

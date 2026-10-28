@@ -1,0 +1,119 @@
+
+<div style="min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5">
+
+<header class="as-header" style="background: var(--glass); border-bottom: 1px solid var(--hair)">
+<div style="position: relative; max-width: 1440px; margin: 0 auto; height: 56px; padding: 0 20px; display: flex; align-items: center; gap: 10px">
+<button type="button" class="as-stepsbtn as-ghost" onClick="{{toggleSide}}" aria-expanded="{{sideOpen}}" aria-label="Guide">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg><span>Guide</span>
+</button>
+<div class="as-hide-sm" style="width: 28px; height: 28px; border-radius: 8px; background: var(--inverse); display: flex; align-items: center; justify-content: center; flex: 0 0 auto">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="8.5" y="14" width="7" height="7" rx="1"></rect><path d="M6.5 10v2h11v-2M12 12v2"></path></svg>
+</div>
+<span style="font-weight: 600; font-size: 15px; letter-spacing: -0.01em">ArchStudio</span>
+<span class="as-hide-xs" style="font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--ink-3)">v2.1</span>
+<span class="as-brief" style="font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 10px; margin-left: 4px; border-left: 1px solid var(--hair)">{{briefLine}}</span>
+<span style="flex: 1 1 auto"></span>
+<button type="button" class="as-ghost as-hide-sm" onClick="{{toggleFw}}" aria-expanded="{{fwExpanded}}">Frameworks</button>
+<button type="button" class="as-ghost" onClick="{{togglePort}}" aria-expanded="{{portExpanded}}">Portfolio <span style="color: var(--ink-4)">{{portCount}}</span></button>
+<button type="button" class="as-ghost" onClick="{{toggleMenu}}" aria-expanded="{{menuOpen}}" aria-label="View options">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg><span class="as-hide-sm">View</span>
+</button>
+<sc-if value="{{menuShown}}" hint-placeholder-val="{{false}}">
+<div role="dialog" aria-label="View options" class="as-pop">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="as-eyebrow">Experience level</span>
+<div role="group" aria-label="Skill level" style="display: flex; background: var(--fill); border-radius: 10px; padding: 3px">
+<sc-for list="{{levels}}" as="l" hint-placeholder-count="3">
+<button type="button" onClick="{{l.pick}}" aria-pressed="{{l.on}}" style="flex: 1 1 0; min-height: 32px; padding: 4px 8px; border-radius: 8px; border: none; background: transparent; color: var(--ink-2); font-size: 13px; font-weight: 500">{{l.l}}</button>
+</sc-for>
+</div>
+<span style="font-size: 12px; color: var(--ink-4)">{{lockedLine}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--hair)">
+<span class="as-eyebrow">Practice track</span>
+<div role="group" aria-label="Practice track" style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{trackOpts}}" as="tk" hint-placeholder-count="3">
+<button type="button" onClick="{{tk.pick}}" aria-pressed="{{tk.on}}" style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline; text-align: left; min-height: 34px; padding: 6px 10px; border-radius: 8px; border: 1px solid {{tk.bd}}; background: {{tk.bg}}; color: var(--ink); font-size: 13px"><span style="font-weight: 500">{{tk.n}}</span><span style="font-size: 11.5px; color: var(--ink-3)">{{tk.t}}</span></button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--hair)">
+<span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500">Plain language</span><span style="font-size: 12px; color: var(--ink-3)">Define terms as you go</span></span>
+<button type="button" role="switch" class="as-switch" onClick="{{togglePlain}}" aria-checked="{{plainPressed}}" aria-label="Plain language"><span></span></button>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--hair); font-size: 14px">
+<span style="font-weight: 500">Checkpoints</span><span style="color: var(--ink-3); font-variant-numeric: tabular-nums">{{quizScore}}</span>
+</div>
+<sc-if value="{{canSetupAI}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--hair)">
+<span style="font-size: 14px; font-weight: 500">AI model</span><span style="font-size: 12px; color: var(--ink-3)">{{aiStatus}}</span>
+<button type="button" class="as-secondary" onClick="{{openAI}}" style="align-self: flex-start; min-height: 34px; font-size: 13px">{{aiBtnLabel}}</button>
+</div>
+</sc-if>
+<button type="button" class="as-ghost as-show-sm" onClick="{{toggleFw}}" style="justify-content: flex-start">Frameworks</button>
+</div>
+</sc-if>
+</div>
+<div style="max-width: 1440px; margin: 0 auto; padding: 0 20px 10px">
+<nav aria-label="Design journey" class="as-journey">
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; gap: 3px">
+<sc-for list="{{journey}}" as="j" hint-placeholder-count="9">
+<li style="flex: 1 0 auto; min-width: 104px; display: flex">
+<button type="button" class="as-chev" data-state="{{j.state}}" data-first="{{j.first}}" onClick="{{j.go}}" aria-current="{{j.cur}}" title="{{j.tip}}"><span class="as-chev-l">{{j.label}}</span><span class="as-chev-s">{{j.sub}}</span></button>
+</li>
+</sc-for>
+<sc-if value="{{hasLockedChev}}" hint-placeholder-val="{{true}}">
+<li style="flex: 1 0 auto; min-width: 128px; display: flex">
+<button type="button" class="as-chev" data-state="locked" data-first="false" onClick="{{lockedClick}}" title="{{lockedTip}}"><span class="as-chev-l">+{{lockedNum}} more</span><span class="as-chev-s">{{lockedNext}}</span></button>
+</li>
+</sc-if>
+</ol>
+</nav>
+</div>
+</header>
+
+
+<div class="as-shell" style="max-width: 1440px; margin: 0 auto; display: flex; align-items: flex-start">
+<aside class="as-side {{sideCls}}" aria-label="Guide">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin: 0 10px 16px; padding-bottom: 12px; border-bottom: 1px solid var(--hair)">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<h2 style="margin: 0; font-size: 16px; font-weight: 650">Guide</h2>
+<span style="font-size: 12.5px; color: var(--ink-3)">For this step: {{guideStep}}</span>
+</div>
+<button type="button" class="as-ghost as-guide-close" onClick="{{toggleSide}}" aria-label="Close guide"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>Close</span></button>
+</div>
+<div style="margin: 0 10px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="as-eyebrow">Mentor</span>
+<p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2)">{{coach}}</p>
+</div>
+<sc-if value="{{fwHasHere}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span class="as-eyebrow">Draws on</span>
+<div style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start">
+<sc-for list="{{fwHere}}" as="h" hint-placeholder-count="2">
+<button type="button" class="as-link" onClick="{{h.open}}">{{h.n}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{plain}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span class="as-eyebrow">Key terms</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{terms}}" as="t" hint-placeholder-count="5">
+<button type="button" class="as-term" onClick="{{t.pick}}" aria-expanded="{{t.on}}">{{t.l}}</button>
+</sc-for>
+</div>
+<sc-if value="{{hasTerm}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); box-shadow: var(--shadow-1); border: 1px solid var(--hair-soft); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600; font-size: 14px">{{term.l}}</span>
+<span style="font-size: 13px; line-height: 1.5; color: var(--ink-2)">{{term.d}}</span>
+<span style="font-size: 12.5px; color: var(--ink-3)">Think of it as {{term.a}}</span>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</aside>
+<main class="as-main" style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 24px">

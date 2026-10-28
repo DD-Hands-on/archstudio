@@ -1,0 +1,69 @@
+<sc-if value="{{isVision}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phase A · Architecture vision</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">{{vision.title}}</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">Name who cares, what drives the change and what is in scope before drawing anything. This becomes your statement of architecture work.</p>
+</div>
+<sc-if value="{{vision.hasScen}}" hint-placeholder-val="{{true}}">
+<div style="background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2); text-transform: uppercase">Scenario · {{vision.scenName}}</span>
+<span style="font-size: 15px; line-height: 1.6">{{vision.sit}}</span>
+</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 16px">Vision statement</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">{{vision.statement}}</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px">
+<sc-for list="{{vision.lists}}" as="L" hint-placeholder-count="4">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+<h3 style="margin: 0; font-size: 14px">{{L.h}}</h3>
+<sc-for list="{{L.items}}" as="i" hint-placeholder-count="3"><div style="display: flex; gap: 8px; font-size: 13px"><span aria-hidden="true" style="color: {{L.c}}">{{L.m}}</span><span>{{i.t}}</span></div></sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="flex: 1 1 420px; min-width: 0; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap">
+<h2 style="margin: 0; font-size: 16px">Stakeholder map</h2>
+<span style="font-size: 12px; color: var(--ink-3)">Power up, interest right. Select a stakeholder.</span>
+</div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+<sc-for list="{{vision.quads}}" as="q" hint-placeholder-count="4">
+<div style="background: {{q.bg}}; border-radius: var(--r-md); padding: 10px; min-height: 110px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 700; color: {{q.fg}}">{{q.l}}</span>
+<sc-if value="{{q.empty}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: var(--ink-3)">No one in this group</span></sc-if>
+<sc-for list="{{q.items}}" as="s" hint-placeholder-count="2">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="min-height: 34px; text-align: left; padding: 4px 10px; border-radius: var(--r-sm); border: 1px solid {{s.bd}}; background: var(--surface); color: var(--ink); font-size: 13px">{{s.n}}</button>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{vision.hasSel}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--accent-soft); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 700; color: var(--accent-ink)">{{vision.sel.n}}</span>
+<span style="font-size: 14px"><strong>Concern:</strong> {{vision.sel.c}}</span>
+<span style="font-size: 14px"><strong>View they need:</strong> {{vision.sel.v}}</span>
+<div><button type="button" class="as-link" onClick="{{vision.sel.go}}">See this in {{vision.sel.stepName}} &#8250;</button></div>
+</div>
+</sc-if>
+</div>
+</div>
+<div id="step-action" class="as-commit" style="scroll-margin-top: 80px">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-weight: 600">Does this vision hold?</span>
+<span style="font-size: 13px; color: var(--ink-3)">Agreeing it becomes your statement of architecture work. You can come back and change it.</span>
+</div>
+<sc-if value="{{visionPending}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-primary" onClick="{{visionAgree}}">Agree the vision</button>
+</sc-if>
+<sc-if value="{{visionAgreed}}" hint-placeholder-val="{{false}}">
+<span class="as-done">&#10003; Vision agreed</span>
+</sc-if>
+</div>
+</section>
+</sc-if>
+

@@ -1,0 +1,150 @@
+<sc-if value="{{isBrief}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Brief</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.15">What are you building?</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 760px">{{briefIntro}}</p>
+</div>
+<div role="group" aria-label="Design lens" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px">
+<sc-for list="{{lensOpts}}" as="l" hint-placeholder-count="2">
+<button type="button" onClick="{{l.pick}}" aria-pressed="{{l.on}}" style="text-align: left; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid {{l.bd}}; box-shadow: {{l.ring}}; background: {{l.bg}}; color: var(--ink); display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: baseline"><span style="font-weight: 700; font-size: 15px">{{l.n}}</span><span style="font-size: 12px; color: var(--ink-3)">{{l.who}}</span></span>
+<span style="font-size: 13px; color: var(--ink-2)">{{l.d}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{l.path}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+<h2 id="step-action" style="margin: 0; font-size: 16px; scroll-margin-top: 80px">Start from an enterprise scenario</h2>
+<span style="font-size: 13px; color: var(--ink-3)">Each sets the template, constraints, stakeholders, baseline estate and change triggers.</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+<sc-for list="{{entScen}}" as="s" hint-placeholder-count="4">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="text-align: left; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid {{s.bd}}; box-shadow: {{s.ring}}; background: {{s.bg}}; color: var(--ink); display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 700; font-size: 15px">{{s.n}}</span>
+<span style="font-size: 13px; color: var(--ink-2)">{{s.d}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{s.tags}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{hasScenario}}" hint-placeholder-val="{{false}}">
+<div><button type="button" onClick="{{clearScenario}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">Clear scenario</button></div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+
+<div style="flex: 999 1 600px; min-width: 0; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); display: flex; flex-direction: column">
+<div style="padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 240px">
+<sc-if value="{{chatEmpty}}" hint-placeholder-val="{{true}}">
+<div style="align-self: flex-start; max-width: 640px; background: var(--fill); border-radius: var(--r-xs) 14px 14px 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 15px">Tell me what you want to design. Plain language is fine, for example "an AI-native procurement process on SAP for a pharma company" or "an app where patients book and track lab tests".</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{examples}}" as="x" hint-placeholder-count="5">
+<button type="button" onClick="{{x.go}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">{{x.l}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-for list="{{chat}}" as="m" hint-placeholder-count="2">
+<sc-if value="{{m.isUser}}" hint-placeholder-val="{{true}}">
+<div style="align-self: flex-end; max-width: 560px; background: var(--accent); color: var(--on-accent); border-radius: var(--r-xl) 4px 14px 14px; padding: 12px 16px; font-size: 15px; white-space: pre-wrap">{{m.text}}</div>
+</sc-if>
+<sc-if value="{{m.isStudio}}" hint-placeholder-val="{{false}}">
+<div style="align-self: flex-start; max-width: 680px; width: 100%; box-sizing: border-box; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-xs) 14px 14px 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+<span style="font-weight: 700; font-size: 16px; color: var(--accent-ink)">{{m.title}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{m.mode}}</span>
+</div>
+<span style="font-size: 15px">{{m.understanding}}</span>
+<div style="display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 12px; font-size: 14px">
+<span style="color: var(--ink-3)">Starting from</span><span>{{m.base}}</span>
+<span style="color: var(--ink-3)">Components</span><span>{{m.comps}}</span>
+<span style="color: var(--ink-3)">Settings applied</span><span>{{m.applied}}</span>
+</div>
+<sc-if value="{{m.hasAssumptions}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 14px"><div style="color: var(--ink-3); margin-bottom: 4px">Assumptions I made</div>
+<sc-for list="{{m.assumptions}}" as="a" hint-placeholder-count="2"><div style="display: flex; gap: 8px"><span aria-hidden="true">·</span><span>{{a.t}}</span></div></sc-for></div>
+</sc-if>
+<sc-if value="{{m.hasGaps}}" hint-placeholder-val="{{false}}">
+<div style="font-size: 14px; color: var(--warn)"><div style="margin-bottom: 4px">Not covered by the catalogue yet</div>
+<sc-for list="{{m.gaps}}" as="a" hint-placeholder-count="2"><div style="display: flex; gap: 8px"><span aria-hidden="true">·</span><span>{{a.t}}</span></div></sc-for></div>
+</sc-if>
+<sc-if value="{{m.hasQuestions}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; color: var(--ink-3)">To sharpen the design, tell me:</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{m.questions}}" as="q" hint-placeholder-count="2">
+<button type="button" onClick="{{q.pick}}" style="min-height: 40px; padding: 6px 12px; border-radius: var(--r-md); border: 1px solid var(--accent-line); background: var(--surface); color: var(--accent-ink); font-size: 13px; text-align: left">{{q.t}}</button>
+</sc-for>
+</div></div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+
+</div>
+</div>
+</sc-if>
+<sc-if value="{{m.isNote}}" hint-placeholder-val="{{false}}">
+<div style="align-self: flex-start; font-size: 13px; color: var(--warn)">{{m.text}}</div>
+</sc-if>
+</sc-for>
+<sc-if value="{{thinking}}" hint-placeholder-val="{{false}}">
+<div style="align-self: flex-start; display: flex; align-items: center; gap: 12px; background: var(--fill); border-radius: var(--r-xl); padding: 10px 14px">
+<span style="font-size: 14px; color: var(--ink-2)">{{thinkingLabel}}</span>
+<button type="button" onClick="{{stopThinking}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">Stop</button>
+</div>
+</sc-if>
+</div>
+<div style="border-top: 1px solid var(--hair); padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end">
+<label for="brief-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Describe or refine your brief</label>
+<textarea id="brief-input" rows="2" value="{{text}}" onChange="{{onText}}" onKeyDown="{{onKey}}" placeholder="{{composerHint}}" style="flex: 1 1 360px; min-height: 52px; padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--hair-strong); font-size: 15px; line-height: 1.4; color: var(--ink); background: var(--surface); box-sizing: border-box; resize: vertical; font-family: inherit"></textarea>
+<button type="button" class="as-send" data-ready="{{sendReady}}" onClick="{{send}}">Send</button>
+</div>
+<div style="padding: 0 16px 12px; font-size: 12px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center"><span style="flex: 1 1 280px">{{aiModeLine}}</span><sc-if value="{{canSetupAI}}" hint-placeholder-val="{{false}}"><button type="button" class="as-ghost" onClick="{{openAI}}" style="min-height: 30px; font-size: 12.5px; color: var(--accent-ink)">{{aiBtnLabel}}</button></sc-if></div>
+</div>
+
+<aside style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 14px">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">Your brief at a glance</h2>
+<div style="display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 6px 10px; font-size: 14px">
+<sc-for list="{{glance}}" as="g" hint-placeholder-count="7"><span style="color: var(--ink-3)">{{g.l}}</span><span style="font-weight: 500">{{g.v}}</span></sc-for>
+</div>
+<button type="button" onClick="{{toggleCtx}}" aria-expanded="{{ctxExpanded}}" style="align-self: flex-start; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 13px; font-weight: 600">{{ctxLabel}}</button>
+<sc-if value="{{showCtx}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--hair); padding-top: 12px">
+<sc-for list="{{ctx}}" as="g" hint-placeholder-count="7">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 600">{{g.label}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<span style="font-size: 12px; color: var(--ink-3)">{{planning}}</span>
+</div>
+</sc-if>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">Or start from a template</h2>
+<button type="button" onClick="{{toggleTpl}}" aria-expanded="{{tplExpanded}}" style="align-self: flex-start; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 13px; font-weight: 600">{{tplLabel}}</button>
+<sc-if value="{{showTpl}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-3)">Systems</span>
+<sc-for list="{{apps}}" as="a" hint-placeholder-count="4">
+<button type="button" onClick="{{a.pick}}" style="min-height: 44px; text-align: left; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid {{a.bd}}; background: {{a.bg}}; color: var(--ink); font-size: 14px; font-weight: 600">{{a.n}}</button>
+</sc-for>
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-3); margin-top: 4px">Enterprise implementations</span>
+<sc-for list="{{implApps}}" as="a" hint-placeholder-count="5">
+<button type="button" onClick="{{a.pick}}" style="min-height: 44px; text-align: left; padding: 8px 12px; border-radius: var(--r-md); border: 1px solid {{a.bd}}; background: {{a.bg}}; color: var(--ink); font-size: 14px; font-weight: 600">{{a.n}}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+</aside>
+</div>
+</section>
+</sc-if>
+

@@ -1,0 +1,91 @@
+<sc-if value="{{isWorkload}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Requirements · Workload</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">Size it before you draw it</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">First principles: describe how {{appName}} will be used, and the numbers decide which building blocks it needs. Defaults are typical for this kind of system. Change any answer and everything recalculates.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 1 1 380px; min-width: 0; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 20px; display: flex; flex-direction: column; gap: 18px">
+<h2 style="margin: 0; font-size: 17px">How it will be used</h2>
+<sc-for list="{{wQs}}" as="q" hint-placeholder-count="7">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px; font-weight: 600">{{q.label}}</span>
+<span style="font-size: 12.5px; color: var(--ink-3)">{{q.help}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{q.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 38px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
+</sc-for>
+</div>
+</div>
+</sc-for>
+<span style="font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--hair); padding-top: 10px">{{wBasis}}</span>
+</div>
+<div style="flex: 2 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+<sc-for list="{{wFig}}" as="f" hint-placeholder-count="5">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; color: var(--ink-3)">{{f.l}}</span>
+<span class="as-wfig" style="font-size: 24px; font-weight: 700">{{f.v}}</span>
+<span style="font-size: 12px; color: var(--ink-2)">{{f.n}}</span>
+</div>
+</sc-for>
+</div>
+<div style="background: var(--inverse); color: var(--on-inverse); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px; font-weight: 600">The working</span>
+<sc-for list="{{wCalc}}" as="w" hint-placeholder-count="4">
+<div><span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2)">{{w.h}}</span><div style="font-family: var(--mono); font-size: 12.5px">{{w.t}}</div></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{wLaws}}" as="l" hint-placeholder-count="3">
+<div style="flex: 1 1 220px; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-lg); padding: 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 700; font-size: 14px; color: var(--accent-ink)">{{l.t}}</span>
+<span style="font-size: 13px">{{l.d}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-xl); padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+<h2 style="margin: 0; font-size: 18px">What the numbers say you need</h2>
+<span style="font-size: 14px; font-weight: 600; color: {{wSumFg}}">{{wSummary}}</span>
+</div>
+<sc-if value="{{wImplNote}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--ink-3)">For SaaS enterprise platforms the vendor runs caching, load balancing and storage. Your sizing decisions move to integration, data and process.</span>
+</sc-if>
+<sc-for list="{{wDerived}}" as="d" hint-placeholder-count="6">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--hair)">
+<div style="flex: 0 0 210px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-weight: 600; font-size: 14px">{{d.n}}</span>
+<span style="font-size: 12px; color: var(--ink-3)">{{d.status}}</span>
+</div>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{d.vbg}}; color: {{d.vfg}}">{{d.v}}</span>
+<span style="flex: 1 1 280px; font-size: 13px; color: var(--ink-2)">Because {{d.b}}</span>
+<sc-if value="{{d.hasAct}}" hint-placeholder-val="{{false}}">
+<button type="button" class="as-secondary" onClick="{{d.act}}">{{d.actL}}</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<h2 style="margin: 0; font-size: 18px">What these numbers mean for products</h2>
+<span style="font-size: 13px; color: var(--ink-3)">Product scores are curated for a typical load. At your numbers, these move. Outcomes and Compare use the adjusted scores, so change a number above and watch them shift.</span>
+<sc-if value="{{wFitNone}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--ink-2); padding-top: 8px">Every product offered for this design's building blocks is within its comfortable range at these numbers. Try a bigger scale or a 20x peak.</span>
+</sc-if>
+<sc-for list="{{wFit}}" as="f" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 0; border-top: 1px solid var(--hair)">
+<div style="flex: 0 0 210px; display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 600; font-size: 14px">{{f.n}}</span>
+<span style="font-size: 12px; color: var(--ink-3)">{{f.blk}}</span>
+</div>
+<span style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{f.cbg}}; color: {{f.cfg}}">{{f.chg}}</span>
+<span style="flex: 1 1 280px; font-size: 13px; color: var(--ink-2)">{{f.why}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+

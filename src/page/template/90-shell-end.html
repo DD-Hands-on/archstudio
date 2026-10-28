@@ -1,0 +1,42 @@
+<sc-if value="{{showFinish}}" hint-placeholder-val="{{false}}">
+<section aria-label="Finished" class="as-finish">
+<div style="width: 44px; height: 44px; border-radius: 50%; background: var(--good-soft); color: var(--good); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700" aria-hidden="true">&#10003;</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center">
+<h2 style="margin: 0; font-size: 24px">{{finishTitle}}</h2>
+<p style="margin: 0; color: var(--ink-3); max-width: 520px; line-height: 1.55">{{finishBody}}</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center">
+<sc-if value="{{finishCanLevel}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-primary" onClick="{{levelUp}}">{{finishLevelLabel}}</button>
+</sc-if>
+<sc-if value="{{finishCanSave}}" hint-placeholder-val="{{true}}">
+<button type="button" class="{{finishSaveCls}}" onClick="{{saveDesign}}">Save to portfolio</button>
+</sc-if>
+<button type="button" class="{{finishNewCls}}" onClick="{{startNew}}">Start a new design</button>
+</div>
+</section>
+</sc-if>
+
+<div class="as-footer">
+<sc-if value="{{hasPrev}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-float as-float-2 as-float-icon" onClick="{{goPrev}}" aria-label="Back to {{prevLabel}}" title="Back to {{prevLabel}}"><span aria-hidden="true">&#8249;</span></button>
+</sc-if>
+<span style="flex: 1 1 auto"></span>
+<sc-if value="{{hasTodo}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-float as-float-hint" onClick="{{todoGo}}">{{todoLine}}</button>
+</sc-if>
+<sc-if value="{{hasNext}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-float {{nextCls}}" onClick="{{goNext}}">{{nextVerb}} {{nextLabel}} <span aria-hidden="true">&#8250;</span></button>
+</sc-if>
+<sc-if value="{{atLevelEnd}}" hint-placeholder-val="{{false}}">
+<button type="button" class="as-float as-float-good" onClick="{{levelUp}}">{{levelUpLabel}}</button>
+</sc-if>
+</div>
+
+</sc-if>
+
+
+
+</main>
+</div>
+</div>

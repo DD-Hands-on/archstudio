@@ -63,11 +63,18 @@ TOGAF Standard (10th Edition), ArchiMate, ISO/IEC/IEEE 42010, architecture decis
 
 ## Repository contents
 
-- `app/index.html`: the complete app in one file
+- `app/index.html`: the complete app in one file, built from `src/`
 - `app/vendor/`: morphdom 2.7.4 (MIT licence), the one library the app uses
+- `src/`: the source, split into the rules engine, the app, standalone support, the renderer and one template file per step
+- `test/`: unit tests for the workload maths, fit rules, scoring, catalogue and renderer
 - `CASE_STUDY.md`: one-page case study
+- `docs/architecture.md`: how the code is organised, built and tested
 - `docs/build-log.md`: how the app evolved, version by version
 - `docs/screenshots/`: screenshots of key steps
+
+## Working on the code
+
+Edit `src/`, then run `npm install`, `npm test` and `npm run build`. See [docs/architecture.md](docs/architecture.md).
 
 ## Notes
 

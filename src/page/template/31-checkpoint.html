@@ -1,0 +1,25 @@
+<sc-if value="{{showQuiz}}" hint-placeholder-val="{{true}}">
+<section id="checkpoint" aria-label="Checkpoint" style="scroll-margin-top: 80px; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--good-soft); color: var(--good)">Checkpoint</span>
+<span style="font-weight: 600">{{quizHead}}</span>
+</div>
+<sc-for list="{{quiz}}" as="q" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 500">{{q.q}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{q.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" style="min-height: 44px; padding: 8px 14px; border-radius: var(--r-sm); border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 14px; text-align: left">{{o.t}}</button>
+</sc-for>
+</div>
+<sc-if value="{{q.answered}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--ink-2)"><strong style="color: {{q.vfg}}">{{q.verdict}}</strong> {{q.why}}</span>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{quizDone}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--good-soft); border-radius: var(--r-md); padding: 12px 14px; font-size: 14px"><strong style="color: var(--good)">What you learned:</strong> {{quizTake}}</div>
+</sc-if>
+</section>
+</sc-if>
+

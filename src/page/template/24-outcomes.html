@@ -1,0 +1,114 @@
+<sc-if value="{{isOutcomes}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Outcomes</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">Build competing outcomes</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">{{outcomesIntro}}</p>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between">
+<div role="tablist" aria-label="Outcomes" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+<button type="button" role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid {{t.bd}}; background: {{t.bg}}; color: {{t.fg}}; font-size: 14px; font-weight: 500">{{t.name}}</button>
+</sc-for>
+<sc-if value="{{canAdd}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{addOutcome}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px dashed var(--hair-strong); background: var(--surface); color: var(--ink); font-size: 14px">+ Add outcome</button>
+</sc-if>
+<sc-if value="{{canRemove}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{removeOutcome}}" style="min-height: 44px; padding: 8px 12px; border-radius: 999px; border: none; background: transparent; color: var(--warn); font-size: 14px; text-decoration: underline">Remove {{activeName}}</button>
+</sc-if>
+</div>
+<button type="button" class="as-ghost" onClick="{{toggleGuided}}">{{guidedSwitchLabel}}</button>
+</div>
+<sc-if value="{{freeOn}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<span style="font-size: 13px; color: var(--ink-3); margin-right: 4px">Quick fill {{activeName}}:</span>
+<sc-for list="{{fills}}" as="f" hint-placeholder-count="4">
+<button type="button" onClick="{{f.go}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 13px">{{f.l}}</button>
+</sc-for>
+</div>
+</sc-if>
+<div style="font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--hair); padding-top: 10px">How to read scores: 1 to 5, higher is better. Scale: grows without redesign. Cost: cheaper to run. Ops ease: less to run yourself. Portability: easy to leave. Speed: time to first value. These are curated judgements, not measurements. Catalogue signals are samples.</div>
+</div>
+
+<sc-if value="{{hasFocus}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--warn-soft); border: 1px solid var(--warn-line); border-radius: var(--r-lg); padding: 14px 18px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center">
+<div><div style="font-weight: 700; color: var(--warn)">Fixing in {{activeName}}: {{focus.label}}</div><div style="font-size: 14px">{{focus.tip}}</div></div>
+<button type="button" onClick="{{clearFocus}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--warn); background: var(--surface); color: var(--warn); font-size: 13px">Done fixing</button>
+</div>
+</sc-if>
+
+<sc-if value="{{guidedOn}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span id="step-action" style="font-weight: 600; scroll-margin-top: 80px">{{g.progress}}</span>
+<div style="flex: 1 1 auto; height: 8px; background: var(--fill-2); border-radius: var(--r-xs); overflow: hidden"><div style="height: 8px; width: {{g.pct}}; background: var(--accent)"></div></div>
+</div>
+<sc-if value="{{g.done}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--good-soft); border: 1px solid var(--good-line); border-radius: var(--r-lg); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+<span style="font-weight: 600; color: var(--good)">All decisions made for {{activeName}}. Build a second outcome to compare, or go to Compare.</span>
+<sc-if value="{{canAdd}}" hint-placeholder-val="{{true}}">
+<button type="button" class="as-secondary" onClick="{{addOutcome}}">Build a second outcome to compare</button>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{g.ask}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 2px solid var(--accent); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--accent); text-transform: uppercase">Predict first · {{g.label}}</span>
+<span style="font-size: 14px; color: var(--ink-3)">{{g.need}}</span>
+<span style="font-size: 17px; font-weight: 600">{{g.q}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{g.qopts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 14px; font-weight: 500">{{o.n}}</button>
+</sc-for>
+</div>
+<sc-if value="{{g.answered}}" hint-placeholder-val="{{false}}">
+<div style="background: {{g.rbg}}; border-radius: var(--r-sm); padding: 12px 14px; font-size: 14px"><strong style="color: {{g.rfg}}">{{g.verdict}}</strong> {{g.reveal}}</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-for list="{{builder}}" as="c" hint-placeholder-count="3">
+<div style="background: var(--surface); border: {{c.cardBorder}}; border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px">
+<h2 style="margin: 0; font-size: 18px">{{c.label}}</h2>
+<span style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); text-transform: uppercase">{{c.layer}}</span>
+</div>
+<p style="margin: 0; font-size: 14px; color: var(--ink-3)">{{c.need}}</p>
+<sc-if value="{{c.showAn}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 13px; color: var(--accent-ink)">Think of it as: {{c.an}}</p></sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{c.opts}}" as="o" hint-placeholder-count="3">
+<div style="flex: 1 1 240px; border-radius: var(--r-md); border: 1px solid {{o.bd}}; box-shadow: {{o.ring}}; background: {{o.bg}}; display: flex; flex-direction: column">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.sel}}" style="flex: 1 1 auto; text-align: left; padding: 14px 14px 8px; border: none; background: transparent; color: var(--ink); display: flex; flex-direction: column; gap: 8px">
+<span style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; width: 100%">
+<span style="font-weight: 600; font-size: 15px">{{o.n}}</span>
+<span style="font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; background: {{o.kbg}}; color: {{o.kfg}}">{{o.k}}</span>
+</span>
+<span style="font-size: 13px; color: var(--ink-2)">{{o.w}}</span>
+<sc-if value="{{o.isStd}}" hint-placeholder-val="{{false}}">
+<span style="align-self: flex-start; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: {{o.stdBg}}; color: {{o.stdFg}}">{{o.stdLabel}}</span>
+</sc-if>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{o.scoreLine}}</span>
+<sc-if value="{{o.hasFit}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: var(--ink-2)"><strong style="font-weight: 600">At your workload:</strong> {{o.fitLine}}</span>
+</sc-if>
+<sc-if value="{{o.hasSignal}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: var(--warn)">Catalogue signal: {{o.signal}}</span>
+</sc-if>
+<sc-if value="{{o.sel}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; font-weight: 600; color: var(--accent-ink)">Selected for {{activeName}}</span>
+</sc-if>
+</button>
+<div style="padding: 0 14px 12px">
+<a href="{{o.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px">Read more</a>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</section>
+</sc-if>
+

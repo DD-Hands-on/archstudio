@@ -1,0 +1,51 @@
+<sc-if value="{{isDrill}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 22px">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">Drill and threats</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2">What breaks first in {{eaName}}?</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">Run a scenario, read the real incident behind it, then walk the trust boundaries.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{scenarios}}" as="s" hint-placeholder-count="4">
+<button type="button" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 1px solid {{s.bd}}; background: {{s.bg}}; color: {{s.fg}}; font-size: 14px">{{s.l}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 999 1 620px; min-width: 0; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 15px; font-weight: 600; margin-bottom: 8px">{{drillSummary}}</div>
+<sc-for list="{{drillRows}}" as="r" hint-placeholder-count="6">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--hair)">
+<div style="flex: 1 1 220px"><div style="font-weight: 600; font-size: 14px">{{r.n}}</div><div style="font-size: 12px; color: var(--ink-3)">{{r.c}}</div></div>
+<span style="font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; background: {{r.bg}}; color: {{r.fg}}">{{r.s}}</span>
+<div style="flex: 2 1 260px; font-size: 13px; color: var(--ink-2)">{{r.why}}</div>
+</div>
+</sc-for>
+</div>
+<aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px">
+<div style="background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2); text-transform: uppercase">{{incident.k}}</span>
+<span style="font-weight: 700">{{incident.t}}</span>
+<span style="font-size: 14px; color: var(--hair)">{{incident.d}}</span>
+<a href="{{incident.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--on-inverse-accent)">Read the source</a>
+</div>
+<div style="background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 16px; color: var(--accent-ink)">How a senior architect responds</h2>
+<p style="margin: 0; font-size: 14px">{{drillAdvice}}</p>
+</div>
+</aside>
+</div>
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Threat model by trust boundary (STRIDE)</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{threats}}" as="t" hint-placeholder-count="4">
+<div style="flex: 1 1 260px; border: 1px solid var(--hair); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600">{{t.b}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--warn)">{{t.th}}</span>
+<span style="font-size: 13px; color: var(--ink-2)">{{t.m}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</sc-if>
+

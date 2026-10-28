@@ -1,0 +1,97 @@
+<sc-if value="{{isBoard}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-end">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phase G · AI review board</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">Defend your design to the board</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 760px">{{brd.who}} plays the board below. Each member reads your actual blocks, products, Workload numbers, principles and roadmap, and questions you from their own lens. A thin answer gets a sharper follow-up, up to three rounds. A strong answer names the trade-off you accepted and the evidence for it. Your architecture contract unlocks when the board approves.</p>
+</div>
+<sc-if value="{{brd.ready}}" hint-placeholder-val="{{true}}">
+<button type="button" id="step-action" class="{{conveneCls}}" onClick="{{brd.convene}}" style="scroll-margin-top: 80px">{{brd.conveneLabel}}</button>
+</sc-if>
+</div>
+<div role="list" aria-label="The board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px">
+<sc-for list="{{brd.panel}}" as="m" hint-placeholder-count="5">
+<div role="listitem" style="background: var(--surface); border: 1px solid var(--hair-soft); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 3px">
+<span style="font-weight: 700; font-size: 14px">{{m.n}}</span>
+<span style="font-size: 12px; font-weight: 600; color: var(--accent-ink)">{{m.f}}</span>
+<span style="font-size: 12px; color: var(--ink-3); line-height: 1.45">{{m.d}}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{brd.isBusy}}" hint-placeholder-val="{{false}}">
+<div role="status" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--fill); border-radius: var(--r-md); padding: 10px 14px">
+<span style="font-size: 14px; color: var(--ink-2)">{{brd.busy}}</span>
+<button type="button" onClick="{{brd.stop}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">Stop</button>
+</div>
+</sc-if>
+<sc-if value="{{brd.hasErr}}" hint-placeholder-val="{{false}}">
+<div role="alert" style="font-size: 14px; padding: 10px 14px; border-radius: var(--r-md); background: var(--bad-soft); color: var(--bad)">{{brd.err}}</div>
+</sc-if>
+<sc-if value="{{brd.hasOpening}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2); text-transform: uppercase">Chief architect opens the session</span>
+<span style="font-size: 15px; line-height: 1.6">{{brd.opening}}</span>
+</div>
+</sc-if>
+<sc-for list="{{brd.qs}}" as="q" hint-placeholder-count="2">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline">
+<span style="font-size: 13px; font-weight: 700; color: var(--accent-ink)">Question {{q.n}} · {{q.member}}</span>
+<sc-if value="{{q.hasFocus}}" hint-placeholder-val="{{true}}"><span style="font-family: var(--mono); font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink)">{{q.focus}}</span></sc-if>
+</div>
+<span style="font-size: 16px; line-height: 1.55">{{q.q}}</span>
+<span style="font-size: 12px; color: var(--ink-3)">Testing: {{q.why}}</span>
+<sc-for list="{{q.rounds}}" as="r" hint-placeholder-count="1">
+<div style="display: flex; flex-direction: column; gap: 8px; border-left: 3px solid var(--hair); border-radius: 0; padding-left: 12px">
+<span style="font-size: 14px; color: var(--ink-2); white-space: pre-wrap"><strong>You:</strong> {{r.a}}</span>
+<div style="display: flex; gap: 8px; align-items: flex-start">
+<span style="flex: 0 0 auto; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: {{r.sbg}}; color: {{r.sfg}}">{{r.sl}}</span>
+<span style="font-size: 14px">{{r.fb}}</span>
+</div>
+<sc-if value="{{r.hasFollow}}" hint-placeholder-val="{{false}}"><span style="font-size: 15px; font-weight: 600">Follow-up: {{r.follow}}</span></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{q.open}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="{{q.id}}" style="font-size: 13px; font-weight: 600">{{q.prompt}}</label>
+<textarea id="{{q.id}}" rows="3" value="{{q.draft}}" onChange="{{q.onDraft}}" placeholder="Name the blocks, numbers and trade-offs behind your choice" style="min-height: 80px; padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--hair-strong); font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--surface); box-sizing: border-box; width: 100%; resize: vertical; font-family: inherit"></textarea>
+<sc-if value="{{q.needText}}" hint-placeholder-val="{{false}}"><span style="font-size: 13px; color: var(--bad)">Write an answer before sending it to the board.</span></sc-if>
+<div><button type="button" onClick="{{q.send}}" style="min-height: 42px; padding: 6px 18px; border-radius: 999px; border: none; background: var(--accent); color: var(--on-accent); font-size: 14px; font-weight: 600">Send answer</button></div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{brd.hasQs}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+<span style="font-size: 13px; color: var(--ink-3)">{{brd.progress}}</span>
+<sc-if value="{{brd.canVerdict}}" hint-placeholder-val="{{false}}">
+<button type="button" class="as-primary" onClick="{{brd.verdictBtn}}">Ask the board for its decision</button>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{brd.hasVerdict}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 2px solid {{brd.v.c}}; border-radius: var(--r-lg); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase">Board decision</span>
+<span style="font-size: 26px; font-weight: 700; color: {{brd.v.c}}">{{brd.v.label}}</span>
+<span style="font-size: 15px; line-height: 1.6">{{brd.v.summary}}</span>
+<sc-if value="{{brd.v.hasCond}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 14px; font-weight: 600">Conditions</span>
+<sc-for list="{{brd.v.conditions}}" as="c" hint-placeholder-count="2"><div style="display: flex; gap: 8px; font-size: 14px"><span aria-hidden="true">›</span><span>{{c.t}}</span></div></sc-for></div>
+</sc-if>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+<div style="background: var(--good-soft); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; font-weight: 700; color: var(--good)">Strengths</span>
+<sc-for list="{{brd.v.strengths}}" as="c" hint-placeholder-count="2"><span style="font-size: 13px">{{c.t}}</span></sc-for></div>
+<div style="background: var(--bad-soft); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 13px; font-weight: 700; color: var(--bad)">Risks</span>
+<sc-for list="{{brd.v.risks}}" as="c" hint-placeholder-count="2"><span style="font-size: 13px">{{c.t}}</span></sc-for></div>
+</div>
+<sc-if value="{{brd.v.hasLearn}}" hint-placeholder-val="{{false}}"><span style="font-size: 14px; color: var(--accent-ink)"><strong>Practise next:</strong> {{brd.v.learn}}</span></sc-if>
+<span style="font-size: 13px; color: var(--ink-3)">{{brd.saveNote}}</span>
+</div>
+</sc-if>
+<sc-if value="{{brd.notReady}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; font-size: 14px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center"><span style="flex: 1 1 320px">{{brd.notReadyLine}}</span><sc-if value="{{brd.canSetup}}" hint-placeholder-val="{{false}}"><button type="button" class="as-secondary" onClick="{{brd.setup}}">Connect an AI model</button></sc-if></div>
+</sc-if>
+</section>
+</sc-if>
+

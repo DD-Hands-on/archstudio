@@ -1,0 +1,133 @@
+<sc-if value="{{isCanvas}}" hint-placeholder-val="{{false}}">
+<section style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-end">
+<div>
+<div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM phases C and D · Design canvas</div>
+<h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">Assemble the design from approved building blocks</h1>
+<p style="margin: 0; color: var(--ink-3); max-width: 760px">Drag blocks from the pattern library onto their layer, move them, and connect them. Select a block to choose its product. Every choice is checked against the enterprise standards.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<span style="font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: {{cv.confBg}}; color: {{cv.confFg}}">{{cv.confLine}}</span>
+<button type="button" class="as-ghost" onClick="{{cv.reset}}">Reset from blueprint</button>
+<button type="button" class="as-ghost" onClick="{{cv.clear}}">{{cv.clearLabel}}</button>
+<sc-if value="{{canvasPending}}" hint-placeholder-val="{{true}}">
+<button type="button" id="step-action" class="as-primary" onClick="{{canvasAgree}}" style="scroll-margin-top: 80px">Use this design</button>
+</sc-if>
+<sc-if value="{{canvasAgreed}}" hint-placeholder-val="{{false}}">
+<span class="as-done">&#10003; Design in use</span>
+</sc-if>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 12px 14px">
+<span style="font-size: 13px; font-weight: 600">Pattern library</span>
+<div role="group" aria-label="Pattern library" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{libOpts}}" as="o" hint-placeholder-count="4">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
+</sc-for>
+</div>
+<span style="flex-basis: 100%; font-size: 12.5px; color: var(--ink-3)">{{libNote}}</span>
+</div>
+<sc-if value="{{cv.linking}}" hint-placeholder-val="{{false}}">
+<div role="status" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-md); padding: 10px 14px">
+<span style="font-size: 14px; color: var(--accent-ink)">Select the block that {{cv.linkFrom}} connects to.</span>
+<button type="button" onClick="{{cv.cancelLink}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--accent-line); background: var(--surface); color: var(--accent-ink); font-size: 13px">Cancel</button>
+</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<aside aria-label="Pattern library" style="flex: 1 1 240px; max-width: 100%; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 12px; display: flex; flex-direction: column; gap: 10px">
+<label for="pal-q" style="font-size: 13px; font-weight: 600">Pattern library</label>
+<input id="pal-q" type="search" value="{{palQ}}" onChange="{{onPalQ}}" placeholder="Filter blocks" style="min-height: 40px; padding: 6px 10px; border-radius: var(--r-sm); border: 1px solid var(--hair-strong); font-size: 14px; box-sizing: border-box; width: 100%">
+<span style="font-size: 12px; color: var(--ink-3)">Drag onto the canvas, or select to add to its layer.</span>
+<div style="display: flex; flex-direction: column; gap: 10px; max-height: 640px; overflow-y: auto">
+<sc-for list="{{cv.palette}}" as="g" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3); text-transform: uppercase">{{g.name}}</span>
+<sc-for list="{{g.items}}" as="p" hint-placeholder-count="3">
+<button type="button" data-pal="{{p.cid}}" onClick="{{p.add}}" style="text-align: left; padding: 8px 10px; border-radius: var(--r-sm); border: 1px solid {{p.bd}}; background: {{p.bg}}; color: var(--ink); display: flex; flex-direction: column; gap: 2px; cursor: grab">
+<span style="font-size: 13px; font-weight: 600">{{p.l}}</span>
+<span style="font-size: 11px; color: {{p.sfg}}">{{p.sub}}</span>
+</button>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</aside>
+<div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<div style="overflow-x: auto; background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg)">
+<div id="as-canvas" style="position: relative; width: {{cv.w}}px; height: {{cv.h}}px">
+<sc-for list="{{cv.lanes}}" as="ln" hint-placeholder-count="5">
+<div style="position: absolute; left: 0; top: {{ln.top}}px; width: {{cv.w}}px; height: {{cv.laneH}}px; background: {{ln.bg}}; border-top: 1px solid var(--hair)">
+<div style="position: absolute; left: 0; top: 0; width: 120px; height: {{cv.laneH}}px; padding: 10px 12px; box-sizing: border-box; border-right: 1px solid var(--hair); display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700">{{ln.l}}</span>
+<span style="font-family: var(--mono); font-size: 10px; color: var(--ink-3)">{{ln.t}}</span>
+</div>
+</div>
+</sc-for>
+<svg width="{{cv.w}}" height="{{cv.h}}" viewBox="0 0 {{cv.w}} {{cv.h}}" style="position: absolute; left: 0; top: 0; pointer-events: none" aria-hidden="true">
+<defs>
+<marker id="cv-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path style="fill: var(--ink-3)" d="M0 0L10 5L0 10z"></path></marker>
+<marker id="cv-arrow-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path style="fill: var(--accent)" d="M0 0L10 5L0 10z"></path></marker>
+</defs>
+<sc-for list="{{cv.edges}}" as="e" hint-placeholder-count="3">
+<path style="stroke: {{e.c}}" d="{{e.d}}" fill="none" stroke-width="{{e.sw}}" stroke-dasharray="{{e.dash}}" marker-end="{{e.m}}"></path>
+</sc-for>
+</svg>
+<sc-for list="{{cv.nodes}}" as="n" hint-placeholder-count="4">
+<div data-node="{{n.id}}" role="button" tabindex="0" aria-pressed="{{n.on}}" aria-label="{{n.aria}}" onClick="{{n.pick}}" onKeyDown="{{n.key}}" style="position: absolute; left: {{n.x}}px; top: {{n.y}}px; width: {{cv.nodeW}}px; height: {{cv.nodeH}}px; box-sizing: border-box; padding: 6px 10px; border-radius: var(--r-sm); border: {{n.border}}; background: var(--surface); box-shadow: var(--shadow-1); cursor: move; touch-action: none; user-select: none; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+<span style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; line-height: 1.25"><span aria-hidden="true" style="flex: 0 0 auto; width: 8px; height: 8px; border-radius: var(--r-xs); background: {{n.dot}}"></span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{n.l}}</span></span>
+<span style="font-size: 11px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{n.prod}}</span>
+</div>
+</sc-for>
+<sc-if value="{{cv.empty}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 140px; right: 20px; top: 40%; text-align: center; font-size: 14px; color: var(--ink-3)">The canvas is empty. Drag a block from the pattern library to start.</div>
+</sc-if>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--ink-3); align-items: center">
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: var(--r-xs); background: var(--good)"></span>Enterprise standard</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: var(--r-xs); background: var(--bad)"></span>Deviation</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: var(--r-xs); background: var(--warn)"></span>Pattern under review</span>
+<span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: var(--r-xs); background: var(--accent)"></span>No standard set</span>
+<span>Solid line: synchronous call · Dashed: event · Dotted: batch</span>
+<span>Keyboard: select a block, then arrow keys move it and Delete removes it</span>
+</div>
+<sc-if value="{{cv.hasSel}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: baseline">
+<div style="display: flex; flex-direction: column"><h2 style="margin: 0; font-size: 18px">{{cv.sel.l}}</h2><span style="font-size: 13px; color: var(--ink-3)">{{cv.sel.layer}} · {{cv.sel.need}}</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" onClick="{{cv.sel.remove}}" style="min-height: 38px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--bad-line); background: var(--surface); color: var(--bad); font-size: 13px">Remove from canvas</button>
+<button type="button" onClick="{{cv.sel.close}}" style="min-height: 38px; padding: 4px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 13px">Done</button>
+</div>
+</div>
+<div role="group" aria-label="Product for {{cv.sel.l}}" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{cv.sel.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 40px; padding: 6px 12px; border-radius: var(--r-sm); border: 1px solid {{o.bd}}; background: {{o.bg}}; color: var(--ink); font-size: 13px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left">
+<span style="font-weight: 600">{{o.n}}</span><span style="font-size: 11px; color: {{o.tfg}}">{{o.tag}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<span style="font-size: 13px; font-weight: 600">Connect to another block:</span>
+<sc-for list="{{cv.sel.linkTypes}}" as="t" hint-placeholder-count="3">
+<button type="button" onClick="{{t.go}}" style="min-height: 38px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--accent-line); background: var(--surface); color: var(--accent-ink); font-size: 13px">{{t.l}}</button>
+</sc-for>
+</div>
+<sc-if value="{{cv.sel.hasLinks}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 13px; font-weight: 600">Connections</span>
+<sc-for list="{{cv.sel.links}}" as="k" hint-placeholder-count="2">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px">
+<span>{{k.t}}</span>
+<button type="button" onClick="{{k.remove}}" aria-label="Remove connection {{k.t}}" style="min-height: 32px; padding: 2px 10px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 12px">Remove</button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+</section>
+</sc-if>
+
