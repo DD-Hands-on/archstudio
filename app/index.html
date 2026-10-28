@@ -251,6 +251,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 <span style="font-size: 12px; color: var(--ink-4)">{{lockedLine}}</span>
 </div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 12px; border-top: 1px solid var(--hair)">
+<span class="as-eyebrow">Practice track</span>
+<div role="group" aria-label="Practice track" style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{trackOpts}}" as="tk" hint-placeholder-count="3">
+<button type="button" onClick="{{tk.pick}}" aria-pressed="{{tk.on}}" style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline; text-align: left; min-height: 34px; padding: 6px 10px; border-radius: 8px; border: 1px solid {{tk.bd}}; background: {{tk.bg}}; color: var(--ink); font-size: 13px"><span style="font-weight: 500">{{tk.n}}</span><span style="font-size: 11.5px; color: var(--ink-3)">{{tk.t}}</span></button>
+</sc-for>
+</div>
+</div>
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--hair)">
 <span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 500">Plain language</span><span style="font-size: 12px; color: var(--ink-3)">Define terms as you go</span></span>
 <button type="button" role="switch" class="as-switch" onClick="{{togglePlain}}" aria-checked="{{plainPressed}}" aria-label="Plain language"><span></span></button>
@@ -278,7 +286,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </sc-for>
 <sc-if value="{{hasLockedChev}}" hint-placeholder-val="{{true}}">
 <li style="flex: 1 0 auto; min-width: 128px; display: flex">
-<button type="button" class="as-chev" data-state="locked" data-first="false" onClick="{{toggleMenu}}" title="{{lockedLine}}. Change level in View."><span class="as-chev-l">+{{lockedNum}} more</span><span class="as-chev-s">{{lockedNext}}</span></button>
+<button type="button" class="as-chev" data-state="locked" data-first="false" onClick="{{lockedClick}}" title="{{lockedTip}}"><span class="as-chev-l">+{{lockedNum}} more</span><span class="as-chev-s">{{lockedNext}}</span></button>
 </li>
 </sc-if>
 </ol>
@@ -428,8 +436,21 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 <sc-if value="{{isTour}}" hint-placeholder-val="{{true}}">
 <section style="display: flex; flex-direction: column; gap: 24px">
-<div style="display: flex; flex-direction: column; gap: 8px">
-<span class="as-eyebrow">Start here · Worked example</span>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="as-eyebrow">Start here · Choose how to practise</span>
+<div role="group" aria-label="Practice track" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+<sc-for list="{{trackOpts}}" as="tk" hint-placeholder-count="3">
+<button type="button" onClick="{{tk.pick}}" aria-pressed="{{tk.on}}" style="text-align: left; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid {{tk.bd}}; box-shadow: {{tk.ring}}; background: {{tk.bg}}; color: var(--ink); display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: baseline"><span style="font-weight: 700; font-size: 15px">{{tk.n}}</span><span style="font-size: 12px; color: var(--ink-3)">{{tk.t}}</span></span>
+<span style="font-size: 13px; color: var(--ink-2)">{{tk.d}}</span>
+<span style="font-family: var(--mono); font-size: 11px; color: var(--ink-3)">{{tk.path}}</span>
+</button>
+</sc-for>
+</div>
+<span style="font-size: 12.5px; color: var(--ink-3)">Short on time? A track shows only the steps it needs. You can switch tracks any time from View, and the full journey keeps your work.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid var(--hair)">
+<span class="as-eyebrow">Worked example</span>
 <h1 style="margin: 0; font-size: 30px; line-height: 1.15">{{tourTitle}}</h1>
 <p style="margin: 0; color: var(--ink-3); max-width: 680px; line-height: 1.55">{{tourIntro}}</p>
 </div>
@@ -2010,6 +2031,17 @@ function localStore() {
     collection: name => ({ doc: () => docRef(name + '/' + newId()), orderBy: () => ({ limit: () => ({ onSnapshot: cb => sub(() => cb(snap())) }) }) }) };
 }
 
+const TRACKS = {
+  interview: { n: 'System design interview', t: 'About 30 minutes', lens: 'system',
+    d: 'Clarify the brief, size it from first principles, sketch the blueprint, then defend it when something fails.',
+    steps: [['brief', 5], ['workload', 10], ['blueprint', 10], ['drill', 5]] },
+  tradeoff: { n: 'Trade-off practice', t: 'About 20 minutes',
+    d: 'Pick a system, assemble it, build competing designs and name the trade-off you accept.',
+    steps: [['brief', 3], ['canvas', 7], ['outcomes', 5], ['compare', 5]] },
+  full: { n: 'Full journey', t: 'Several sessions',
+    d: 'Every step from principles to the review board, in the order a real programme follows.', steps: null }
+};
+
 const AI_PROVIDERS = {
   anthropic: { n: 'Anthropic', s: 'Claude', model: 'claude-sonnet-5-5', key: true, link: 'https://console.anthropic.com/settings/keys',
     help: 'Uses Claude through the Anthropic API. You need an API key from the Anthropic Console; API usage is billed by Anthropic.' },
@@ -2088,7 +2120,7 @@ class Component extends DCLogic {
     scenario: null, principles: null, stake: null, chg: {}, contractSigned: false,
     canvas: null, canvasSel: null, linkFrom: null, linkType: 'sync', palQ: '',
     board: null, boardVerdict: null, portfolio: [], names: {}, savedId: null, showPort: false, showFw: false, showMenu: false, showSide: false, portMsg: '', portErr: false, confirmDel: null, teamMsg: '',
-    showAI: false, aiCfg: { provider: 'anthropic', model: 'claude-sonnet-5-5', key: '', url: '', remember: false }, aiSrc: 'none', aiTest: '', aiTestOk: null, aiTesting: false };
+    track: 'full', showAI: false, aiCfg: { provider: 'anthropic', model: 'claude-sonnet-5-5', key: '', url: '', remember: false }, aiSrc: 'none', aiTest: '', aiTestOk: null, aiTesting: false };
 
   componentDidMount() {
     this._host = !!(window.claude && typeof window.claude.use === 'function');
@@ -2855,7 +2887,32 @@ class Component extends DCLogic {
 
   visibleSteps(level) {
     const cap = { beginner: 1, intermediate: 2, advanced: 3 }[level || this.state.level];
+    const T = TRACKS[this.state.track];
+    if (T && T.steps) {
+      const all = this.allSteps(); const byId = {}; all.forEach(x => { byId[x[0]] = x; });
+      return (cap === 1 ? [byId.tour] : []).concat(T.steps.map(x => byId[x[0]]).filter(Boolean));
+    }
     return this.allSteps().filter(s => s[2] <= cap && (s[0] !== 'tour' || cap === 1));
+  }
+
+  pickTrack(id) {
+    const T = TRACKS[id]; if (!T) return;
+    const patch = { track: id, showMenu: false };
+    if (T.lens) patch.lens = T.lens;
+    if (T.steps) patch.step = T.steps[0][0];
+    this.setState(patch);
+    try { window.scrollTo({ top: 0 }); } catch (e) {}
+  }
+
+  trackVals() {
+    const st = this.state; const cur = TRACKS[st.track] ? st.track : 'full';
+    const opts = ['interview', 'tradeoff', 'full'].map(id => { const T = TRACKS[id]; const on = id === cur;
+      return { n: T.n, t: T.t, d: T.d, on: on ? 'true' : 'false', pick: () => this.pickTrack(id),
+        path: T.steps ? T.steps.map(x => this.allSteps().find(a => a[0] === x[0])[1]).join(' › ') : (st.lens === 'enterprise' ? 'Portfolio first · all steps' : 'System first · all steps'),
+        bd: on ? 'var(--accent)' : 'var(--hair)', bg: on ? 'var(--accent-soft)' : 'var(--surface)', ring: on ? '0 0 0 1px var(--accent)' : 'none' }; });
+    const T = TRACKS[cur];
+    return { trackOpts: opts, inTrack: !!T.steps, trackName: T.n, trackLine: T.steps ? T.n + ' · ' + T.t.toLowerCase() : '',
+      fullJourney: () => this.pickTrack('full') };
   }
 
   setLevel(level) {
@@ -3880,6 +3937,15 @@ class Component extends DCLogic {
       gap: 'Never jump from baseline to target in one step. Each plateau should be something the business can run on.',
       board: 'Answer with the specifics of your design: names, numbers and the trade-off you accepted. Boards distrust adjectives.',
       change: 'Most change is smaller than it looks. Reserve a new ADM cycle for changes to drivers, scope or strategy.' };
+    if (st.track === 'interview') {
+      coaches.brief = 'Interview habit: spend the first minutes asking, not drawing. Users, load, data size, and what an outage costs.';
+      coaches.workload = 'Say the numbers out loud. Interviewers care less about the exact figure than whether your design follows from it.';
+      coaches.blueprint = 'Draw the simplest thing that meets the numbers, then add parts only when a number forces you to.';
+      coaches.drill = 'Expect "what happens when this fails?" Name how you would notice, how far it spreads and how you recover.';
+    } else if (st.track === 'tradeoff') {
+      coaches.outcomes = 'Make the two designs genuinely different: one open source and self-run, one managed. Similar options teach nothing.';
+      coaches.compare = 'Finish by saying which design you would pick and the one quality you are giving up for it.';
+    }
     if (ent) {
       coaches.brief = 'Portfolio first: start from the capability that must improve and the systems that serve it today. Technology comes later.';
       coaches.blueprint = 'Look outward first. A solution that fits its neighbours and lets old systems retire beats a clever one that adds to the estate.';
@@ -4110,15 +4176,18 @@ class Component extends DCLogic {
 
     // Journey chevrons: every step on the learner's path, plus what unlocks later
     const phaseTxt = p => !p ? '' : p === 'R' ? 'Requirements' : p === 'Prelim' ? 'Preliminary' : (p.indexOf(' ') >= 0 ? 'Phases ' + p.split(' ').join(' and ') : 'Phase ' + p);
+    const trk = TRACKS[st.track] && TRACKS[st.track].steps ? TRACKS[st.track] : null; const tmin = {}; if (trk) trk.steps.forEach(x => { tmin[x[0]] = x[1]; });
     const journey = vis.map((x, i) => {
       const cur = x[0] === step; const dn = i < si; const ph = phaseTxt(x[3]);
       return { label: x[0] === 'tour' ? 'Start here' : x[1], state: cur ? 'now' : dn ? 'done' : 'next', first: i === 0 ? 'true' : 'false', cur: cur ? 'step' : 'false',
-        sub: cur ? 'You are here' : dn ? '✓ ' + (ph || 'Done') : (ph || 'Step ' + (i + 1)),
+        sub: cur ? 'You are here' : dn ? '✓ ' + (trk && tmin[x[0]] ? 'Done' : (ph || 'Done')) : (trk && tmin[x[0]] ? 'About ' + tmin[x[0]] + ' min' : (ph || 'Step ' + (i + 1))),
         tip: 'Step ' + (i + 1) + ' of ' + vis.length + ': ' + x[1] + (ph ? ' (' + ph + ')' : ''), go: go(x[0]) };
     });
     const lockedSteps = this.allSteps().filter(x => x[0] !== 'tour' && visIds.indexOf(x[0]) < 0);
     const lockedLv = lockedSteps.map(x => x[2]).filter((v, i, a) => a.indexOf(v) === i).sort();
-    const lockedNext = lockedLv.length > 1 ? 'Intermediate and Advanced' : lockedLv[0] === 3 ? 'At Advanced level' : 'At Intermediate level';
+    const lockedNext = trk ? 'In the full journey' : lockedLv.length > 1 ? 'Intermediate and Advanced' : lockedLv[0] === 3 ? 'At Advanced level' : 'At Intermediate level';
+    const lockedClick = trk ? () => this.pickTrack('full') : () => this.setState({ showMenu: !st.showMenu });
+    const lockedTip = trk ? 'Switch to the full journey' : 'Steps unlock at higher levels. Change level in View.';
 
     // Flowchart: orthogonal routing through the gaps between cards
     const colOf = { exp: 0, edge: 1, app: 2, data: 3 };
@@ -4495,7 +4564,7 @@ class Component extends DCLogic {
     const nextLevel = { beginner: ['intermediate','Unlock Intermediate: decisions, evolution and drills'], intermediate: ['advanced','Unlock Advanced: enterprise view and review board'] }[st.level];
     const atEnd = si === vis.length - 1;
     const base = {
-      journey, hasLockedChev: lockedSteps.length > 0, lockedNum: lockedSteps.length, lockedNext,
+      journey, hasLockedChev: lockedSteps.length > 0, lockedNum: lockedSteps.length, lockedNext, lockedClick, lockedTip,
       lensOpts, briefIntro, libOpts, libNote, land, showLandscape: ent, guideStep: step === 'tour' ? 'Start here' : vis[si][1],
       flowHead: ent ? '2. Inside the solution: how the parts talk' : '1. How the parts talk to each other', reqHead: ent ? '3. Follow a request and inspect the structure' : '2. Follow a request and inspect the structure',
       wQs, wFig, wCalc, wLaws, wDerived, wSummary, wSumFg: wMis ? 'var(--warn)' : 'var(--good)', wBasis, wImplNote: isImplApp,
@@ -4508,7 +4577,7 @@ class Component extends DCLogic {
       showTpl: st.showTpl, tplExpanded: st.showTpl ? 'true' : 'false', tplLabel: st.showTpl ? 'Hide templates' : 'Browse templates', toggleTpl: () => this.setState({ showTpl: !st.showTpl }),
       stepPos: 'Step ' + (si + 1) + ' of ' + vis.length + ': ' + vis[si][1],
       steps, coach: coaches[step], briefLine: A.n + ' · ' + { none: 'No AI', enabled: 'AI-enabled', native: 'AI-native' }[st.ai] + ' · ' + st.scale + ' · ' + st.avail + '%', levels,
-      hasLocked: lockedN > 0, lockedLine: lockedN === 1 ? '1 more step unlocks at a higher level' : lockedN + ' more steps unlock at higher levels',
+      hasLocked: lockedN > 0, lockedLine: trk ? 'Levels change the detail on each step. Your practice track sets which steps you see.' : lockedN === 1 ? '1 more step unlocks at a higher level' : lockedN + ' more steps unlock at higher levels',
       plain: st.plain, togglePlain: () => this.setState({ plain: !st.plain }), plainPressed: st.plain ? 'true' : 'false', plainLabel: st.plain ? 'on' : 'off',
       plainBg: st.plain ? SOFT : 'var(--surface)', plainBd: st.plain ? ACC : LINE, plainFg: st.plain ? 'var(--accent-ink)' : INK,
       quizScore: qRight + ' / ' + qTotal, terms, hasTerm, term,
@@ -4588,6 +4657,13 @@ class Component extends DCLogic {
       base.finishSaveCls = base.atLevelEnd ? 'as-secondary' : 'as-primary';
       base.finishNewCls = (base.atLevelEnd || this._db) ? 'as-secondary' : 'as-primary';
       base.startNew = () => { this.setState({ step: 'brief', scenario: null, briefChosen: false, visionAgreed: false, canvasAgreed: false, canvas: null, chosen: null, reqPlayed: false, reqStep: -1, contractSigned: false, chg: {}, board: null, boardVerdict: null, savedId: null, outcomes: [], outcomesApp: null, active: 0, predict: {} }); try { window.scrollTo({ top: 0 }); } catch (e) {} };
+      if (trk && base.showFinish) {
+        base.finishTitle = 'You have finished ' + (st.track === 'interview' ? 'the system design interview' : 'trade-off practice');
+        base.finishBody = (st.track === 'interview' ? 'Run it again with a different template and keep to the time on each step. ' : 'Try the same system under a different constraint, such as Regulated or 99.99%, and see whether your pick changes. ') + 'The full journey adds principles, the business view, a roadmap and the review board.';
+        base.finishCanLevel = true; base.finishLevelLabel = 'Continue in the full journey';
+        base.levelUp = () => this.pickTrack('full');
+        base.finishSaveCls = 'as-secondary'; base.finishNewCls = 'as-secondary';
+      }
       if (base.showFinish) base.atLevelEnd = false;
       base.conveneCls = (st.board && st.board.questions && st.board.questions.length) ? 'as-secondary' : 'as-primary';
       // Blueprint
@@ -4595,7 +4671,7 @@ class Component extends DCLogic {
       base.playCls = played ? 'as-secondary' : 'as-primary'; base.playLabel = played ? 'Replay' : 'Play the request';
       if (st.reqStep >= 0 && !st.reqPlayed) setTimeout(() => this.setState({ reqPlayed: true }), 0);
     }
-    return Object.assign(base, this.admVals(go, stepNames), this.fwVals(go), this.canvasVals(), this.portVals(), this.boardVals(), this.teamVals(qRight, qTotal), this.aiVals());
+    return Object.assign(base, this.admVals(go, stepNames), this.fwVals(go), this.canvasVals(), this.portVals(), this.boardVals(), this.teamVals(qRight, qTotal), this.aiVals(), this.trackVals());
   }
 }
 

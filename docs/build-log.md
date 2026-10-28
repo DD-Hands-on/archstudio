@@ -54,4 +54,5 @@ Changes made after an external review of the repository.
 
 - **Works fully outside Claude.** Designs save to browser storage when Claude's shared store is not available.
 - **Bring your own model.** Briefs and the AI review board can use Anthropic, OpenAI, Gemini or a local Ollama model, called directly from the browser. Keys are kept in memory unless the user chooses to remember them.
+- **Practice tracks.** A 30-minute system design interview and a 20-minute trade-off practice sit alongside the full journey. Each track shows only its steps, with suggested minutes and its own coaching.
 - **Safer links.** The renderer already escaped all text and attributes; links now must use https, http or mailto, or they are blocked.

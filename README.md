@@ -23,6 +23,16 @@ Open **View options → AI model** and choose Anthropic, OpenAI, Google Gemini o
 
 For Ollama, start it with `OLLAMA_ORIGINS` set to the site's address (for example `https://dd-hands-on.github.io`) so the browser is allowed to call it.
 
+## Practice tracks
+
+Choose how to practise on the first screen, or any time from **View**:
+
+| Track | Time | Steps |
+|---|---|---|
+| System design interview | About 30 minutes | Brief › Workload › Blueprint › Drill |
+| Trade-off practice | About 20 minutes | Brief › Canvas › Outcomes › Compare |
+| Full journey | Several sessions | Every step below |
+
 ## What it covers
 
 | Step | What you do |
