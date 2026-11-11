@@ -52,6 +52,8 @@ npm run build     # rebuild app/index.html and dist/
 npm run check     # fail if the built files are out of date
 ```
 
+Browser tests live in `test/e2e/` (Python Playwright): `standalone.py`, `tracks.py`, `workload_fit.py`, `board.py`, and `fingerprint.py` for before-and-after comparison during refactors. See [HANDOFF.md](HANDOFF.md) for project state, settled rules and the backlog.
+
 Edit files in `src/`, never the built files. To add a product, add an option to its building block in `src/engine/catalogue.js` (name, kind, rationale, https link, five scores from 1 to 5, tags); the catalogue tests check its shape. To add a workload rule, add a line to `FIT_RULES` with the threshold stated in its reason.
 
 ## How the split was verified
