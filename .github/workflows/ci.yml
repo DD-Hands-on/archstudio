@@ -16,3 +16,26 @@ jobs:
       - run: npm test
       - name: Built files match the source
         run: npm run check
+
+  browser:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npm run build
+      - name: Install Playwright and Chromium (pinned)
+        run: |
+          pip install playwright==1.63.0
+          python -m playwright install --with-deps chromium
+      - name: Browser suites
+        run: npm run e2e
+      - name: Screens and scores match the fingerprint baseline
+        run: npm run fingerprint

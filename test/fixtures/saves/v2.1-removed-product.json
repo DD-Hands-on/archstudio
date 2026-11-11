@@ -1,0 +1,8 @@
+{
+  "ownerId": "u1", "title": "Old shop", "app": "ecom", "step": "outcomes",
+  "settings": { "ai": "none" },
+  "comps": ["ui", "db", "retired-block"],
+  "picks": { "ui": 0, "db": 9, "retired-block": 0 },
+  "canvas": { "nodes": [ { "id": "n1", "cid": "ui", "x": 0, "y": 0, "p": 7 }, { "id": "n2", "cid": "retired-block", "x": 5, "y": 5, "p": 0 } ],
+              "edges": [ { "a": "n1", "b": "n2", "t": "sync" } ] }
+}

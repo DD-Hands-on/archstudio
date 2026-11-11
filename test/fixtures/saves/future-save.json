@@ -1,0 +1,2 @@
+{ "schemaVersion": 9, "appVersion": "9.0.0", "ownerId": "u1", "title": "From the future", "app": "ecom", "step": "blueprint",
+  "settings": { "ai": "none" }, "comps": ["ui"], "picks": { "ui": 1 }, "pickNames": { "ui": "Angular" }, "somethingNew": { "x": 1 } }

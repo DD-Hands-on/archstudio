@@ -13,10 +13,10 @@ A practice studio for designing system and enterprise architectures, from a plai
 ## How to work on it
 
 1. Edit `src/` only. Never edit `app/index.html` or `dist/` by hand.
-2. `npm install`, `npm test` (30 unit tests), `npm run build`, `npm run check`.
-3. Browser tests: `python3 test/e2e/standalone.py`, `tracks.py`, `workload_fit.py`, `board.py` (Python Playwright, Chromium). Each prints PASS or FAIL lines and a failure count.
-4. Before any refactor, run `python3 test/e2e/fingerprint.py <built file> before.json`, refactor, run it again and compare. It fingerprints 702 evaluations and 1,053 rendered screens.
-5. Commit, push to `main` (CI runs unit tests and the build check), then republish the Claude artifact from `dist/archstudio-claude.html`.
+2. `npm install`, `npm test` (39 unit tests), `npm run build`, `npm run check`.
+3. `npm run e2e` runs the five browser suites (standalone, tracks, workload fit, board, saves; Python Playwright 1.63.0, Chromium).
+4. `npm run fingerprint` compares 702 evaluations and 1,053 step screens with the committed baseline. After an intended screen or score change, run `npm run fingerprint:update` and commit the baseline in the same commit.
+5. Commit, push to `main` (CI runs unit tests, the build check, all browser suites and the fingerprint), then republish the Claude artifact from `dist/archstudio-claude.html`.
 
 ## Rules that are settled
 
@@ -57,8 +57,9 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 7. Platform engineering and supply-chain blocks.
 
 **App architecture**
-1. Finish moving rules into the engine; split `component.js` per step; add types and a version on saved designs.
-2. Run the browser tests in CI (they are in `test/e2e` but CI runs unit tests only).
+1. Finish moving rules into the engine; split `component.js` per step; add types. (Save versioning done in Stage 1.)
+2. Done in Stage 1: browser tests and fingerprint run in CI.
+2a. Team standards (`team/standards`) store the chosen product by position. Store by name before Stage 3 or 4 change product lists.
 3. Catalogue as dated data: source, "as of" date and reviewer per entry.
 4. Practise the AI patterns taught: versioned prompts, schema-checked replies, golden-set tests for the brief reader and board, a usage meter.
 5. One engine, three shells: web app, command line, MCP server.

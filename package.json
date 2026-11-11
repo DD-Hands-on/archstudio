@@ -7,7 +7,10 @@
   "scripts": {
     "build": "node build/build.mjs",
     "check": "node build/build.mjs --check",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "e2e": "python3 test/e2e/run_all.py",
+    "fingerprint": "python3 test/e2e/fingerprint_check.py",
+    "fingerprint:update": "python3 test/e2e/fingerprint_check.py --update"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

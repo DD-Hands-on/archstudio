@@ -3129,6 +3129,75 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, heavy, saas, missing, base, realIssues, chain, fitted };
   }
 
+  // src/engine/design-save.js
+  var SAVE_VERSION = 2;
+  var APP_VERSION = "2.1.0";
+  var isPos = (v) => Number.isInteger(v) && v >= 0;
+  function pickNamesFor(picks, cat) {
+    const out = {};
+    Object.keys(picks || {}).forEach((cid) => {
+      const p = picks[cid];
+      const cc = cat[cid];
+      if (cc && isPos(p) && cc.o[p]) out[cid] = cc.o[p].n;
+    });
+    return out;
+  }
+  function resolvePick(cc, pos, name) {
+    if (name != null) {
+      const i = cc.o.findIndex((o) => o.n === name);
+      return i >= 0 ? { p: i, gone: false } : { p: null, gone: true };
+    }
+    if (pos == null) return { p: null, gone: false };
+    return isPos(pos) && cc.o[pos] ? { p: pos, gone: false } : { p: null, gone: true };
+  }
+  function migrateDesign(raw, cat) {
+    const d = raw && typeof raw === "object" ? JSON.parse(JSON.stringify(raw)) : {};
+    const from = Number.isInteger(d.schemaVersion) && d.schemaVersion > 0 ? d.schemaVersion : 1;
+    const notes = [];
+    if (from > SAVE_VERSION) notes.push("This design was saved by a newer version of ArchStudio Dojo. Some details may not show.");
+    if (!d.settings || typeof d.settings !== "object") d.settings = {};
+    if (!d.step) d.step = "blueprint";
+    const comps = Array.isArray(d.comps) ? d.comps : [];
+    d.comps = comps.filter((c) => cat[c]);
+    let lostComps = comps.length - d.comps.length;
+    const names = d.pickNames && typeof d.pickNames === "object" ? d.pickNames : {};
+    const srcPicks = d.picks && typeof d.picks === "object" ? d.picks : {};
+    const picks = {};
+    let lostPicks = 0;
+    Object.keys(Object.assign({}, srcPicks, names)).forEach((cid) => {
+      if (!cat[cid]) {
+        lostPicks++;
+        return;
+      }
+      const r = resolvePick(cat[cid], srcPicks[cid], names[cid]);
+      if (r.gone) lostPicks++;
+      if (r.p != null) picks[cid] = r.p;
+    });
+    d.picks = picks;
+    if (d.canvas && typeof d.canvas === "object") {
+      const nodes = Array.isArray(d.canvas.nodes) ? d.canvas.nodes : [];
+      const kept = nodes.filter((n2) => n2 && cat[n2.cid]);
+      lostComps += nodes.length - kept.length;
+      const ids = new Set(kept.map((n2) => n2.id));
+      d.canvas = {
+        nodes: kept.map((n2) => {
+          const r = resolvePick(cat[n2.cid], n2.p, n2.pn);
+          if (r.gone) lostPicks++;
+          const out = Object.assign({}, n2, { p: r.p });
+          delete out.pn;
+          return out;
+        }),
+        edges: (Array.isArray(d.canvas.edges) ? d.canvas.edges : []).filter((e) => e && ids.has(e.a) && ids.has(e.b))
+      };
+    } else d.canvas = null;
+    const n = (k, one, many) => k + " " + (k === 1 ? one : many);
+    if (lostComps) notes.push(n(lostComps, "component in this save is", "components in this save are") + " no longer in the catalogue, so " + (lostComps === 1 ? "it was" : "they were") + " left out.");
+    if (lostPicks) notes.push(n(lostPicks, "product in this save is", "products in this save are") + " no longer in the catalogue, so " + (lostPicks === 1 ? "that choice was" : "those choices were") + " cleared.");
+    delete d.pickNames;
+    d.schemaVersion = SAVE_VERSION;
+    return { design: d, notes, fromVersion: from };
+  }
+
   // src/app/board-roles.js
   var BOARD_ROLES = [
     ["SRE lead", "Reliability and operations", "failure modes, the availability chain, observability, on-call load and recovery targets, tested against the Drill results and the Workload numbers"],
@@ -5096,7 +5165,11 @@ Give the board's decision. Each member's concern must be resolved in the answers
         };
         this._unsubs = [
           db.collection("portfolio").orderBy("savedAt", "desc").limit(300).onSnapshot((s) => {
-            const docs = s.docs.map((d) => Object.assign({ id: d.id }, d.data()));
+            const cat = this.data().cat;
+            const docs = s.docs.map((d) => {
+              const m = migrateDesign(d.data(), cat);
+              return Object.assign({ id: d.id }, m.design, { _notes: m.notes });
+            });
             this.setState({ portfolio: docs });
             const ids = docs.map((d) => d.ownerId).filter((v, i, a) => v && a.indexOf(v) === i);
             if (this._user && ids.length) this._user.profiles(ids).then((ps) => {
@@ -5141,12 +5214,16 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const r = this.checkDesign(ds.comps, (c) => ds.picks[c]);
       const mine = st.savedId ? (st.portfolio || []).find((d) => d.id === st.savedId && d.ownerId === st.uid) : null;
       const now = (/* @__PURE__ */ new Date()).toISOString();
-      const canvas = st.canvas && st.canvas.app === st.app ? { nodes: st.canvas.nodes.map((n) => ({ id: n.id, cid: n.cid, x: n.x, y: n.y, p: n.p == null ? null : n.p })), edges: st.canvas.edges.map((e) => ({ a: e.a, b: e.b, t: e.t })) } : null;
+      const cat = this.data().cat;
+      const pn = (n) => n.p != null && cat[n.cid] && cat[n.cid].o[n.p] ? cat[n.cid].o[n.p].n : null;
+      const canvas = st.canvas && st.canvas.app === st.app ? { nodes: st.canvas.nodes.map((n) => ({ id: n.id, cid: n.cid, x: n.x, y: n.y, p: n.p == null ? null : n.p, pn: pn(n) })), edges: st.canvas.edges.map((e) => ({ a: e.a, b: e.b, t: e.t })) } : null;
       const picks = {};
       Object.keys(ds.picks).forEach((k) => {
         if (ds.picks[k] != null) picks[k] = ds.picks[k];
       });
       const body = {
+        schemaVersion: SAVE_VERSION,
+        appVersion: APP_VERSION,
         ownerId: st.uid || null,
         title: sc ? sc.n : A.n,
         app: st.app,
@@ -5159,6 +5236,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, avail: st.avail },
         comps: ds.comps,
         picks,
+        pickNames: pickNamesFor(picks, cat),
         canvas,
         principles: this.prinOn(),
         contract: !!(st.contractSigned || stageOverride === "review"),
@@ -5182,7 +5260,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         level: d.level || this.state.level,
         step: d.step || "blueprint",
         mode: "learn",
-        showPort: false,
+        showPort: !!(d._notes && d._notes.length),
         outcomes: [{ picks: Object.assign({}, d.picks || {}) }],
         outcomesApp: d.app,
         active: 0,
@@ -5199,8 +5277,8 @@ Give the board's decision. Each member's concern must be resolved in the answers
         boardVerdict: d.aiBoard || null,
         savedId: d.ownerId && d.ownerId === this.state.uid ? d.id : null,
         openCard: null,
-        portMsg: d.ownerId && d.ownerId === this.state.uid ? "" : "Opened a copy. Saving creates a new design in your portfolio.",
-        portErr: false
+        portMsg: [d.ownerId && d.ownerId === this.state.uid ? "" : "Opened a copy. Saving creates a new design in your portfolio."].concat(d._notes || []).filter(Boolean).join(" "),
+        portErr: d._notes && d._notes.length ? "warn" : false
       };
       if (d.app === "custom" && d.custom) patch.custom = d.custom;
       ["ai", "field", "scale", "cloud", "avail"].forEach((k) => {
@@ -5277,8 +5355,8 @@ Give the board's decision. Each member's concern must be resolved in the answers
         saveDesign: () => this.saveDesign(),
         hasPortMsg: !!st.portMsg,
         portMsg: st.portMsg || "",
-        portMsgBg: st.portErr ? "var(--bad-soft)" : "var(--good-soft)",
-        portMsgFg: st.portErr ? "var(--bad)" : "var(--good)",
+        portMsgBg: st.portErr === "warn" ? "var(--warn-soft)" : st.portErr ? "var(--bad-soft)" : "var(--good-soft)",
+        portMsgFg: st.portErr === "warn" ? "var(--warn)" : st.portErr ? "var(--bad)" : "var(--good)",
         portEmpty: ready && !mine.length,
         myPort
       };

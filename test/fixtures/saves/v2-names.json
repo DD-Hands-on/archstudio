@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 2, "appVersion": "2.1.0", "ownerId": "u1", "title": "Named shop", "app": "ecom", "step": "blueprint",
+  "settings": { "ai": "none" }, "comps": ["ui", "db"],
+  "picks": { "ui": 0, "db": 0 }, "pickNames": { "ui": "Flutter", "db": "Retired Database" },
+  "canvas": { "nodes": [ { "id": "n1", "cid": "ui", "x": 0, "y": 0, "p": 0, "pn": "Angular" } ], "edges": [] }
+}

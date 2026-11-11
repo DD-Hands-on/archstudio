@@ -6,6 +6,7 @@ import { buildCatalogue } from '../engine/catalogue.js';
 import { buildAdmContent } from '../engine/adm-content.js';
 import { wlDefaults, workloadNumbers } from '../engine/workload.js';
 import { evaluateOutcome } from '../engine/evaluate.js';
+import { SAVE_VERSION, APP_VERSION, pickNamesFor, migrateDesign } from '../engine/design-save.js';
 import { BOARD_ROLES } from '../app/board-roles.js';
 import { TRACKS } from '../app/tracks.js';
 import { localStore } from '../standalone/local-store.js';
@@ -977,7 +978,8 @@ export class Component extends DCLogic {
       const err = () => {};
       this._unsubs = [
         db.collection('portfolio').orderBy('savedAt', 'desc').limit(300).onSnapshot(s => {
-          const docs = s.docs.map(d => Object.assign({ id: d.id }, d.data()));
+          const cat = this.data().cat;
+          const docs = s.docs.map(d => { const m = migrateDesign(d.data(), cat); return Object.assign({ id: d.id }, m.design, { _notes: m.notes }); });
           this.setState({ portfolio: docs });
           const ids = docs.map(d => d.ownerId).filter((v, i, a) => v && a.indexOf(v) === i);
           if (this._user && ids.length) this._user.profiles(ids).then(ps => { const names = {}; ids.forEach(k => { names[k] = (ps[k] && ps[k].name) || ''; }); this.setState({ names }); }).catch(() => {});
@@ -1003,11 +1005,12 @@ export class Component extends DCLogic {
     const ds = this.designState(); const A = this.getApp(); const sc = this.scen(); const r = this.checkDesign(ds.comps, c => ds.picks[c]);
     const mine = st.savedId ? (st.portfolio || []).find(d => d.id === st.savedId && d.ownerId === st.uid) : null;
     const now = new Date().toISOString();
-    const canvas = st.canvas && st.canvas.app === st.app ? { nodes: st.canvas.nodes.map(n => ({ id: n.id, cid: n.cid, x: n.x, y: n.y, p: n.p == null ? null : n.p })), edges: st.canvas.edges.map(e => ({ a: e.a, b: e.b, t: e.t })) } : null;
+    const cat = this.data().cat; const pn = n => n.p != null && cat[n.cid] && cat[n.cid].o[n.p] ? cat[n.cid].o[n.p].n : null;
+    const canvas = st.canvas && st.canvas.app === st.app ? { nodes: st.canvas.nodes.map(n => ({ id: n.id, cid: n.cid, x: n.x, y: n.y, p: n.p == null ? null : n.p, pn: pn(n) })), edges: st.canvas.edges.map(e => ({ a: e.a, b: e.b, t: e.t })) } : null;
     const picks = {}; Object.keys(ds.picks).forEach(k => { if (ds.picks[k] != null) picks[k] = ds.picks[k]; });
-    const body = { ownerId: st.uid || null, title: sc ? sc.n : A.n, app: st.app, scenario: st.scenario || null, step: st.step, level: st.level,
+    const body = { schemaVersion: SAVE_VERSION, appVersion: APP_VERSION, ownerId: st.uid || null, title: sc ? sc.n : A.n, app: st.app, scenario: st.scenario || null, step: st.step, level: st.level,
       stage: stageOverride || (mine && mine.stage === 'review' ? 'review' : this.liveStage(r)), savedAt: now, createdAt: (mine && mine.createdAt) || now,
-      settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, avail: st.avail }, comps: ds.comps, picks, canvas,
+      settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, avail: st.avail }, comps: ds.comps, picks, pickNames: pickNamesFor(picks, cat), canvas,
       principles: this.prinOn(), contract: !!(st.contractSigned || stageOverride === 'review'), aiBoard: st.boardVerdict ? { decision: st.boardVerdict.decision, conditions: st.boardVerdict.conditions, summary: st.boardVerdict.summary, at: st.boardVerdict.at } : null, custom: st.app === 'custom' && st.custom ? st.custom : null };
     this.setState({ portMsg: 'Saving...', portErr: false });
     try {
@@ -1019,11 +1022,11 @@ export class Component extends DCLogic {
 
   openDesign(d) {
     const s = d.settings || {};
-    const patch = { app: d.app, scenario: d.scenario || null, level: d.level || this.state.level, step: d.step || 'blueprint', mode: 'learn', showPort: false,
+    const patch = { app: d.app, scenario: d.scenario || null, level: d.level || this.state.level, step: d.step || 'blueprint', mode: 'learn', showPort: !!(d._notes && d._notes.length),
       outcomes: [{ picks: Object.assign({}, d.picks || {}) }], outcomesApp: d.app, active: 0, chosen: null, guided: false, focus: null, predict: {},
       canvas: d.canvas ? { app: d.app, nodes: d.canvas.nodes || [], edges: d.canvas.edges || [] } : null, canvasSel: null, linkFrom: null,
       principles: d.principles || null, contractSigned: !!d.contract, board: null, boardVerdict: d.aiBoard || null, savedId: d.ownerId && d.ownerId === this.state.uid ? d.id : null, openCard: null,
-      portMsg: d.ownerId && d.ownerId === this.state.uid ? '' : 'Opened a copy. Saving creates a new design in your portfolio.', portErr: false };
+      portMsg: [d.ownerId && d.ownerId === this.state.uid ? '' : 'Opened a copy. Saving creates a new design in your portfolio.'].concat(d._notes || []).filter(Boolean).join(' '), portErr: d._notes && d._notes.length ? 'warn' : false };
     if (d.app === 'custom' && d.custom) patch.custom = d.custom;
     ['ai', 'field', 'scale', 'cloud', 'avail'].forEach(k => { if (s[k] != null) patch[k] = s[k]; }); if (s.reg != null) patch.reg = !!s.reg;
     this.setState(patch);
@@ -1055,7 +1058,7 @@ export class Component extends DCLogic {
       portBg: st.showPort ? 'var(--accent-soft)' : 'var(--surface)', portBd: st.showPort ? 'var(--accent)' : 'var(--hair)', portFg: st.showPort ? 'var(--accent-ink)' : 'var(--ink)',
       portNote: ready && this._local ? 'Designs are saved in this browser only. Clearing site data removes them.' : ready ? (st.canWrite ? 'Designs you save stay in your portfolio.' : 'You can view designs here. Saving needs Contributor access.') : 'Saving works when this page is opened in Claude while signed in.',
       canSave: ready && st.canWrite !== false, saveLabel: st.savedId ? 'Save changes' : 'Save current design', saveDesign: () => this.saveDesign(),
-      hasPortMsg: !!st.portMsg, portMsg: st.portMsg || '', portMsgBg: st.portErr ? 'var(--bad-soft)' : 'var(--good-soft)', portMsgFg: st.portErr ? 'var(--bad)' : 'var(--good)',
+      hasPortMsg: !!st.portMsg, portMsg: st.portMsg || '', portMsgBg: st.portErr === 'warn' ? 'var(--warn-soft)' : st.portErr ? 'var(--bad-soft)' : 'var(--good-soft)', portMsgFg: st.portErr === 'warn' ? 'var(--warn)' : st.portErr ? 'var(--bad)' : 'var(--good)',
       portEmpty: ready && !mine.length, myPort };
   }
 

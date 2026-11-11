@@ -1,13 +1,13 @@
 """Capture a fingerprint of app behaviour: evalOut, build picks, workload numbers,
 renderVals (functions stripped) and rendered HTML, across a matrix of states.
-Usage: python3 golden.py <file.html> <out.json>"""
+Usage: python3 test/e2e/fingerprint.py <file.html> <out.json>"""
 import os, tempfile
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
 import sys, json
 from playwright.sync_api import sync_playwright
 
-src, out = sys.argv[1], sys.argv[2]
+src, out = os.path.abspath(sys.argv[1]), sys.argv[2]
 HOOK = """
 (() => {
   let boot;

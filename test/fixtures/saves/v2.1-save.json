@@ -1,0 +1,10 @@
+{
+  "ownerId": "u1", "title": "Online shop", "app": "ecom", "scenario": null, "step": "outcomes", "level": "intermediate",
+  "stage": "draft", "savedAt": "2026-10-28T10:00:00.000Z", "createdAt": "2026-10-28T09:00:00.000Z",
+  "settings": { "ai": "none", "reg": false, "field": "retail", "scale": "m", "cloud": "aws", "avail": "99.9" },
+  "comps": ["ui", "gw", "app", "db", "cache"],
+  "picks": { "ui": 0, "db": 2 },
+  "canvas": { "nodes": [ { "id": "n1", "cid": "ui", "x": 10, "y": 20, "p": 1 }, { "id": "n2", "cid": "db", "x": 40, "y": 20, "p": null } ],
+              "edges": [ { "a": "n1", "b": "n2", "t": "sync" } ] },
+  "principles": null, "contract": false, "aiBoard": null, "custom": null
+}
