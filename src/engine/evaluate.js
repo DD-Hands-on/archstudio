@@ -5,7 +5,10 @@
 //   comps      building blocks in the design; appComps: blocks in the reference model
 //   cat        the catalogue; nonCrit: blocks users do not wait on
 //   fitOpts(c) options for block c with scores adjusted to the workload; workload: workloadNumbers()
-export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts, workload }) {
+import { agenticIssues } from './agentic.js';
+
+//   deferred   blocks the learner's level hides for now; rules do not ask for them yet
+export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts, workload, deferred = [] }) {
   const picks = comps.filter(c => o.picks[c] != null && cat[c].o[o.picks[c]]).map(c => ({ c, p: fitOpts(c)[o.picks[c]] }));
   const get = c => { const x = picks.find(q => q.c === c); return x ? x.p : null; };
   const fitted = picks.filter(q => q.p.fit);
@@ -27,8 +30,7 @@ export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts,
   const vec = get('vec');
   if (vec && vec.t.indexOf('pg') >= 0 && db && db.t.indexOf('pg') < 0) add('Interoperability', 'pgvector needs PostgreSQL but the operational database is ' + db.n + ', so you run two databases.', 'vec', 'Pick Qdrant or Pinecone, or switch the database to PostgreSQL.');
   if (vec && vec.t.indexOf('pg') >= 0 && st.scale === '50M') add('Non-functional', 'pgvector slows past tens of millions of vectors; plan partitioning or a dedicated vector store.', 'vec', 'Pick a dedicated vector store for this scale.');
-  const ag = get('agents'); const tl = get('tools');
-  if (ag && tl && ag.n === 'CrewAI' && tl.n.indexOf('A2A') >= 0) add('Interoperability', 'Check CrewAI support for A2A in your version before committing; MCP is more widely supported.', 'tools', 'Pick MCP for tool access.');
+  const tl = get('tools');
   const erp = get('erpcore'), mdmP = get('mdm'), uxP = get('ux'), hcmP = get('hcm'), payP = get('payroll'), extP = get('ext');
   const isSap = p => p && p.t.indexOf('sap') >= 0;
   const sapApp = picks.some(q => isSap(q.p) && ['ipaas','alm','migr','proc','mdm','grc','ext','ux','embai'].indexOf(q.c) < 0);
@@ -44,7 +46,8 @@ export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts,
     const need = { 'SAP Joule': [p => isSap(p), 'SAP application'], 'Salesforce Agentforce': [p => p.n.indexOf('Salesforce') >= 0, 'Salesforce CRM'], 'ServiceNow Now Assist': [p => p.n.indexOf('ServiceNow') >= 0, 'ServiceNow platform'] }[emb.n];
     if (need && !picks.some(q => q.c !== 'embai' && supportOnly.indexOf(q.c) < 0 && need[0](q.p))) add('Interoperability', emb.n + ' only works on its own platform, but this design has no ' + need[1] + ' for it to run on.', 'embai', 'Pick the AI that ships with your core platform, or Copilot Studio or your own agents for cross-platform work.');
   }
-  if (ai === 'native' && tl && tl.n.indexOf('OpenAPI') >= 0) add('Non-functional', 'Bespoke tool adapters for every agent will not scale in an AI-native estate.', 'tools', 'Pick MCP so every agent reaches tools the same way.');
+  if (ai === 'native' && tl && tl.n.indexOf('OpenAPI') >= 0) add('Non-functional', 'Hand-written adapters for every agent drift apart in an AI-native estate.', 'tools', 'Standardise the tool interface: MCP where tools are shared or need OAuth boundaries, direct typed calls where one team owns a few tools.');
+  agenticIssues({ comps, get, W: (workload && workload.W) || {}, deferred }).forEach(([c, t, cid, tip]) => add(c, t, cid, tip));
   if (ai !== 'none' && llm && llm.k !== 'OSS' && st.scale === '50M') add('Non-functional', 'Token spend grows with every user and agent step; set budgets per task, cache prompts and route simple calls to smaller models.', gwP ? 'aigw' : 'llm', 'Pick an AI gateway that enforces budgets and caching.');
   if (ai !== 'none' && st.reg && !get('aigov')) add('Non-functional', 'Regulated AI use: classify each use case (for example under the EU AI Act), keep human oversight, and log model inputs, outputs and approvals.', comps.indexOf('aigov') >= 0 ? 'aigov' : null, 'Choose an AI governance platform and record each use case\'s risk class in an ADR.');
   if (ai === 'native' && llm && !get('guard') && comps.indexOf('guard') >= 0) add('Non-functional', 'Agents act without guardrails or evaluation: wrong or manipulated actions go unchecked.', 'guard', 'Pick a guardrail and evaluation option before agents touch real systems.');
@@ -58,7 +61,7 @@ export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts,
   if (picks.length && avg[3] <= 2.6) { const lk = picks.slice().sort((a, b) => a.p.s[3] - b.p.s[3])[0]; add('Non-functional', 'High lock-in across the stack: an exit would mean re-platforming.', lk.c, 'Pick a more portable option here, the most locked-in choice.'); }
   if (picks.length && avg[1] <= 2.6) { const cs = picks.slice().sort((a, b) => a.p.s[1] - b.p.s[1])[0]; add('Non-functional', 'Licence and consumption costs dominate; model run cost at target scale before committing.', cs.c, 'Pick a lower-cost option here, the most expensive choice.'); }
   const avOf = p => p.k !== 'OSS' ? 0.9999 : (p.s[2] >= 4 ? 0.9995 : 0.999);
-  const aiSoft = st.ai === 'native' ? ['aigov'] : ['llm','aigw','vec','guard','embai','aigov','agents','tools','mem'];
+  const aiSoft = st.ai === 'native' ? ['aigov'] : ['llm','aigw','vec','guard','embai','aigov','agents','tools','mem','a2a','agentid','sandbox','durable','approve'];
   const aiIsProduct = appComps.indexOf('llm') >= 0;
   const crit = picks.filter(q => nonCrit.indexOf(q.c) < 0 && (aiIsProduct || aiSoft.indexOf(q.c) < 0));
   const avail = crit.reduce((a, q) => a * avOf(q.p), 1);

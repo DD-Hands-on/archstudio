@@ -12,6 +12,7 @@ import { principleCheck } from '../engine/principles.js';
 import { baselineFor, gapAnalysis } from '../engine/gap.js';
 import { provenanceOf, asOfLabel, monthYear } from '../engine/provenance.js';
 import { SOV_OPTIONS, SOV_PHRASE, sovOf, sovFromText } from '../engine/sovereignty.js';
+import { AGENT_QUESTIONS, isAgentic, agentAnswers } from '../engine/agentic.js';
 import { BOARD_ROLES } from '../app/board-roles.js';
 import { TRACKS } from '../app/tracks.js';
 import { localStore } from '../standalone/local-store.js';
@@ -265,12 +266,15 @@ export class Component extends DCLogic {
 
   getApp() { const st = this.state; return st.app === 'custom' && st.custom ? st.custom : this.data().apps[st.app]; }
 
+  // Blocks the full design has but the learner's level hides for now.
+  deferredComps() { const now = this.comps(); return this.comps(3).filter(c => now.indexOf(c) < 0); }
+
   comps(capOverride) {
     const D = this.data(); const A = this.getApp();
     const cap = capOverride || { beginner: 1, intermediate: 2, advanced: 3 }[this.state.level];
     const ai = this.state.ai; const impl = A.kind === 'impl';
-    const aiAdd = ai === 'none' ? [] : (impl ? (ai === 'native' ? ['agents','tools','aigw','llm','guard','aigov','embai'] : ['embai','aigw','guard','aigov'])
-      : (ai === 'native' ? ['agents','tools','mem','aigw','llm','vec','guard','aigov'] : ['aigw','llm','vec','guard','aigov']));
+    const aiAdd = ai === 'none' ? [] : (impl ? (ai === 'native' ? ['agents','agentid','tools','approve','aigw','llm','guard','aigov','embai'] : ['embai','aigw','guard','aigov'])
+      : (ai === 'native' ? ['agents','agentid','tools','mem','aigw','llm','vec','guard','sandbox','durable','approve','aigov'] : ['aigw','llm','vec','guard','aigov']));
     const forced = A.forced || [], removed = A.removed || [];
     const all = A.c.concat(aiAdd.filter(x => A.c.indexOf(x) < 0)).filter(x => removed.indexOf(x) < 0);
     const c = all.filter(x => (D.lvlOf[x] || 1) <= cap || forced.indexOf(x) >= 0);
@@ -427,7 +431,7 @@ export class Component extends DCLogic {
 
   evalOut(o) {
     const D = this.data();
-    return evaluateOutcome({ o, st: this.state, comps: this.comps(), appComps: this.getApp().c, cat: D.cat, nonCrit: D.nonCrit, fitOpts: c => this.fitOpts(c), workload: this.wlNums() });
+    return evaluateOutcome({ o, st: this.state, comps: this.comps(), appComps: this.getApp().c, cat: D.cat, nonCrit: D.nonCrit, fitOpts: c => this.fitOpts(c), workload: this.wlNums(), deferred: this.deferredComps() });
   }
 
   // ---------- ADM content ----------
@@ -780,6 +784,11 @@ export class Component extends DCLogic {
     const Nw = this.wlNums();
     lines.push('WORKLOAD (from the Workload step): peak ' + fmtW(Nw.peakRps) + ' requests/s (average ' + fmtW(Nw.avgRps) + '); ' + fmtW(Nw.readRps) + ' reads/s and ' + fmtW(Nw.writeRps) + ' writes/s at peak; ' + fmtGBW(Nw.store3) + ' stored after 3 years; latency budget ' + Nw.lat + ' ms; ' + Nw.cons + ' consistency; main pattern ' + Nw.pattern + (Nw.tokensDay ? '; about ' + fmtW(Nw.tokensDay) + ' AI tokens a day' : '') + '.');
     const fitFlags = []; ds.comps.forEach(c => { const p = ds.picks[c]; const cc = D.cat[c]; if (p == null || !cc || !cc.o[p]) return; fitFor(c, cc.o[p], Nw).forEach(f => fitFlags.push(cc.o[p].n + ': ' + f.why)); });
+    if (isAgentic(ds.comps)) {
+      const ag = agentAnswers(Nw.W); const pk = c => { const p = ds.picks[c]; return ds.comps.indexOf(c) < 0 ? 'NOT IN DESIGN' : p != null && D.cat[c].o[p] ? D.cat[c].o[p].n : 'no product chosen'; };
+      lines.push('AGENTS (from the Workload step): ' + ag.agents + ' agent(s); the most an agent can do: ' + { read: 'read and suggest', write: 'change records that can be undone', irreversible: 'pay, delete or message outside' }[ag.impact] + '; runs code or commands: ' + ag.code + '; one run takes ' + ag.run + '; owned by ' + (ag.cross === 'many' ? 'several teams or vendors' : 'one team') + '; ' + ag.tools + ' tools.');
+      lines.push('AGENT CONTROLS (evidence for the CISO and SRE): agent identity = ' + pk('agentid') + '; sandbox = ' + pk('sandbox') + '; durable execution = ' + pk('durable') + '; approval tiers = ' + pk('approve') + '; agent-to-tool interface = ' + pk('tools') + '; agent-to-agent protocol = ' + pk('a2a') + '.');
+    }
     lines.push('WORKLOAD FIT FLAGS: ' + (fitFlags.length ? fitFlags.filter((x, i, a) => a.indexOf(x) === i).join(' ') : 'none, every chosen product is within its comfortable range.'));
     lines.push('DESIGN LENS: ' + (st.lens === 'enterprise' ? 'enterprise portfolio first. Weigh capability gaps, application rationalisation, standards and the roadmap above technical detail.' : 'system first. Weigh building blocks, non-functional qualities and operations.'));
     lines.push('LEARNER LEVEL: ' + st.level + '.');
@@ -1171,7 +1180,8 @@ export class Component extends DCLogic {
     const implTerms = { brief: ['gxp'], blueprint: ['cleancore','mdmg','fts'], outcomes: ['cleancore'], evolve: ['fts','cutover','gxp'], drill: ['cutover','sod'], review: ['sod'] };
     const aiOn = st.ai !== 'none';
     const aiTerms = { brief: ['agentic'], blueprint: ['aigw','agentic','hitl'], outcomes: ['aigw','evals'], compare: ['evals'], evolve: ['evals','hitl'], enterprise: ['euaiact'], drill: ['hitl','evals'], review: ['euaiact','evals'] };
-    const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? (implTerms[step] || []) : []).concat(aiOn ? (aiTerms[step] || []) : []).filter((k, i, a) => a.indexOf(k) === i);
+    const agentTerms = { workload: ['durable','approvals'], blueprint: ['agentid','sandbox','durable','approvals','mcp','a2a'], outcomes: ['mcp','a2a'], drill: ['agentid','approvals','sandbox'], review: ['agentid','approvals'] };
+    const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? (implTerms[step] || []) : []).concat(aiOn ? (aiTerms[step] || []) : []).concat(isAgentic(this.comps()) ? (agentTerms[step] || []) : []).filter((k, i, a) => a.indexOf(k) === i);
     const terms = termKeys.map(k => Object.assign({ l: D.glossary[k][0], on: st.term === k ? 'true' : 'false', pick: () => this.setState({ term: st.term === k ? null : k }) }, sel(st.term === k)));
     const hasTerm = !!st.term && termKeys.indexOf(st.term) >= 0;
     const term = hasTerm ? { l: D.glossary[st.term][0], d: D.glossary[st.term][1], a: D.glossary[st.term][2] } : { l: '', d: '', a: '' };
@@ -1237,9 +1247,9 @@ export class Component extends DCLogic {
     let basePath = (A.path || D.hopOrder).slice();
     const itsmAI = st.ai !== 'none' && comps.indexOf('itsm') >= 0 && comps.indexOf('aiops') >= 0;
     if (itsmAI) {
-      basePath = st.ai === 'native' ? ['obs','aiops','agents','tools','aigw','llm','guard','hitl','runbook','itsm'] : ['obs','aiops','itsm','embai','aigw','guard','runbook'];
+      basePath = st.ai === 'native' ? ['obs','aiops','agents','agentid','tools','aigw','llm','guard','hitl','runbook','itsm'] : ['obs','aiops','itsm','embai','aigw','guard','runbook'];
     } else if (st.ai === 'native') {
-      basePath = ['agents','tools','aigw','llm','guard','hitl'].concat(basePath.filter(c => ['ui','ux','bi','edge','agents','tools','aigw','llm','guard','embai'].indexOf(c) < 0));
+      basePath = ['agents','agentid','tools','aigw','llm','guard','sandbox','durable','hitl'].concat(basePath.filter(c => ['ui','ux','bi','edge','agents','agentid','tools','aigw','llm','guard','sandbox','durable','embai'].indexOf(c) < 0));
     } else if (st.ai === 'enabled' && A.path) {
       const at = basePath.indexOf('idp') >= 0 ? basePath.indexOf('idp') + 1 : 1;
       basePath.splice(at, 0, 'embai', 'aigw', 'guard');
@@ -1319,7 +1329,7 @@ export class Component extends DCLogic {
       wq('Peak versus average', 'Sale days, month-end close, outages, Monday log-ins.', 'peak', [[2,'2x'],[5,'5x'],[20,'20x']]),
       wq('New data per year', 'Records, documents, events and media.', 'growth', [[10,'10 GB'],[1000,'1 TB'],[100000,'100 TB']]),
       wq('Main work pattern', 'What most of the work looks like.', 'pattern', [['interactive','People waiting on screens'],['async','Background tasks'],['realtime','Continuous streams'],['batch','Scheduled bulk runs']])
-    ];
+    ].concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
     const wlN = workloadNumbers(A, st);
     const { users: usersN, activeShare, dau, avgRps, peakRps, rN, readRps, writeRps, store3, perInst, inst, inflight, bw, aiCallsDay } = wlN;
     const fmtN = n => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : n >= 10 ? String(Math.round(n)) : n.toFixed(1);
@@ -1682,7 +1692,16 @@ export class Component extends DCLogic {
           c === 'llm' || c === 'embai' ? [false, 'At risk', 'Can be manipulated or confidently wrong; ground answers and show sources.'] :
           c === 'vec' ? [false, 'At risk', 'Poisoned documents in the index become trusted context.'] :
           c === 'idp' ? [true, 'Holds', 'Agent identities limit what a hijacked agent can reach.'] :
-          [true, 'Holds', 'Not directly exposed to model input.'] }
+          [true, 'Holds', 'Not directly exposed to model input.'] },
+      agentact: { l: 'An agent takes a destructive action', advice: 'Give each agent its own identity with no standing rights to production, run its commands in a sandbox, put destructive and irreversible actions behind an approval tier, and make sure you can restore from backup without the agent\'s help.',
+        f: (p, c) => { const on = x => ce.picks.some(q => q.c === x);
+          return c === 'agentid' ? [true, 'Holds', 'A scoped identity has no rights to delete production data.'] :
+            c === 'approve' ? [true, 'Holds', 'A destructive step waits for a person to sign off.'] :
+            c === 'sandbox' ? [true, 'Holds', 'Commands run against a throwaway copy, not production.'] :
+            c === 'durable' ? [true, 'Holds', 'The run history shows which step did what, so you can undo it.'] :
+            c === 'agents' || c === 'tools' ? (on('agentid') && on('approve') ? [true, 'Holds', 'Scoped identity and approvals limit what a mistaken agent can do.'] : [false, 'At risk', 'Nothing stops the agent acting on production: add agent identity and approval tiers.']) :
+            c === 'db' || c === 'nosql' ? (on('agentid') ? [true, 'Holds', 'Agents cannot reach it with rights to delete.'] : [false, 'At risk', 'Agent credentials can change it: test restoring from backup without the agent.']) :
+            [true, 'Holds', 'Not directly exposed to agent actions.']; } }
     };
     const govOn = ce.picks.some(q => q.c === 'aigov');
     sc.exit = { l: 'Vendor ends support for a core product', advice: 'Track end-of-support dates for every product in the portfolio, keep data and integrations in open formats, and record an exit plan in each decision record.',
@@ -1699,7 +1718,7 @@ export class Component extends DCLogic {
         c === 'obs' ? [true, 'Holds', 'The signals are there; the challenge is volume.'] :
         c === 'embai' ? [true, 'Holds', 'Summarises the flood for engineers and drafts status updates.'] :
         [true, 'Holds', 'Not directly affected.'] };
-    const okScenario = k => (k !== 'cutover' || isImplApp) && ((k !== 'model' && k !== 'inject') || aiOn) && (k !== 'storm' || comps.indexOf('itsm') >= 0);
+    const okScenario = k => (k !== 'cutover' || isImplApp) && ((k !== 'model' && k !== 'inject') || aiOn) && (k !== 'agentact' || isAgentic(comps)) && (k !== 'storm' || comps.indexOf('itsm') >= 0);
     const drillPref = st.drillSet ? st.drill : (ent ? 'exit' : 'surge');
     const drillKey = sc[drillPref] && okScenario(drillPref) ? drillPref : 'surge';
     const scOrder = ent ? ['exit', 'regulation'].concat(Object.keys(sc).filter(k => k !== 'exit' && k !== 'regulation')) : Object.keys(sc);
@@ -1756,6 +1775,9 @@ export class Component extends DCLogic {
       { i: 'PO', role: 'Portfolio owner', q: 'Which applications does this let us retire, and when do their costs stop?', hint: 'the gap analysis and transition plateaus' },
       { i: 'CEA', role: 'Chief enterprise architect', q: 'How does this move us towards the target architecture, and which deviations from standards are you asking for?', hint: 'the architecture contract and the pattern library' });
     if (aiOn) board.push({ i: 'RAI', role: 'Responsible AI lead', q: st.ai === 'native' ? 'Which decisions can agents make alone, which need human approval, and how do you stop an agent that misbehaves?' : 'How is each AI use case risk-classified, evaluated before release, and overseen by a person?', hint: 'the AI register, evaluation results, approval thresholds and kill-switch tests' });
+    if (isAgentic(comps)) board.push(
+      { i: 'CISO', role: 'Chief information security officer (agents)', q: 'Does each agent have its own identity, and what could a manipulated agent reach' + (nm('agentid') ? ' through ' + nm('agentid') : '') + '?', hint: 'agent identities, their scopes and how you revoke one' },
+      { i: 'SRE', role: 'SRE lead (agents)', q: 'If an agent run crashes halfway, what happens to the work it started and the side effects it already caused?', hint: 'durable execution, idempotent tools and the agent drill' });
     if (aiOn) board.push({ i: 'FO', role: 'FinOps lead (AI spend)', q: 'What does one AI-assisted transaction cost in tokens, and what stops costs running away at scale?', hint: 'gateway budgets, caching and model routing data' });
     if (st.reg) board.push({ i: 'QA', role: 'Quality and compliance', q: 'How will this be validated, and how do you prove data never leaves approved regions?', hint: 'the validation plan and the residency drill' });
     ce.issues.filter(x => x.cat !== 'Functional').slice(0, 3).forEach(x => board.push({ i: 'ARB', role: 'Board challenge from your own analysis', q: x.text, hint: 'a mitigation recorded in the relevant ADR' }));

@@ -66,7 +66,15 @@ export const FIT_RULES = [
   ['*', '#hosted', N => N.sov === 'sovereign', { 3: -1 }, () => 'Check where it stores and processes data, which country\'s law the provider is subject to, and whether a sovereign-cloud option exists.'],
   ['llm', '#hosted', N => N.sov === 'sovereign', { 3: -1 }, () => 'A hosted model API processes prompts and outputs on the provider\'s side. Look for a sovereign or in-country endpoint, or self-host open-weight models.'],
   ['*', '#saas', N => N.sov === 'region', { 3: -1 }, () => 'Vendor-hosted: confirm it can keep your data in your region before you rely on it.'],
-  ['llm', '#hosted', N => N.sov === 'region', { 3: -1 }, () => 'Confirm the provider processes prompts and outputs in your region, not only stores them there.']
+  ['llm', '#hosted', N => N.sov === 'region', { 3: -1 }, () => 'Confirm the provider processes prompts and outputs in your region, not only stores them there.'],
+  // Agent protocols and runtimes: choices with trade-offs, not defaults. N.W holds the Workload answers about agents.
+  ['tools', 'Model Context Protocol (MCP)', N => N.W && N.W.tools <= 3 && N.W.cross === 'one', { 2: -1 }, N => 'One team and ' + N.W.tools + ' tools: direct typed calls or a CLI may do the job without MCP servers to run. MCP pays off with many tools, OAuth boundaries or shared access.'],
+  ['tools', 'Direct tool calls and CLIs', N => N.W && N.W.cross === 'many', { 3: -2 }, () => 'Tools owned by other teams or vendors: each agent hard-codes their calls and credentials. A shared protocol such as MCP gives one contract and an OAuth boundary.'],
+  ['tools', 'Direct tool calls and CLIs', N => N.W && N.W.tools >= 30, { 0: -1 }, N => N.W.tools + ' tools as hand-written calls is a lot to keep consistent; a shared protocol and registry scale better.'],
+  ['a2a', 'Agent2Agent (A2A) protocol', N => N.W && N.W.cross === 'one', { 2: -1, 4: -1 }, () => 'One team owns every agent: framework hand-offs are simpler. A2A pays off when agents cross team or vendor boundaries.'],
+  ['a2a', 'Framework hand-offs (LangGraph)', N => N.W && N.W.cross === 'many', { 3: -2 }, () => 'Hand-offs inside one framework cannot reach agents that other teams or vendors run.'],
+  ['durable', 'Temporal', N => N.W && N.W.run === 'seconds', { 2: -1 }, () => 'Runs finish in seconds: a workflow cluster is a lot to operate for work a retry would cover.'],
+  ['durable', 'AWS Step Functions', N => N.W && N.W.run === 'hours', { 1: -1 }, () => 'Charged per state transition; runs that wait hours or days for people add many transitions.']
 ];
 
 /**

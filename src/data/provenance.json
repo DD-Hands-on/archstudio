@@ -147,15 +147,10 @@
   },
   "tools/Model Context Protocol (MCP)": {
    "source": "https://modelcontextprotocol.io",
-   "asOf": "2026-10-23",
+   "asOf": "2026-11-11",
    "reviewedBy": "unreviewed",
-   "reviewBy": "2027-10-23"
-  },
-  "tools/Agent2Agent (A2A) protocol": {
-   "source": "https://github.com/a2aproject/A2A",
-   "asOf": "2026-10-23",
-   "reviewedBy": "unreviewed",
-   "reviewBy": "2027-10-23"
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Under the Linux Foundation Agentic AI Foundation since December 2025."
   },
   "tools/OpenAPI tool adapters": {
    "source": "https://swagger.io/specification/",
@@ -936,6 +931,132 @@
    "asOf": "2026-10-23",
    "reviewedBy": "unreviewed",
    "reviewBy": "2027-10-23"
+  },
+  "tools/Direct tool calls and CLIs": {
+   "source": "https://www.thoughtworks.com/radar/techniques/mcp-by-default",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Thoughtworks Radar, April 2026: caution against MCP by default."
+  },
+  "a2a/Agent2Agent (A2A) protocol": {
+   "source": "https://github.com/a2aproject/A2A",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Donated to the Linux Foundation June 2025; hosted by the Agentic AI Foundation from August 2026."
+  },
+  "a2a/Framework hand-offs (LangGraph)": {
+   "source": "https://langchain-ai.github.io/langgraph/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "a2a/Events on a message broker": {
+   "source": "https://kafka.apache.org/documentation/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "agentid/SPIFFE and SPIRE": {
+   "source": "https://spiffe.io/docs/latest/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "agentid/Microsoft Entra Agent ID": {
+   "source": "https://learn.microsoft.com/entra/agent-id/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. GA on 1 May 2026, checked against Microsoft Learn and reports."
+  },
+  "agentid/Okta for AI Agents": {
+   "source": "https://www.okta.com/products/govern-ai-agent-identity/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. GA on 30 April 2026, checked against Okta announcements."
+  },
+  "agentid/Amazon Bedrock AgentCore Identity": {
+   "source": "https://aws.amazon.com/bedrock/agentcore/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. AgentCore GA since 13 October 2025, checked against AWS."
+  },
+  "sandbox/E2B": {
+   "source": "https://e2b.dev/docs",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Apache 2.0, Firecracker microVMs, self-hostable: checked against e2b.dev."
+  },
+  "sandbox/gVisor": {
+   "source": "https://gvisor.dev/docs/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "sandbox/Amazon Bedrock AgentCore Code Interpreter": {
+   "source": "https://aws.amazon.com/bedrock/agentcore/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. AgentCore GA since 13 October 2025, checked against AWS."
+  },
+  "sandbox/Azure Container Apps dynamic sessions": {
+   "source": "https://learn.microsoft.com/azure/container-apps/sessions",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "durable/Temporal": {
+   "source": "https://docs.temporal.io",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. MIT licence checked."
+  },
+  "durable/DBOS": {
+   "source": "https://docs.dbos.dev",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. MIT library on Postgres, checked against dbos.dev."
+  },
+  "durable/AWS Step Functions": {
+   "source": "https://docs.aws.amazon.com/step-functions/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "approve/LangGraph interrupts": {
+   "source": "https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "approve/Temporal signals": {
+   "source": "https://docs.temporal.io",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "approve/Microsoft Power Automate approvals": {
+   "source": "https://learn.microsoft.com/power-automate/get-started-approvals",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
   }
  },
  "fitRules": {
@@ -1237,6 +1358,55 @@
    "reviewedBy": "unreviewed",
    "reviewBy": "2027-11-11",
    "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  },
+  "tools/Model Context Protocol (MCP)#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "tools/Direct tool calls and CLIs#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "tools/Direct tool calls and CLIs#2": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "a2a/Agent2Agent (A2A) protocol#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "a2a/Framework hand-offs (LangGraph)#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "durable/Temporal#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+  },
+  "durable/AWS Step Functions#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
   }
  },
  "incidents": {
@@ -1300,6 +1470,13 @@
    "asOf": "2026-10-23",
    "reviewedBy": "unreviewed",
    "reviewBy": "2028-10-23"
+  },
+  "agentact": {
+   "source": "https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-11-11",
+   "note": "Checked 11 Nov 2026 against The Register, eWeek and the AI Incident Database (incident 1152)."
   }
  },
  "referenceModels": {
@@ -1341,9 +1518,10 @@
   },
   "agents": {
    "source": "curated",
-   "asOf": "2026-10-23",
+   "asOf": "2026-11-11",
    "reviewedBy": "unreviewed",
-   "reviewBy": "2027-10-23"
+   "reviewBy": "2027-05-11",
+   "note": "Rebuilt on the agent identity, sandbox, durable execution and approval blocks."
   },
   "ride": {
    "source": "curated",

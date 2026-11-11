@@ -2101,7 +2101,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     ["*", "#hosted", (N) => N.sov === "sovereign", { 3: -1 }, () => "Check where it stores and processes data, which country's law the provider is subject to, and whether a sovereign-cloud option exists."],
     ["llm", "#hosted", (N) => N.sov === "sovereign", { 3: -1 }, () => "A hosted model API processes prompts and outputs on the provider's side. Look for a sovereign or in-country endpoint, or self-host open-weight models."],
     ["*", "#saas", (N) => N.sov === "region", { 3: -1 }, () => "Vendor-hosted: confirm it can keep your data in your region before you rely on it."],
-    ["llm", "#hosted", (N) => N.sov === "region", { 3: -1 }, () => "Confirm the provider processes prompts and outputs in your region, not only stores them there."]
+    ["llm", "#hosted", (N) => N.sov === "region", { 3: -1 }, () => "Confirm the provider processes prompts and outputs in your region, not only stores them there."],
+    // Agent protocols and runtimes: choices with trade-offs, not defaults. N.W holds the Workload answers about agents.
+    ["tools", "Model Context Protocol (MCP)", (N) => N.W && N.W.tools <= 3 && N.W.cross === "one", { 2: -1 }, (N) => "One team and " + N.W.tools + " tools: direct typed calls or a CLI may do the job without MCP servers to run. MCP pays off with many tools, OAuth boundaries or shared access."],
+    ["tools", "Direct tool calls and CLIs", (N) => N.W && N.W.cross === "many", { 3: -2 }, () => "Tools owned by other teams or vendors: each agent hard-codes their calls and credentials. A shared protocol such as MCP gives one contract and an OAuth boundary."],
+    ["tools", "Direct tool calls and CLIs", (N) => N.W && N.W.tools >= 30, { 0: -1 }, (N) => N.W.tools + " tools as hand-written calls is a lot to keep consistent; a shared protocol and registry scale better."],
+    ["a2a", "Agent2Agent (A2A) protocol", (N) => N.W && N.W.cross === "one", { 2: -1, 4: -1 }, () => "One team owns every agent: framework hand-offs are simpler. A2A pays off when agents cross team or vendor boundaries."],
+    ["a2a", "Framework hand-offs (LangGraph)", (N) => N.W && N.W.cross === "many", { 3: -2 }, () => "Hand-offs inside one framework cannot reach agents that other teams or vendors run."],
+    ["durable", "Temporal", (N) => N.W && N.W.run === "seconds", { 2: -1 }, () => "Runs finish in seconds: a workflow cluster is a lot to operate for work a retry would cover."],
+    ["durable", "AWS Step Functions", (N) => N.W && N.W.run === "hours", { 1: -1 }, () => "Charged per state transition; runs that wait hours or days for people add many transitions."]
   ];
   function fitFor(cid, o, N) {
     const notes = [];
@@ -2177,10 +2185,37 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         o("CrewAI", "OSS", "Role-based crews of agents; quick to prototype collaboration.", "https://docs.crewai.com", [4, 5, 4, 5, 5]),
         o("Claude Agent SDK", "Proprietary", "Agent loop, sub-agents, tools and context management built in.", "https://docs.claude.com/en/api/agent-sdk/overview", [5, 3, 4, 3, 5], ["saas"])
       ]),
-      tools: C("Tool and agent protocols", "app", "A standard way for agents to reach tools, data and each other.", "a universal power adaptor between agents and every system they plug into.", "custom glue for each system, so every new tool is a new integration project.", [
-        o("Model Context Protocol (MCP)", "OSS", "Open standard for exposing tools and data to any agent.", "https://modelcontextprotocol.io", [5, 5, 4, 5, 5]),
-        o("Agent2Agent (A2A) protocol", "OSS", "Open protocol for agents from different vendors to delegate work.", "https://github.com/a2aproject/A2A", [4, 5, 3, 5, 3]),
+      tools: C("Agent-to-tool interface", "app", "How agents reach tools and data: a standard protocol, or direct typed calls.", "a universal power adaptor between agents and every system they plug into.", "custom glue for each system, so every new tool is a new integration.", [
+        o("Model Context Protocol (MCP)", "OSS", "Open standard, now under the Linux Foundation, for exposing tools and data to any agent. Pays off with many tools, OAuth boundaries and shared access.", "https://modelcontextprotocol.io", [5, 5, 3, 5, 4]),
+        o("Direct tool calls and CLIs", "OSS", "Typed functions or a well-documented CLI the agent calls directly. Often all one team needs, with no protocol layer to run.", "https://www.thoughtworks.com/radar/techniques/mcp-by-default", [3, 5, 5, 4, 5]),
         o("OpenAPI tool adapters", "OSS", "Wrap existing REST APIs as tools; no new standard to adopt.", "https://swagger.io/specification/", [3, 4, 3, 4, 3])
+      ]),
+      a2a: C("Agent-to-agent protocol", "app", "How agents owned by different teams or vendors discover each other and hand work over.", "a shared shipping manifest, so parcels move between carriers without re-labelling.", "every hand-off between teams is custom glue with its own identity and error handling.", [
+        o("Agent2Agent (A2A) protocol", "OSS", "Open protocol, under the Linux Foundation, for agents from different teams and vendors to discover each other and delegate tasks.", "https://github.com/a2aproject/A2A", [4, 5, 3, 5, 3]),
+        o("Framework hand-offs (LangGraph)", "OSS", "Sub-agents and hand-offs inside one runtime. Simplest when one team owns every agent.", "https://langchain-ai.github.io/langgraph/", [3, 5, 4, 3, 5]),
+        o("Events on a message broker", "OSS", "Agents publish and consume task events. Loosely coupled, but you design the contract and identity yourself.", "https://kafka.apache.org/documentation/", [5, 4, 3, 4, 3])
+      ]),
+      agentid: C("Agent identity", "x", "Gives each agent its own identity, with access scoped to its tools, short-lived tokens and a named owner.", "a badge for each contractor, not one master key shared by all.", "agents act under a shared service account or the user's own rights, so one manipulated agent reaches everything.", [
+        o("SPIFFE and SPIRE", "OSS", "Open standard for workload identity (CNCF); issues short-lived identities to each agent process you run.", "https://spiffe.io/docs/latest/", [5, 5, 2, 5, 2], ["k8s"]),
+        o("Microsoft Entra Agent ID", "Proprietary", "Agent identities in Entra with owners, conditional access and audit; generally available since May 2026.", "https://learn.microsoft.com/entra/agent-id/", [5, 3, 4, 2, 4], ["azure", "saas"]),
+        o("Okta for AI Agents", "Proprietary", "Registers agents, issues scoped short-lived tokens, and can revoke an agent's access everywhere at once.", "https://www.okta.com/products/govern-ai-agent-identity/", [5, 2, 5, 3, 4], ["saas"]),
+        o("Amazon Bedrock AgentCore Identity", "Proprietary", "Authentication and credential handling for agents on AWS; works with existing identity providers.", "https://aws.amazon.com/bedrock/agentcore/", [4, 4, 5, 2, 5], ["aws"])
+      ]),
+      sandbox: C("Sandboxed execution", "app", "Runs agent-generated code and commands in an isolated, short-lived environment with no standing credentials.", "a test kitchen: mistakes stay inside it.", "agent commands run on shared servers, so one bad command can reach production.", [
+        o("E2B", "OSS", "Open source (Apache 2.0) Firecracker microVM sandboxes; managed cloud or self-hosted.", "https://e2b.dev/docs", [4, 4, 4, 5, 5]),
+        o("gVisor", "OSS", "Google's open source container sandbox; adds a kernel boundary to containers you already run.", "https://gvisor.dev/docs/", [5, 5, 2, 5, 3], ["k8s"]),
+        o("Amazon Bedrock AgentCore Code Interpreter", "Proprietary", "Managed microVM sandboxes for agent code on AWS.", "https://aws.amazon.com/bedrock/agentcore/", [4, 4, 5, 1, 5], ["aws"]),
+        o("Azure Container Apps dynamic sessions", "Proprietary", "Managed, isolated sessions for running untrusted code inside Azure.", "https://learn.microsoft.com/azure/container-apps/sessions", [4, 4, 5, 2, 5], ["azure"])
+      ]),
+      durable: C("Durable execution", "app", "Records each step of a long agent run so it survives crashes and deploys, and resumes without repeating side effects.", "a ship's log: after a storm, the crew picks up exactly where the log ends.", "a crash or deploy restarts long runs from the beginning and repeats emails, payments or tool calls.", [
+        o("Temporal", "OSS", "The established durable execution engine (MIT): a server and workers you run, or Temporal Cloud.", "https://docs.temporal.io", [5, 4, 2, 5, 3]),
+        o("DBOS", "OSS", "Durable execution as a library on the Postgres you already run; no separate server.", "https://docs.dbos.dev", [3, 5, 4, 5, 5], ["pg"]),
+        o("AWS Step Functions", "Proprietary", "Managed state machines with retries and waits for human tasks, inside AWS.", "https://docs.aws.amazon.com/step-functions/", [5, 4, 5, 1, 4], ["aws", "serverless"])
+      ]),
+      approve: C("Approval tiers", "app", "Routes agent actions by impact: some run alone, some notify a person, high-impact ones wait for sign-off.", "a spending limit: small purchases go through, large ones need a manager's signature.", "agents take irreversible actions, such as payments, deletions or external messages, with nobody signing off.", [
+        o("LangGraph interrupts", "OSS", "Pause the graph before a risky step, show the proposed action, resume on approval.", "https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/", [4, 5, 4, 5, 5]),
+        o("Temporal signals", "OSS", "A durable workflow waits, for days if needed, for an approval signal before acting.", "https://docs.temporal.io", [5, 4, 3, 5, 3]),
+        o("Microsoft Power Automate approvals", "Proprietary", "Approval requests in Teams and Outlook with an audit trail, inside Microsoft 365.", "https://learn.microsoft.com/power-automate/get-started-approvals", [4, 3, 5, 2, 5], ["azure", "saas"])
       ]),
       llm: C("Model serving", "app", "Hosts or brokers the language models that generate answers.", "the expert writer who drafts the answer.", "nothing generates language, so the assistant cannot respond.", [
         o("vLLM + Hugging Face models", "OSS", "Serve open-weight models on your own GPUs; data never leaves.", "https://docs.vllm.ai", [4, 3, 2, 5, 3], ["k8s", "gpu"]),
@@ -2490,15 +2525,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         n: "Multi-agent system",
         d: "Specialised agents coordinated by a supervisor, using tools through standard protocols.",
         req: "a user assigns a research task",
-        c: ["ui", "gw", "idp", "app", "agents", "tools", "llm", "mem", "vec", "guard", "mq", "obs"],
+        c: ["ui", "gw", "idp", "agentid", "app", "agents", "tools", "llm", "mem", "vec", "guard", "sandbox", "durable", "approve", "mq", "obs"],
         caps: ["Research and analysis", "Workflow automation", "Decision support", "Knowledge work"],
         nb: [["Enterprise systems as tools", "ERP, CRM, ITSM", "MCP servers"], ["Document stores", "Knowledge sources", "connectors"], ["Human approvers", "Review queues", "task inbox"], ["AI governance", "Policy and evals", "policy API"], ["Identity platform", "Agent identities", "OAuth scopes"]],
         dom: ["Task", "Agent run trace", "Memory", "Tool result", "Evaluation"],
         shelf: [["How we built our multi-agent research system", "Article", "https://www.anthropic.com/engineering/multi-agent-research-system"], ["Model Context Protocol", "Specification", "https://modelcontextprotocol.io"]],
         sig: [
           ["Orchestrator and workers", "A lead agent plans, spawns sub-agents that work in parallel, then synthesises their findings.", "https://www.anthropic.com/engineering/multi-agent-research-system"],
-          ["Tools through MCP", "Agents reach enterprise systems through standard servers rather than bespoke glue code.", "https://modelcontextprotocol.io"],
-          ["Human in the loop", "Irreversible actions pause for approval at defined checkpoints.", "https://langchain-ai.github.io/langgraph/"],
+          ["An identity per agent", "Each agent gets its own identity and only the access its tools need, so a manipulated agent reaches little.", "https://learn.microsoft.com/entra/agent-id/"],
+          ["Choose the tool interface", "MCP where tools are shared or need OAuth boundaries; direct typed calls where one team owns a few tools.", "https://www.thoughtworks.com/radar/techniques/mcp-by-default"],
+          ["Human in the loop", "Irreversible actions pause for approval at defined checkpoints.", "https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/"],
+          ["Durable runs", "Long runs record each step, so a crash resumes the work instead of repeating its side effects.", "https://docs.temporal.io"],
           ["Trace and budget every run", "Each run is traced and evaluated, with token spend capped per task.", "https://langfuse.com/docs"]
         ]
       },
@@ -2737,6 +2774,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       aiops: ["Correlation groups related alerts into one incident with a likely cause", 30],
       runbook: ["Approved runbook runs the fix: restart, scale or roll back", 2e3]
     };
+    hopDef.agentid = ["Agent gets a short-lived token scoped to this task", 10];
+    hopDef.sandbox = ["Generated code runs in an isolated sandbox", 300];
+    hopDef.durable = ["Durable workflow records the step before it runs", 5];
     const hopOrder = ["ui", "bi", "edge", "lb", "gw", "mesh", "app", "ingest", "agents", "orch", "tools", "mem", "vec", "media", "reco", "geo", "stream", "cache", "db", "nosql", "tsdb", "search", "lake", "aigw", "llm", "guard", "mq"];
     const stores = ["db", "nosql", "tsdb", "search"];
     const layerNames = { exp: "Experience", edge: "Edge and access", app: "Application and intelligence", data: "Data and events", x: "Cross-cutting" };
@@ -2760,8 +2800,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         native: ["AI: redesign processes around agents; decide which steps an agent can own end to end", "AI: expose processes as governed tools (APIs or MCP) with agent roles and permissions", "AI: agents run approved steps; people approve postings above thresholds", "AI: review agent accuracy, cost and exceptions like any team's performance"]
       }
     };
-    const lvlOf = { aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
-    const nonCrit = ["obs", "lake", "bi", "catalog", "reco", "search", "guard", "integ", "media", "mem", "migr", "proc", "alm", "grc", "talent", "payroll", "ipaas"];
+    const lvlOf = { sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
+    const nonCrit = ["approve", "obs", "lake", "bi", "catalog", "reco", "search", "guard", "integ", "media", "mem", "migr", "proc", "alm", "grc", "talent", "payroll", "ipaas"];
     const tour = [
       ["The brief", "An online shop: 1M users, sales-day peaks, card payments. Before naming any product, a senior architect asks how many requests, how much data, how bad downtime is, and how sensitive the data is.", [], "Constraints decide trade-offs. Products come last."],
       ["Users arrive", "Customers use a web front end. Static files such as images and scripts come from a CDN close to them, which also filters attacks.", ["Web and mobile front end", "CDN and web firewall"], "Most of a page is static. Serve it from the edge and your servers see far less traffic."],
@@ -2843,8 +2883,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     glossary.mdmg = ["Master data", "Core reference records such as materials, customers, vendors and employees that every transaction uses.", "the contacts list behind every phone call."];
     glossary.sod = ["Segregation of duties", "No single person can complete a risky process end to end, such as creating and paying a vendor.", "two keys to open the vault."];
     glossary.gxp = ["GxP validation", "Documented evidence that a system used in regulated life-science work does what it is meant to, reliably.", "a safety certificate for software."];
+    glossary.agentid = ["Agent identity", "Each agent has its own identity, owner and scoped, short-lived access, so its actions can be traced, limited and revoked.", "a badge for each contractor instead of one master key."];
+    glossary.sandbox = ["Sandbox", "An isolated, throwaway environment where agent code and commands run without reaching real systems.", "a test kitchen: mistakes stay inside it."];
+    glossary.durable = ["Durable execution", "A workflow records each completed step, so after a crash it resumes where it stopped instead of starting again and repeating side effects.", "a ship's log the crew resumes from after a storm."];
+    glossary.approvals = ["Approval tiers", "Agent actions grouped by impact: run alone, notify a person, or wait for sign-off. Irreversible actions sit in the top tier.", "a spending limit with a manager's signature above it."];
+    glossary.mcp = ["MCP (Model Context Protocol)", "An open standard for agents to reach tools and data. Useful for shared tools and OAuth boundaries; not needed for every integration.", "a universal power adaptor."];
+    glossary.a2a = ["A2A (Agent2Agent)", "An open protocol for agents from different teams or vendors to discover each other and delegate tasks.", "a shipping manifest carriers all accept."];
+    incidents.agentact = ["Replit agent deletes a production database, July 2025", "During a 12-day public trial, an AI coding agent on Replit ran destructive commands against a live production database during a code freeze, despite instructions not to change anything. It then said a rollback was impossible, which was wrong. Replit's chief executive called it unacceptable and added safeguards.", "https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/", "Real incident"];
     signals["LiteLLM"] = "Very fast release cadence; pin versions and test upgrades.";
-    shared.push("aigw", "aigov");
+    shared.push("aigw", "aigov", "agentid");
     return {
       cat,
       apps,
@@ -2973,11 +3020,64 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return { principles, scenarios, defaultChanges, glossary, defaultOn: ["primacy", "continuity", "compliance", "security", "reuse", "interop", "diversity", "rai"] };
   }
 
+  // src/engine/agentic.js
+  var AGENT_DEFAULTS = (
+    /** @type {AgentAnswers} */
+    { agents: 3, impact: "write", code: "no", run: "minutes", cross: "one", tools: 10 }
+  );
+  var AGENT_QUESTIONS = (
+    /** @type {[keyof AgentAnswers, string, string, [any, string][]][]} */
+    [
+      ["agents", "Agents in the design", "Count each agent with its own role and tools.", [[1, "1"], [3, "3"], [10, "10"]]],
+      ["impact", "The most an agent can do", "Think of its most powerful tool, not its usual task.", [["read", "Read and suggest"], ["write", "Change records that can be undone"], ["irreversible", "Pay, delete or message outside"]]],
+      ["code", "Agents run code or commands", "Generated scripts, shell commands, browser automation.", [["no", "No"], ["yes", "Yes"]]],
+      ["run", "How long one run takes", "From the task arriving to the result, including waits for people.", [["seconds", "Seconds"], ["minutes", "Minutes"], ["hours", "Hours or days"]]],
+      ["cross", "Who owns the agents and tools", "Agents or tools run by other teams or vendors need a shared contract.", [["one", "One team"], ["many", "Several teams or vendors"]]],
+      ["tools", "Tools the agents call", "Distinct systems or functions across all agents.", [[3, "3"], [10, "10"], [30, "30"]]]
+    ]
+  );
+  function isAgentic(comps) {
+    return comps.indexOf("agents") >= 0;
+  }
+  function agentAnswers(W) {
+    const a = (
+      /** @type {any} */
+      Object.assign({}, AGENT_DEFAULTS)
+    );
+    Object.keys(AGENT_DEFAULTS).forEach((k) => {
+      if (W && W[k] != null) a[k] = W[k];
+    });
+    return a;
+  }
+  function agenticIssues({ comps, get, W, deferred = [] }) {
+    if (!isAgentic(comps)) return [];
+    const a = agentAnswers(W);
+    const out = [];
+    const has = (c) => !!get(c);
+    const ask = (c) => !has(c) && deferred.indexOf(c) < 0;
+    const at = (c) => comps.indexOf(c) >= 0 ? c : null;
+    const addTip = (c, name) => comps.indexOf(c) >= 0 ? "Pick an option for " + name + "." : "Add the " + name + " block on the Blueprint or Canvas.";
+    if (ask("agentid")) out.push(["Non-functional", "Agents act under a shared service account or the user's own rights, so one manipulated agent reaches everything that account can. Give each agent its own identity, scoped to its tools.", at("agentid"), addTip("agentid", "Agent identity")]);
+    if (a.code === "yes" && ask("sandbox")) out.push(["Non-functional", "Agents run code or commands where real systems are reachable: one bad command can reach production. Run them in a sandbox with no standing credentials.", at("sandbox"), addTip("sandbox", "Sandboxed execution")]);
+    const checkpointed = (() => {
+      const m = get("mem");
+      return !!m && m.n.indexOf("checkpointer") >= 0;
+    })();
+    if (a.run !== "seconds" && ask("durable") && !(a.run === "minutes" && checkpointed)) out.push(["Non-functional", "Runs last " + (a.run === "hours" ? "hours or days" : "minutes") + " but nothing records their progress: a crash or deploy restarts the run and repeats side effects such as emails or payments.", at("durable"), addTip("durable", "Durable execution")]);
+    if (a.impact === "irreversible" && ask("approve")) out.push(["Non-functional", "Agents can pay, delete or message outside the company with no approval step. Put irreversible actions in a tier that waits for a person to sign off.", at("approve"), addTip("approve", "Approval tiers")]);
+    if (a.cross === "many" && a.agents > 1 && ask("a2a")) out.push(["Interoperability", "Agents owned by different teams or vendors hand work over through custom glue. Agree a shared protocol, such as A2A, with identity checked on every hop.", at("a2a"), addTip("a2a", "Agent-to-agent protocol")]);
+    return out;
+  }
+
   // src/engine/workload.js
+  var agentKey = (W) => {
+    const ch = Object.keys(AGENT_DEFAULTS).filter((k) => W[k] !== AGENT_DEFAULTS[k]);
+    return ch.length ? "|ag:" + ch.map((k) => k + "=" + W[k]).join(",") : "";
+  };
   function wlDefaults(A) {
     const c = A.c;
     const impl = A.kind === "impl";
-    const d = { actions: impl ? 150 : 40, ratio: impl ? "10:1" : "100:1", lat: impl ? 1e3 : 200, cons: "strong", peak: 5, growth: 1e3, pattern: "interactive" };
+    const d = { ...AGENT_DEFAULTS, actions: impl ? 150 : 40, ratio: impl ? "10:1" : "100:1", lat: impl ? 1e3 : 200, cons: "strong", peak: 5, growth: 1e3, pattern: "interactive" };
     if (c.indexOf("llm") >= 0 || c.indexOf("agents") >= 0) {
       d.lat = 5e3;
       if (c.indexOf("agents") >= 0) d.pattern = "async";
@@ -3041,12 +3141,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       inst: Math.ceil(peakRps / 400) + 1,
       tokensDay,
       sov: st.sov || "any",
-      key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join("|") + (st.sov && st.sov !== "any" ? "|" + st.sov : "")
+      key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join("|") + agentKey(W) + (st.sov && st.sov !== "any" ? "|" + st.sov : "")
     };
   }
 
   // src/engine/evaluate.js
-  function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts, workload }) {
+  function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts, workload, deferred = [] }) {
     const picks = comps.filter((c) => o.picks[c] != null && cat[c].o[o.picks[c]]).map((c) => ({ c, p: fitOpts(c)[o.picks[c]] }));
     const get = (c) => {
       const x = picks.find((q) => q.c === c);
@@ -3078,9 +3178,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     const vec = get("vec");
     if (vec && vec.t.indexOf("pg") >= 0 && db && db.t.indexOf("pg") < 0) add("Interoperability", "pgvector needs PostgreSQL but the operational database is " + db.n + ", so you run two databases.", "vec", "Pick Qdrant or Pinecone, or switch the database to PostgreSQL.");
     if (vec && vec.t.indexOf("pg") >= 0 && st.scale === "50M") add("Non-functional", "pgvector slows past tens of millions of vectors; plan partitioning or a dedicated vector store.", "vec", "Pick a dedicated vector store for this scale.");
-    const ag = get("agents");
     const tl = get("tools");
-    if (ag && tl && ag.n === "CrewAI" && tl.n.indexOf("A2A") >= 0) add("Interoperability", "Check CrewAI support for A2A in your version before committing; MCP is more widely supported.", "tools", "Pick MCP for tool access.");
     const erp = get("erpcore"), mdmP = get("mdm"), uxP = get("ux"), hcmP = get("hcm"), payP = get("payroll"), extP = get("ext");
     const isSap = (p) => p && p.t.indexOf("sap") >= 0;
     const sapApp = picks.some((q) => isSap(q.p) && ["ipaas", "alm", "migr", "proc", "mdm", "grc", "ext", "ux", "embai"].indexOf(q.c) < 0);
@@ -3098,7 +3196,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const need = { "SAP Joule": [(p) => isSap(p), "SAP application"], "Salesforce Agentforce": [(p) => p.n.indexOf("Salesforce") >= 0, "Salesforce CRM"], "ServiceNow Now Assist": [(p) => p.n.indexOf("ServiceNow") >= 0, "ServiceNow platform"] }[emb.n];
       if (need && !picks.some((q) => q.c !== "embai" && supportOnly.indexOf(q.c) < 0 && need[0](q.p))) add("Interoperability", emb.n + " only works on its own platform, but this design has no " + need[1] + " for it to run on.", "embai", "Pick the AI that ships with your core platform, or Copilot Studio or your own agents for cross-platform work.");
     }
-    if (ai === "native" && tl && tl.n.indexOf("OpenAPI") >= 0) add("Non-functional", "Bespoke tool adapters for every agent will not scale in an AI-native estate.", "tools", "Pick MCP so every agent reaches tools the same way.");
+    if (ai === "native" && tl && tl.n.indexOf("OpenAPI") >= 0) add("Non-functional", "Hand-written adapters for every agent drift apart in an AI-native estate.", "tools", "Standardise the tool interface: MCP where tools are shared or need OAuth boundaries, direct typed calls where one team owns a few tools.");
+    agenticIssues({ comps, get, W: workload && workload.W || {}, deferred }).forEach(([c, t, cid, tip]) => add(c, t, cid, tip));
     if (ai !== "none" && llm && llm.k !== "OSS" && st.scale === "50M") add("Non-functional", "Token spend grows with every user and agent step; set budgets per task, cache prompts and route simple calls to smaller models.", gwP ? "aigw" : "llm", "Pick an AI gateway that enforces budgets and caching.");
     if (ai !== "none" && st.reg && !get("aigov")) add("Non-functional", "Regulated AI use: classify each use case (for example under the EU AI Act), keep human oversight, and log model inputs, outputs and approvals.", comps.indexOf("aigov") >= 0 ? "aigov" : null, "Choose an AI governance platform and record each use case's risk class in an ADR.");
     if (ai === "native" && llm && !get("guard") && comps.indexOf("guard") >= 0) add("Non-functional", "Agents act without guardrails or evaluation: wrong or manipulated actions go unchecked.", "guard", "Pick a guardrail and evaluation option before agents touch real systems.");
@@ -3124,7 +3223,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       add("Non-functional", "Licence and consumption costs dominate; model run cost at target scale before committing.", cs.c, "Pick a lower-cost option here, the most expensive choice.");
     }
     const avOf = (p) => p.k !== "OSS" ? 0.9999 : p.s[2] >= 4 ? 0.9995 : 0.999;
-    const aiSoft = st.ai === "native" ? ["aigov"] : ["llm", "aigw", "vec", "guard", "embai", "aigov", "agents", "tools", "mem"];
+    const aiSoft = st.ai === "native" ? ["aigov"] : ["llm", "aigw", "vec", "guard", "embai", "aigov", "agents", "tools", "mem", "a2a", "agentid", "sandbox", "durable", "approve"];
     const aiIsProduct = appComps.indexOf("llm") >= 0;
     const crit = picks.filter((q) => nonCrit.indexOf(q.c) < 0 && (aiIsProduct || aiSoft.indexOf(q.c) < 0));
     const avail = crit.reduce((a, q) => a * avOf(q.p), 1);
@@ -3147,6 +3246,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
   // src/engine/design-save.js
   var SAVE_VERSION = 2;
+  var V1_PRODUCT_ORDER = {
+    tools: ["Model Context Protocol (MCP)", "Agent2Agent (A2A) protocol", "OpenAPI tool adapters"]
+  };
   var APP_VERSION = "2.1.0";
   var isPos = (v) => Number.isInteger(v) && /** @type {number} */
   v >= 0;
@@ -3159,7 +3261,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     });
     return out;
   }
-  function resolvePick(cc, pos, name) {
+  function resolvePick(cc, pos, name, legacy) {
+    if (name == null && legacy && isPos(pos)) name = legacy[pos] != null ? legacy[pos] : "";
     if (name != null) {
       const i = cc.o.findIndex((o) => o.n === name);
       return i >= 0 ? { p: i, gone: false } : { p: null, gone: true };
@@ -3186,7 +3289,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         lostPicks++;
         return;
       }
-      const r = resolvePick(cat[cid], srcPicks[cid], names[cid]);
+      const r = resolvePick(cat[cid], srcPicks[cid], names[cid], from < 2 ? V1_PRODUCT_ORDER[cid] : void 0);
       if (r.gone) lostPicks++;
       if (r.p != null) picks[cid] = r.p;
     });
@@ -3198,7 +3301,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const ids = new Set(kept.map((n2) => n2.id));
       d.canvas = {
         nodes: kept.map((n2) => {
-          const r = resolvePick(cat[n2.cid], n2.p, n2.pn);
+          const r = resolvePick(cat[n2.cid], n2.p, n2.pn, from < 2 ? V1_PRODUCT_ORDER[n2.cid] : void 0);
           if (r.gone) lostPicks++;
           const out = Object.assign({}, n2, { p: r.p });
           delete out.pn;
@@ -3319,8 +3422,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         return;
       }
       const entry = { i: typeof sd.i === "number" ? sd.i : -1, status: sd.status || "none" };
-      if (sd.n != null) {
-        const i = cc.o.findIndex((o) => o.n === sd.n);
+      const legacy = sd.n == null && entry.i >= 0 && V1_PRODUCT_ORDER[cid] ? V1_PRODUCT_ORDER[cid][entry.i] || "" : null;
+      const name = sd.n != null ? sd.n : legacy;
+      if (name != null) {
+        const i = cc.o.findIndex((o) => o.n === name);
         if (i < 0) {
           lost.push(cid);
           std[cid] = { i: -1, status: "none" };
@@ -3576,15 +3681,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       },
       "tools/Model Context Protocol (MCP)": {
         source: "https://modelcontextprotocol.io",
-        asOf: "2026-10-23",
+        asOf: "2026-11-11",
         reviewedBy: "unreviewed",
-        reviewBy: "2027-10-23"
-      },
-      "tools/Agent2Agent (A2A) protocol": {
-        source: "https://github.com/a2aproject/A2A",
-        asOf: "2026-10-23",
-        reviewedBy: "unreviewed",
-        reviewBy: "2027-10-23"
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Under the Linux Foundation Agentic AI Foundation since December 2025."
       },
       "tools/OpenAPI tool adapters": {
         source: "https://swagger.io/specification/",
@@ -4365,6 +4465,132 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         asOf: "2026-10-23",
         reviewedBy: "unreviewed",
         reviewBy: "2027-10-23"
+      },
+      "tools/Direct tool calls and CLIs": {
+        source: "https://www.thoughtworks.com/radar/techniques/mcp-by-default",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Thoughtworks Radar, April 2026: caution against MCP by default."
+      },
+      "a2a/Agent2Agent (A2A) protocol": {
+        source: "https://github.com/a2aproject/A2A",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Donated to the Linux Foundation June 2025; hosted by the Agentic AI Foundation from August 2026."
+      },
+      "a2a/Framework hand-offs (LangGraph)": {
+        source: "https://langchain-ai.github.io/langgraph/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "a2a/Events on a message broker": {
+        source: "https://kafka.apache.org/documentation/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "agentid/SPIFFE and SPIRE": {
+        source: "https://spiffe.io/docs/latest/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "agentid/Microsoft Entra Agent ID": {
+        source: "https://learn.microsoft.com/entra/agent-id/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. GA on 1 May 2026, checked against Microsoft Learn and reports."
+      },
+      "agentid/Okta for AI Agents": {
+        source: "https://www.okta.com/products/govern-ai-agent-identity/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. GA on 30 April 2026, checked against Okta announcements."
+      },
+      "agentid/Amazon Bedrock AgentCore Identity": {
+        source: "https://aws.amazon.com/bedrock/agentcore/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. AgentCore GA since 13 October 2025, checked against AWS."
+      },
+      "sandbox/E2B": {
+        source: "https://e2b.dev/docs",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Apache 2.0, Firecracker microVMs, self-hostable: checked against e2b.dev."
+      },
+      "sandbox/gVisor": {
+        source: "https://gvisor.dev/docs/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "sandbox/Amazon Bedrock AgentCore Code Interpreter": {
+        source: "https://aws.amazon.com/bedrock/agentcore/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. AgentCore GA since 13 October 2025, checked against AWS."
+      },
+      "sandbox/Azure Container Apps dynamic sessions": {
+        source: "https://learn.microsoft.com/azure/container-apps/sessions",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "durable/Temporal": {
+        source: "https://docs.temporal.io",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. MIT licence checked."
+      },
+      "durable/DBOS": {
+        source: "https://docs.dbos.dev",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. MIT library on Postgres, checked against dbos.dev."
+      },
+      "durable/AWS Step Functions": {
+        source: "https://docs.aws.amazon.com/step-functions/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "approve/LangGraph interrupts": {
+        source: "https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "approve/Temporal signals": {
+        source: "https://docs.temporal.io",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "approve/Microsoft Power Automate approvals": {
+        source: "https://learn.microsoft.com/power-automate/get-started-approvals",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
       }
     },
     fitRules: {
@@ -4666,6 +4892,55 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         reviewedBy: "unreviewed",
         reviewBy: "2027-11-11",
         note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      },
+      "tools/Model Context Protocol (MCP)#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "tools/Direct tool calls and CLIs#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "tools/Direct tool calls and CLIs#2": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "a2a/Agent2Agent (A2A) protocol#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "a2a/Framework hand-offs (LangGraph)#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "durable/Temporal#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
+      },
+      "durable/AWS Step Functions#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Agent protocol and runtime trade-off; basis stated in the reason (Thoughtworks Radar on MCP by default, April 2026)."
       }
     },
     incidents: {
@@ -4729,6 +5004,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         asOf: "2026-10-23",
         reviewedBy: "unreviewed",
         reviewBy: "2028-10-23"
+      },
+      agentact: {
+        source: "https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-11-11",
+        note: "Checked 11 Nov 2026 against The Register, eWeek and the AI Incident Database (incident 1152)."
       }
     },
     referenceModels: {
@@ -4770,9 +5052,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       },
       agents: {
         source: "curated",
-        asOf: "2026-10-23",
+        asOf: "2026-11-11",
         reviewedBy: "unreviewed",
-        reviewBy: "2027-10-23"
+        reviewBy: "2027-05-11",
+        note: "Rebuilt on the agent identity, sandbox, durable execution and approval blocks."
       },
       ride: {
         source: "curated",
@@ -5581,13 +5864,18 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const st = this.state;
       return st.app === "custom" && st.custom ? st.custom : this.data().apps[st.app];
     }
+    // Blocks the full design has but the learner's level hides for now.
+    deferredComps() {
+      const now = this.comps();
+      return this.comps(3).filter((c) => now.indexOf(c) < 0);
+    }
     comps(capOverride) {
       const D = this.data();
       const A = this.getApp();
       const cap = capOverride || { beginner: 1, intermediate: 2, advanced: 3 }[this.state.level];
       const ai = this.state.ai;
       const impl = A.kind === "impl";
-      const aiAdd = ai === "none" ? [] : impl ? ai === "native" ? ["agents", "tools", "aigw", "llm", "guard", "aigov", "embai"] : ["embai", "aigw", "guard", "aigov"] : ai === "native" ? ["agents", "tools", "mem", "aigw", "llm", "vec", "guard", "aigov"] : ["aigw", "llm", "vec", "guard", "aigov"];
+      const aiAdd = ai === "none" ? [] : impl ? ai === "native" ? ["agents", "agentid", "tools", "approve", "aigw", "llm", "guard", "aigov", "embai"] : ["embai", "aigw", "guard", "aigov"] : ai === "native" ? ["agents", "agentid", "tools", "mem", "aigw", "llm", "vec", "guard", "sandbox", "durable", "approve", "aigov"] : ["aigw", "llm", "vec", "guard", "aigov"];
       const forced = A.forced || [], removed = A.removed || [];
       const all = A.c.concat(aiAdd.filter((x) => A.c.indexOf(x) < 0)).filter((x) => removed.indexOf(x) < 0);
       const c = all.filter((x) => (D.lvlOf[x] || 1) <= cap || forced.indexOf(x) >= 0);
@@ -5842,7 +6130,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     }
     evalOut(o) {
       const D = this.data();
-      return evaluateOutcome({ o, st: this.state, comps: this.comps(), appComps: this.getApp().c, cat: D.cat, nonCrit: D.nonCrit, fitOpts: (c) => this.fitOpts(c), workload: this.wlNums() });
+      return evaluateOutcome({ o, st: this.state, comps: this.comps(), appComps: this.getApp().c, cat: D.cat, nonCrit: D.nonCrit, fitOpts: (c) => this.fitOpts(c), workload: this.wlNums(), deferred: this.deferredComps() });
     }
     // ---------- ADM content ----------
     admData() {
@@ -6517,6 +6805,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         if (p == null || !cc || !cc.o[p]) return;
         fitFor(c, cc.o[p], Nw).forEach((f) => fitFlags.push(cc.o[p].n + ": " + f.why));
       });
+      if (isAgentic(ds.comps)) {
+        const ag = agentAnswers(Nw.W);
+        const pk = (c) => {
+          const p = ds.picks[c];
+          return ds.comps.indexOf(c) < 0 ? "NOT IN DESIGN" : p != null && D.cat[c].o[p] ? D.cat[c].o[p].n : "no product chosen";
+        };
+        lines.push("AGENTS (from the Workload step): " + ag.agents + " agent(s); the most an agent can do: " + { read: "read and suggest", write: "change records that can be undone", irreversible: "pay, delete or message outside" }[ag.impact] + "; runs code or commands: " + ag.code + "; one run takes " + ag.run + "; owned by " + (ag.cross === "many" ? "several teams or vendors" : "one team") + "; " + ag.tools + " tools.");
+        lines.push("AGENT CONTROLS (evidence for the CISO and SRE): agent identity = " + pk("agentid") + "; sandbox = " + pk("sandbox") + "; durable execution = " + pk("durable") + "; approval tiers = " + pk("approve") + "; agent-to-tool interface = " + pk("tools") + "; agent-to-agent protocol = " + pk("a2a") + ".");
+      }
       lines.push("WORKLOAD FIT FLAGS: " + (fitFlags.length ? fitFlags.filter((x, i, a) => a.indexOf(x) === i).join(" ") : "none, every chosen product is within its comfortable range."));
       lines.push("DESIGN LENS: " + (st.lens === "enterprise" ? "enterprise portfolio first. Weigh capability gaps, application rationalisation, standards and the roadmap above technical detail." : "system first. Weigh building blocks, non-functional qualities and operations."));
       lines.push("LEARNER LEVEL: " + st.level + ".");
@@ -7192,7 +7489,8 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const implTerms = { brief: ["gxp"], blueprint: ["cleancore", "mdmg", "fts"], outcomes: ["cleancore"], evolve: ["fts", "cutover", "gxp"], drill: ["cutover", "sod"], review: ["sod"] };
       const aiOn = st.ai !== "none";
       const aiTerms = { brief: ["agentic"], blueprint: ["aigw", "agentic", "hitl"], outcomes: ["aigw", "evals"], compare: ["evals"], evolve: ["evals", "hitl"], enterprise: ["euaiact"], drill: ["hitl", "evals"], review: ["euaiact", "evals"] };
-      const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? implTerms[step] || [] : []).concat(aiOn ? aiTerms[step] || [] : []).filter((k, i, a) => a.indexOf(k) === i);
+      const agentTerms = { workload: ["durable", "approvals"], blueprint: ["agentid", "sandbox", "durable", "approvals", "mcp", "a2a"], outcomes: ["mcp", "a2a"], drill: ["agentid", "approvals", "sandbox"], review: ["agentid", "approvals"] };
+      const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? implTerms[step] || [] : []).concat(aiOn ? aiTerms[step] || [] : []).concat(isAgentic(this.comps()) ? agentTerms[step] || [] : []).filter((k, i, a) => a.indexOf(k) === i);
       const terms = termKeys.map((k) => Object.assign({ l: D.glossary[k][0], on: st.term === k ? "true" : "false", pick: () => this.setState({ term: st.term === k ? null : k }) }, sel(st.term === k)));
       const hasTerm = !!st.term && termKeys.indexOf(st.term) >= 0;
       const term = hasTerm ? { l: D.glossary[st.term][0], d: D.glossary[st.term][1], a: D.glossary[st.term][2] } : { l: "", d: "", a: "" };
@@ -7258,9 +7556,9 @@ Give the board's decision. Each member's concern must be resolved in the answers
       let basePath = (A.path || D.hopOrder).slice();
       const itsmAI = st.ai !== "none" && comps.indexOf("itsm") >= 0 && comps.indexOf("aiops") >= 0;
       if (itsmAI) {
-        basePath = st.ai === "native" ? ["obs", "aiops", "agents", "tools", "aigw", "llm", "guard", "hitl", "runbook", "itsm"] : ["obs", "aiops", "itsm", "embai", "aigw", "guard", "runbook"];
+        basePath = st.ai === "native" ? ["obs", "aiops", "agents", "agentid", "tools", "aigw", "llm", "guard", "hitl", "runbook", "itsm"] : ["obs", "aiops", "itsm", "embai", "aigw", "guard", "runbook"];
       } else if (st.ai === "native") {
-        basePath = ["agents", "tools", "aigw", "llm", "guard", "hitl"].concat(basePath.filter((c) => ["ui", "ux", "bi", "edge", "agents", "tools", "aigw", "llm", "guard", "embai"].indexOf(c) < 0));
+        basePath = ["agents", "agentid", "tools", "aigw", "llm", "guard", "sandbox", "durable", "hitl"].concat(basePath.filter((c) => ["ui", "ux", "bi", "edge", "agents", "agentid", "tools", "aigw", "llm", "guard", "sandbox", "durable", "embai"].indexOf(c) < 0));
       } else if (st.ai === "enabled" && A.path) {
         const at = basePath.indexOf("idp") >= 0 ? basePath.indexOf("idp") + 1 : 1;
         basePath.splice(at, 0, "embai", "aigw", "guard");
@@ -7408,7 +7706,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         wq("Peak versus average", "Sale days, month-end close, outages, Monday log-ins.", "peak", [[2, "2x"], [5, "5x"], [20, "20x"]]),
         wq("New data per year", "Records, documents, events and media.", "growth", [[10, "10 GB"], [1e3, "1 TB"], [1e5, "100 TB"]]),
         wq("Main work pattern", "What most of the work looks like.", "pattern", [["interactive", "People waiting on screens"], ["async", "Background tasks"], ["realtime", "Continuous streams"], ["batch", "Scheduled bulk runs"]])
-      ];
+      ].concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
       const wlN = workloadNumbers(A, st);
       const { users: usersN, activeShare, dau, avgRps, peakRps, rN, readRps, writeRps, store3, perInst, inst, inflight, bw, aiCallsDay } = wlN;
       const fmtN = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : n >= 10 ? String(Math.round(n)) : n.toFixed(1);
@@ -8044,6 +8342,14 @@ Give the board's decision. Each member's concern must be resolved in the answers
           l: "Prompt injection or wrong answer",
           advice: "Treat all retrieved and user content as untrusted, give agents least privilege, require human approval for irreversible actions, ground answers with sources, and red-team before every release.",
           f: (p, c) => c === "guard" ? [true, "Holds", "Screens inputs and outputs, and logs evaluations."] : c === "agents" || c === "tools" ? [false, "At risk", "Untrusted content can steer tool calls; scope permissions and require approval."] : c === "llm" || c === "embai" ? [false, "At risk", "Can be manipulated or confidently wrong; ground answers and show sources."] : c === "vec" ? [false, "At risk", "Poisoned documents in the index become trusted context."] : c === "idp" ? [true, "Holds", "Agent identities limit what a hijacked agent can reach."] : [true, "Holds", "Not directly exposed to model input."]
+        },
+        agentact: {
+          l: "An agent takes a destructive action",
+          advice: "Give each agent its own identity with no standing rights to production, run its commands in a sandbox, put destructive and irreversible actions behind an approval tier, and make sure you can restore from backup without the agent's help.",
+          f: (p, c) => {
+            const on = (x) => ce.picks.some((q) => q.c === x);
+            return c === "agentid" ? [true, "Holds", "A scoped identity has no rights to delete production data."] : c === "approve" ? [true, "Holds", "A destructive step waits for a person to sign off."] : c === "sandbox" ? [true, "Holds", "Commands run against a throwaway copy, not production."] : c === "durable" ? [true, "Holds", "The run history shows which step did what, so you can undo it."] : c === "agents" || c === "tools" ? on("agentid") && on("approve") ? [true, "Holds", "Scoped identity and approvals limit what a mistaken agent can do."] : [false, "At risk", "Nothing stops the agent acting on production: add agent identity and approval tiers."] : c === "db" || c === "nosql" ? on("agentid") ? [true, "Holds", "Agents cannot reach it with rights to delete."] : [false, "At risk", "Agent credentials can change it: test restoring from backup without the agent."] : [true, "Holds", "Not directly exposed to agent actions."];
+          }
         }
       };
       const govOn = ce.picks.some((q) => q.c === "aigov");
@@ -8062,7 +8368,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         advice: "Declare one major incident and link child incidents to it, pause non-essential automation that could amplify the fault, and let agents summarise and route while a named incident commander owns decisions and communication.",
         f: (p, c) => c === "aiops" ? [true, "Holds", "Groups thousands of alerts into a few incidents."] : c === "runbook" ? [false, "At risk", "Automated fixes can amplify a widespread fault; pause non-essential automation."] : c === "agents" ? [false, "At risk", "Agents must hand control to the incident commander and stop acting alone."] : c === "itsm" ? [true, "Holds", "One major incident record with linked child incidents."] : c === "obs" ? [true, "Holds", "The signals are there; the challenge is volume."] : c === "embai" ? [true, "Holds", "Summarises the flood for engineers and drafts status updates."] : [true, "Holds", "Not directly affected."]
       };
-      const okScenario = (k) => (k !== "cutover" || isImplApp) && (k !== "model" && k !== "inject" || aiOn) && (k !== "storm" || comps.indexOf("itsm") >= 0);
+      const okScenario = (k) => (k !== "cutover" || isImplApp) && (k !== "model" && k !== "inject" || aiOn) && (k !== "agentact" || isAgentic(comps)) && (k !== "storm" || comps.indexOf("itsm") >= 0);
       const drillPref = st.drillSet ? st.drill : ent ? "exit" : "surge";
       const drillKey = sc[drillPref] && okScenario(drillPref) ? drillPref : "surge";
       const scOrder = ent ? ["exit", "regulation"].concat(Object.keys(sc).filter((k) => k !== "exit" && k !== "regulation")) : Object.keys(sc);
@@ -8127,6 +8433,10 @@ Give the board's decision. Each member's concern must be resolved in the answers
         { i: "CEA", role: "Chief enterprise architect", q: "How does this move us towards the target architecture, and which deviations from standards are you asking for?", hint: "the architecture contract and the pattern library" }
       );
       if (aiOn) board.push({ i: "RAI", role: "Responsible AI lead", q: st.ai === "native" ? "Which decisions can agents make alone, which need human approval, and how do you stop an agent that misbehaves?" : "How is each AI use case risk-classified, evaluated before release, and overseen by a person?", hint: "the AI register, evaluation results, approval thresholds and kill-switch tests" });
+      if (isAgentic(comps)) board.push(
+        { i: "CISO", role: "Chief information security officer (agents)", q: "Does each agent have its own identity, and what could a manipulated agent reach" + (nm("agentid") ? " through " + nm("agentid") : "") + "?", hint: "agent identities, their scopes and how you revoke one" },
+        { i: "SRE", role: "SRE lead (agents)", q: "If an agent run crashes halfway, what happens to the work it started and the side effects it already caused?", hint: "durable execution, idempotent tools and the agent drill" }
+      );
       if (aiOn) board.push({ i: "FO", role: "FinOps lead (AI spend)", q: "What does one AI-assisted transaction cost in tokens, and what stops costs running away at scale?", hint: "gateway budgets, caching and model routing data" });
       if (st.reg) board.push({ i: "QA", role: "Quality and compliance", q: "How will this be validated, and how do you prove data never leaves approved regions?", hint: "the validation plan and the residency drill" });
       ce.issues.filter((x) => x.cat !== "Functional").slice(0, 3).forEach((x) => board.push({ i: "ARB", role: "Board challenge from your own analysis", q: x.text, hint: "a mitigation recorded in the relevant ADR" }));

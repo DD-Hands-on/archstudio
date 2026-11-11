@@ -14,6 +14,17 @@
 /** @typedef {{ a: string, b: string, t?: string }} CanvasEdge */
 
 export const SAVE_VERSION = 2;
+
+/**
+ * Product lists as they were in v2.1, for blocks whose list has changed since. Saves and team
+ * standards written without product names hold positions in these lists, so positions are read
+ * against them, then matched by name. Add a block here whenever its product list is reordered,
+ * or a product is removed or replaced.
+ * @type {Record<string, string[]>}
+ */
+export const V1_PRODUCT_ORDER = {
+  tools: ['Model Context Protocol (MCP)', 'Agent2Agent (A2A) protocol', 'OpenAPI tool adapters']
+};
 // Kept equal to package.json "version" by a unit test.
 export const APP_VERSION = '2.1.0';
 
@@ -38,8 +49,9 @@ export function pickNamesFor(picks, cat) {
 
 // Resolve one pick: by name when the save has one, otherwise by position.
 // Returns { p } with p a position or null, and gone = true when a choice was lost.
-/** @param {Block} cc @param {unknown} pos @param {unknown} name @returns {{ p: number | null, gone: boolean }} */
-function resolvePick(cc, pos, name) {
+/** @param {Block} cc @param {unknown} pos @param {unknown} name @param {string[]} [legacy] @returns {{ p: number | null, gone: boolean }} */
+export function resolvePick(cc, pos, name, legacy) {
+  if (name == null && legacy && isPos(pos)) name = legacy[pos] != null ? legacy[pos] : '';
   if (name != null) {
     const i = cc.o.findIndex(o => o.n === name);
     return i >= 0 ? { p: i, gone: false } : { p: null, gone: true };
@@ -76,7 +88,7 @@ export function migrateDesign(raw, cat) {
   const picks = {}; let lostPicks = 0;
   Object.keys(Object.assign({}, srcPicks, names)).forEach(cid => {
     if (!cat[cid]) { lostPicks++; return; }
-    const r = resolvePick(cat[cid], srcPicks[cid], names[cid]);
+    const r = resolvePick(cat[cid], srcPicks[cid], names[cid], from < 2 ? V1_PRODUCT_ORDER[cid] : undefined);
     if (r.gone) lostPicks++;
     if (r.p != null) picks[cid] = r.p;
   });
@@ -90,7 +102,7 @@ export function migrateDesign(raw, cat) {
     const ids = new Set(kept.map(n => n.id));
     d.canvas = {
       nodes: kept.map(n => {
-        const r = resolvePick(cat[n.cid], n.p, n.pn);
+        const r = resolvePick(cat[n.cid], n.p, n.pn, from < 2 ? V1_PRODUCT_ORDER[n.cid] : undefined);
         if (r.gone) lostPicks++;
         const out = Object.assign({}, n, { p: r.p }); delete out.pn; return out;
       }),

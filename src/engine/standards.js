@@ -1,4 +1,5 @@
 // @ts-check
+import { V1_PRODUCT_ORDER } from './design-save.js';
 // Enterprise standards: example pattern libraries, conformance of a design, and storage of
 // team standards. Plain functions with their inputs passed in; no screens, no browser APIs.
 
@@ -128,7 +129,8 @@ export function standardsForStore(std, cat) {
 /**
  * Team standards as read: positions are re-resolved from names. A standard whose product is
  * no longer in the catalogue becomes "none" so it is never silently swapped.
- * Stores written before names were kept are read by position. Blocks with no stored entry
+ * Stores written before names were kept are read by position, against the v2.1 list where it has changed
+ * since (V1_PRODUCT_ORDER). Blocks with no stored entry
  * (for example, added to the catalogue later) have no standard.
  * @param {StandardsMap} raw
  * @param {Catalogue} cat
@@ -143,8 +145,10 @@ export function standardsFromStore(raw, cat) {
     const cc = cat[cid];
     if (!cc) { lost.push(cid); return; }
     const entry = { i: typeof sd.i === 'number' ? sd.i : -1, status: sd.status || 'none' };
-    if (sd.n != null) {
-      const i = cc.o.findIndex(o => o.n === sd.n);
+    const legacy = sd.n == null && entry.i >= 0 && V1_PRODUCT_ORDER[cid] ? V1_PRODUCT_ORDER[cid][entry.i] || '' : null;
+    const name = sd.n != null ? sd.n : legacy;
+    if (name != null) {
+      const i = cc.o.findIndex(o => o.n === name);
       if (i < 0) { lost.push(cid); std[cid] = { i: -1, status: 'none' }; return; }
       entry.i = i;
     } else if (entry.i >= 0 && !cc.o[entry.i]) { lost.push(cid); std[cid] = { i: -1, status: 'none' }; return; }

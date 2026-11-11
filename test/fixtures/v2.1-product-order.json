@@ -1,0 +1,258 @@
+{
+ "ui": [
+  "Next.js (React)",
+  "Angular",
+  "Flutter"
+ ],
+ "bi": [
+  "Apache Superset",
+  "Microsoft Power BI",
+  "Tableau"
+ ],
+ "edge": [
+  "Cloudflare",
+  "AWS CloudFront + WAF",
+  "Azure Front Door"
+ ],
+ "lb": [
+  "NGINX",
+  "Envoy",
+  "AWS Application Load Balancer"
+ ],
+ "gw": [
+  "Kong Gateway",
+  "Amazon API Gateway",
+  "Azure API Management"
+ ],
+ "app": [
+  "Kubernetes",
+  "AWS Lambda",
+  "Azure Container Apps"
+ ],
+ "orch": [
+  "LangGraph",
+  "LlamaIndex",
+  "Haystack"
+ ],
+ "agents": [
+  "LangGraph",
+  "CrewAI",
+  "Claude Agent SDK"
+ ],
+ "tools": [
+  "Model Context Protocol (MCP)",
+  "Agent2Agent (A2A) protocol",
+  "OpenAPI tool adapters"
+ ],
+ "llm": [
+  "vLLM + Hugging Face models",
+  "Claude via API",
+  "Amazon Bedrock",
+  "Azure OpenAI Service",
+  "Gemini on Vertex AI",
+  "OpenAI API"
+ ],
+ "guard": [
+  "NeMo Guardrails",
+  "Langfuse",
+  "Azure AI Content Safety"
+ ],
+ "media": [
+  "FFmpeg + Shaka Packager",
+  "AWS Elemental MediaConvert",
+  "Mux"
+ ],
+ "reco": [
+  "Feast + PyTorch",
+  "Amazon Personalize",
+  "Google Vertex AI"
+ ],
+ "ingest": [
+  "EMQX",
+  "AWS IoT Core",
+  "Azure IoT Hub"
+ ],
+ "stream": [
+  "Apache Flink",
+  "Spark Structured Streaming",
+  "Amazon Managed Flink"
+ ],
+ "integ": [
+  "Airbyte",
+  "Fivetran",
+  "MuleSoft Anypoint"
+ ],
+ "db": [
+  "PostgreSQL",
+  "Amazon Aurora PostgreSQL",
+  "MongoDB Atlas"
+ ],
+ "nosql": [
+  "Apache Cassandra",
+  "Amazon DynamoDB",
+  "Azure Cosmos DB"
+ ],
+ "cache": [
+  "Valkey (Redis-compatible)",
+  "Amazon ElastiCache",
+  "Memcached"
+ ],
+ "geo": [
+  "H3 + PostGIS",
+  "Valkey geo commands",
+  "Amazon Location Service"
+ ],
+ "search": [
+  "OpenSearch",
+  "Elastic Cloud",
+  "Algolia"
+ ],
+ "mq": [
+  "Apache Kafka",
+  "RabbitMQ",
+  "Confluent Cloud"
+ ],
+ "vec": [
+  "pgvector",
+  "Qdrant",
+  "Pinecone"
+ ],
+ "mem": [
+  "LangGraph checkpointer on Postgres",
+  "Mem0",
+  "Letta"
+ ],
+ "tsdb": [
+  "TimescaleDB",
+  "InfluxDB",
+  "Azure Data Explorer"
+ ],
+ "lake": [
+  "Apache Iceberg + Spark",
+  "Databricks",
+  "Snowflake"
+ ],
+ "catalog": [
+  "OpenMetadata",
+  "DataHub",
+  "Collibra"
+ ],
+ "mesh": [
+  "Istio",
+  "Linkerd",
+  "Google Cloud Service Mesh"
+ ],
+ "aigw": [
+  "LiteLLM",
+  "Portkey",
+  "Azure API Management AI gateway"
+ ],
+ "aigov": [
+  "MLflow",
+  "IBM watsonx.governance",
+  "Credo AI"
+ ],
+ "embai": [
+  "SAP Joule",
+  "Salesforce Agentforce",
+  "ServiceNow Now Assist",
+  "Microsoft Copilot Studio"
+ ],
+ "aiops": [
+  "ServiceNow Event Management",
+  "BigPanda",
+  "Keep"
+ ],
+ "runbook": [
+  "Ansible",
+  "Rundeck",
+  "Azure Automation",
+  "AWS Systems Manager Automation"
+ ],
+ "ux": [
+  "SAP Fiori launchpad",
+  "Microsoft Teams apps",
+  "Custom React portal"
+ ],
+ "erpcore": [
+  "SAP S/4HANA Cloud, private edition (RISE)",
+  "SAP S/4HANA Cloud, public edition",
+  "Oracle Fusion Cloud ERP",
+  "Odoo"
+ ],
+ "ext": [
+  "SAP BTP",
+  "Microsoft Power Platform",
+  "Custom services on Kubernetes"
+ ],
+ "ipaas": [
+  "SAP Integration Suite",
+  "MuleSoft Anypoint",
+  "Apache Camel"
+ ],
+ "mdm": [
+  "SAP Master Data Governance",
+  "Informatica MDM",
+  "Reltio"
+ ],
+ "migr": [
+  "SAP S/4HANA Migration Cockpit",
+  "Syniti",
+  "dbt + Python pipelines"
+ ],
+ "proc": [
+  "SAP Signavio",
+  "Celonis",
+  "PM4Py"
+ ],
+ "alm": [
+  "SAP Cloud ALM",
+  "Tricentis Tosca",
+  "Playwright"
+ ],
+ "grc": [
+  "SAP GRC Access Control",
+  "Saviynt",
+  "SailPoint"
+ ],
+ "hcm": [
+  "Workday HCM",
+  "SAP SuccessFactors Employee Central",
+  "OrangeHRM"
+ ],
+ "payroll": [
+  "SAP SuccessFactors Employee Central Payroll",
+  "Workday Payroll",
+  "ADP"
+ ],
+ "talent": [
+  "Cornerstone",
+  "SAP SuccessFactors Learning",
+  "Moodle"
+ ],
+ "crmcore": [
+  "Salesforce Sales and Service Cloud",
+  "Microsoft Dynamics 365",
+  "SuiteCRM"
+ ],
+ "itsm": [
+  "ServiceNow ITSM",
+  "Jira Service Management",
+  "GLPI"
+ ],
+ "p2p": [
+  "SAP Ariba",
+  "Coupa",
+  "Oracle Procurement Cloud"
+ ],
+ "idp": [
+  "Keycloak",
+  "Okta",
+  "Microsoft Entra ID"
+ ],
+ "obs": [
+  "OpenTelemetry + Grafana",
+  "Datadog",
+  "Azure Monitor"
+ ]
+}

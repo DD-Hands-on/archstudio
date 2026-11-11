@@ -36,10 +36,32 @@ export function buildCatalogue() {
       o('LangGraph', 'OSS', 'Explicit graphs for supervisor and worker topologies with checkpoints.', 'https://langchain-ai.github.io/langgraph/', [4,5,3,5,4]),
       o('CrewAI', 'OSS', 'Role-based crews of agents; quick to prototype collaboration.', 'https://docs.crewai.com', [4,5,4,5,5]),
       o('Claude Agent SDK', 'Proprietary', 'Agent loop, sub-agents, tools and context management built in.', 'https://docs.claude.com/en/api/agent-sdk/overview', [5,3,4,3,5], ['saas'])]),
-    tools: C('Tool and agent protocols', 'app', 'A standard way for agents to reach tools, data and each other.', 'a universal power adaptor between agents and every system they plug into.', 'custom glue for each system, so every new tool is a new integration project.', [
-      o('Model Context Protocol (MCP)', 'OSS', 'Open standard for exposing tools and data to any agent.', 'https://modelcontextprotocol.io', [5,5,4,5,5]),
-      o('Agent2Agent (A2A) protocol', 'OSS', 'Open protocol for agents from different vendors to delegate work.', 'https://github.com/a2aproject/A2A', [4,5,3,5,3]),
+    tools: C('Agent-to-tool interface', 'app', 'How agents reach tools and data: a standard protocol, or direct typed calls.', 'a universal power adaptor between agents and every system they plug into.', 'custom glue for each system, so every new tool is a new integration.', [
+      o('Model Context Protocol (MCP)', 'OSS', 'Open standard, now under the Linux Foundation, for exposing tools and data to any agent. Pays off with many tools, OAuth boundaries and shared access.', 'https://modelcontextprotocol.io', [5,5,3,5,4]),
+      o('Direct tool calls and CLIs', 'OSS', 'Typed functions or a well-documented CLI the agent calls directly. Often all one team needs, with no protocol layer to run.', 'https://www.thoughtworks.com/radar/techniques/mcp-by-default', [3,5,5,4,5]),
       o('OpenAPI tool adapters', 'OSS', 'Wrap existing REST APIs as tools; no new standard to adopt.', 'https://swagger.io/specification/', [3,4,3,4,3])]),
+    a2a: C('Agent-to-agent protocol', 'app', 'How agents owned by different teams or vendors discover each other and hand work over.', 'a shared shipping manifest, so parcels move between carriers without re-labelling.', 'every hand-off between teams is custom glue with its own identity and error handling.', [
+      o('Agent2Agent (A2A) protocol', 'OSS', 'Open protocol, under the Linux Foundation, for agents from different teams and vendors to discover each other and delegate tasks.', 'https://github.com/a2aproject/A2A', [4,5,3,5,3]),
+      o('Framework hand-offs (LangGraph)', 'OSS', 'Sub-agents and hand-offs inside one runtime. Simplest when one team owns every agent.', 'https://langchain-ai.github.io/langgraph/', [3,5,4,3,5]),
+      o('Events on a message broker', 'OSS', 'Agents publish and consume task events. Loosely coupled, but you design the contract and identity yourself.', 'https://kafka.apache.org/documentation/', [5,4,3,4,3])]),
+    agentid: C('Agent identity', 'x', 'Gives each agent its own identity, with access scoped to its tools, short-lived tokens and a named owner.', 'a badge for each contractor, not one master key shared by all.', 'agents act under a shared service account or the user\'s own rights, so one manipulated agent reaches everything.', [
+      o('SPIFFE and SPIRE', 'OSS', 'Open standard for workload identity (CNCF); issues short-lived identities to each agent process you run.', 'https://spiffe.io/docs/latest/', [5,5,2,5,2], ['k8s']),
+      o('Microsoft Entra Agent ID', 'Proprietary', 'Agent identities in Entra with owners, conditional access and audit; generally available since May 2026.', 'https://learn.microsoft.com/entra/agent-id/', [5,3,4,2,4], ['azure','saas']),
+      o('Okta for AI Agents', 'Proprietary', 'Registers agents, issues scoped short-lived tokens, and can revoke an agent\'s access everywhere at once.', 'https://www.okta.com/products/govern-ai-agent-identity/', [5,2,5,3,4], ['saas']),
+      o('Amazon Bedrock AgentCore Identity', 'Proprietary', 'Authentication and credential handling for agents on AWS; works with existing identity providers.', 'https://aws.amazon.com/bedrock/agentcore/', [4,4,5,2,5], ['aws'])]),
+    sandbox: C('Sandboxed execution', 'app', 'Runs agent-generated code and commands in an isolated, short-lived environment with no standing credentials.', 'a test kitchen: mistakes stay inside it.', 'agent commands run on shared servers, so one bad command can reach production.', [
+      o('E2B', 'OSS', 'Open source (Apache 2.0) Firecracker microVM sandboxes; managed cloud or self-hosted.', 'https://e2b.dev/docs', [4,4,4,5,5]),
+      o('gVisor', 'OSS', 'Google\'s open source container sandbox; adds a kernel boundary to containers you already run.', 'https://gvisor.dev/docs/', [5,5,2,5,3], ['k8s']),
+      o('Amazon Bedrock AgentCore Code Interpreter', 'Proprietary', 'Managed microVM sandboxes for agent code on AWS.', 'https://aws.amazon.com/bedrock/agentcore/', [4,4,5,1,5], ['aws']),
+      o('Azure Container Apps dynamic sessions', 'Proprietary', 'Managed, isolated sessions for running untrusted code inside Azure.', 'https://learn.microsoft.com/azure/container-apps/sessions', [4,4,5,2,5], ['azure'])]),
+    durable: C('Durable execution', 'app', 'Records each step of a long agent run so it survives crashes and deploys, and resumes without repeating side effects.', 'a ship\'s log: after a storm, the crew picks up exactly where the log ends.', 'a crash or deploy restarts long runs from the beginning and repeats emails, payments or tool calls.', [
+      o('Temporal', 'OSS', 'The established durable execution engine (MIT): a server and workers you run, or Temporal Cloud.', 'https://docs.temporal.io', [5,4,2,5,3]),
+      o('DBOS', 'OSS', 'Durable execution as a library on the Postgres you already run; no separate server.', 'https://docs.dbos.dev', [3,5,4,5,5], ['pg']),
+      o('AWS Step Functions', 'Proprietary', 'Managed state machines with retries and waits for human tasks, inside AWS.', 'https://docs.aws.amazon.com/step-functions/', [5,4,5,1,4], ['aws','serverless'])]),
+    approve: C('Approval tiers', 'app', 'Routes agent actions by impact: some run alone, some notify a person, high-impact ones wait for sign-off.', 'a spending limit: small purchases go through, large ones need a manager\'s signature.', 'agents take irreversible actions, such as payments, deletions or external messages, with nobody signing off.', [
+      o('LangGraph interrupts', 'OSS', 'Pause the graph before a risky step, show the proposed action, resume on approval.', 'https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/', [4,5,4,5,5]),
+      o('Temporal signals', 'OSS', 'A durable workflow waits, for days if needed, for an approval signal before acting.', 'https://docs.temporal.io', [5,4,3,5,3]),
+      o('Microsoft Power Automate approvals', 'Proprietary', 'Approval requests in Teams and Outlook with an audit trail, inside Microsoft 365.', 'https://learn.microsoft.com/power-automate/get-started-approvals', [4,3,5,2,5], ['azure','saas'])]),
     llm: C('Model serving', 'app', 'Hosts or brokers the language models that generate answers.', 'the expert writer who drafts the answer.', 'nothing generates language, so the assistant cannot respond.', [
       o('vLLM + Hugging Face models', 'OSS', 'Serve open-weight models on your own GPUs; data never leaves.', 'https://docs.vllm.ai', [4,3,2,5,3], ['k8s','gpu']),
       o('Claude via API', 'Proprietary', 'Frontier reasoning and long context with no GPUs to run.', 'https://docs.claude.com', [5,3,5,3,5], ['saas']),
@@ -265,14 +287,16 @@ export function buildCatalogue() {
         ['Store as an edge node','Local compute in stores keeps checkout running if the network link drops.','https://medium.com/walmartglobaltech'],
         ['One inventory truth','Inventory changes stream to web, app and stores to support buy online, pick up in store.','https://www.enterpriseintegrationpatterns.com'],
         ['Peak readiness','Load tests, capacity reserves and change freezes ahead of holiday events.','https://aws.amazon.com/architecture/well-architected/']] },
-    agents: { n: 'Multi-agent system', d: 'Specialised agents coordinated by a supervisor, using tools through standard protocols.', req: 'a user assigns a research task', c: ['ui','gw','idp','app','agents','tools','llm','mem','vec','guard','mq','obs'],
+    agents: { n: 'Multi-agent system', d: 'Specialised agents coordinated by a supervisor, using tools through standard protocols.', req: 'a user assigns a research task', c: ['ui','gw','idp','agentid','app','agents','tools','llm','mem','vec','guard','sandbox','durable','approve','mq','obs'],
       caps: ['Research and analysis','Workflow automation','Decision support','Knowledge work'],
       nb: [['Enterprise systems as tools','ERP, CRM, ITSM','MCP servers'],['Document stores','Knowledge sources','connectors'],['Human approvers','Review queues','task inbox'],['AI governance','Policy and evals','policy API'],['Identity platform','Agent identities','OAuth scopes']],
       dom: ['Task','Agent run trace','Memory','Tool result','Evaluation'],
       shelf: [['How we built our multi-agent research system','Article','https://www.anthropic.com/engineering/multi-agent-research-system'],['Model Context Protocol','Specification','https://modelcontextprotocol.io']],
       sig: [['Orchestrator and workers','A lead agent plans, spawns sub-agents that work in parallel, then synthesises their findings.','https://www.anthropic.com/engineering/multi-agent-research-system'],
-        ['Tools through MCP','Agents reach enterprise systems through standard servers rather than bespoke glue code.','https://modelcontextprotocol.io'],
-        ['Human in the loop','Irreversible actions pause for approval at defined checkpoints.','https://langchain-ai.github.io/langgraph/'],
+        ['An identity per agent','Each agent gets its own identity and only the access its tools need, so a manipulated agent reaches little.','https://learn.microsoft.com/entra/agent-id/'],
+        ['Choose the tool interface','MCP where tools are shared or need OAuth boundaries; direct typed calls where one team owns a few tools.','https://www.thoughtworks.com/radar/techniques/mcp-by-default'],
+        ['Human in the loop','Irreversible actions pause for approval at defined checkpoints.','https://langchain-ai.github.io/langgraph/concepts/human_in_the_loop/'],
+        ['Durable runs','Long runs record each step, so a crash resumes the work instead of repeating its side effects.','https://docs.temporal.io'],
         ['Trace and budget every run','Each run is traced and evaluated, with token spend capped per task.','https://langfuse.com/docs']] },
     ride: { n: 'Uber-style real-time marketplace', d: 'Match riders and drivers in seconds with live location and dynamic pricing.', req: 'a rider requests a car', c: ['ui','edge','gw','idp','app','geo','stream','mq','cache','nosql','db','lake','obs'],
       caps: ['Rider experience','Dispatch and matching','Pricing','Driver operations'],
@@ -416,6 +440,7 @@ export function buildCatalogue() {
     aigw: ['AI gateway checks quota, routes to the right model and logs the call', 15], embai: ['Embedded copilot drafts the next step from the user\'s context', 1200],
     hitl: ['A person reviews and approves before anything irreversible happens', -1],
     obs: ['Monitoring detects a problem and raises an alert', 5], aiops: ['Correlation groups related alerts into one incident with a likely cause', 30], runbook: ['Approved runbook runs the fix: restart, scale or roll back', 2000] };
+  hopDef.agentid = ['Agent gets a short-lived token scoped to this task', 10]; hopDef.sandbox = ['Generated code runs in an isolated sandbox', 300]; hopDef.durable = ['Durable workflow records the step before it runs', 5];
   const hopOrder = ['ui','bi','edge','lb','gw','mesh','app','ingest','agents','orch','tools','mem','vec','media','reco','geo','stream','cache','db','nosql','tsdb','search','lake','aigw','llm','guard','mq'];
   const stores = ['db','nosql','tsdb','search'];
   const layerNames = { exp: 'Experience', edge: 'Edge and access', app: 'Application and intelligence', data: 'Data and events', x: 'Cross-cutting' };
@@ -435,8 +460,8 @@ export function buildCatalogue() {
     impl: { enabled: ['AI: use-case inventory and risk classification','AI: decide embedded vendor AI versus your own assistants; check data readiness','AI: ground copilots in governed master data; evaluation sets per use case','AI: monitor adoption, accuracy and cost after go-live'],
       native: ['AI: redesign processes around agents; decide which steps an agent can own end to end','AI: expose processes as governed tools (APIs or MCP) with agent roles and permissions','AI: agents run approved steps; people approve postings above thresholds','AI: review agent accuracy, cost and exceptions like any team\'s performance'] }
   };
-  const lvlOf = { aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
-  const nonCrit = ['obs','lake','bi','catalog','reco','search','guard','integ','media','mem','migr','proc','alm','grc','talent','payroll','ipaas'];
+  const lvlOf = { sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
+  const nonCrit = ['approve','obs','lake','bi','catalog','reco','search','guard','integ','media','mem','migr','proc','alm','grc','talent','payroll','ipaas'];
   const tour = [
     ['The brief', 'An online shop: 1M users, sales-day peaks, card payments. Before naming any product, a senior architect asks how many requests, how much data, how bad downtime is, and how sensitive the data is.', [], 'Constraints decide trade-offs. Products come last.'],
     ['Users arrive', 'Customers use a web front end. Static files such as images and scripts come from a CDN close to them, which also filters attacks.', ['Web and mobile front end','CDN and web firewall'], 'Most of a page is static. Serve it from the edge and your servers see far less traffic.'],
@@ -508,8 +533,15 @@ export function buildCatalogue() {
   glossary.mdmg = ['Master data','Core reference records such as materials, customers, vendors and employees that every transaction uses.','the contacts list behind every phone call.'];
   glossary.sod = ['Segregation of duties','No single person can complete a risky process end to end, such as creating and paying a vendor.','two keys to open the vault.'];
   glossary.gxp = ['GxP validation','Documented evidence that a system used in regulated life-science work does what it is meant to, reliably.','a safety certificate for software.'];
+  glossary.agentid = ['Agent identity','Each agent has its own identity, owner and scoped, short-lived access, so its actions can be traced, limited and revoked.','a badge for each contractor instead of one master key.'];
+  glossary.sandbox = ['Sandbox','An isolated, throwaway environment where agent code and commands run without reaching real systems.','a test kitchen: mistakes stay inside it.'];
+  glossary.durable = ['Durable execution','A workflow records each completed step, so after a crash it resumes where it stopped instead of starting again and repeating side effects.','a ship\'s log the crew resumes from after a storm.'];
+  glossary.approvals = ['Approval tiers','Agent actions grouped by impact: run alone, notify a person, or wait for sign-off. Irreversible actions sit in the top tier.','a spending limit with a manager\'s signature above it.'];
+  glossary.mcp = ['MCP (Model Context Protocol)','An open standard for agents to reach tools and data. Useful for shared tools and OAuth boundaries; not needed for every integration.','a universal power adaptor.'];
+  glossary.a2a = ['A2A (Agent2Agent)','An open protocol for agents from different teams or vendors to discover each other and delegate tasks.','a shipping manifest carriers all accept.'];
+  incidents.agentact = ['Replit agent deletes a production database, July 2025', 'During a 12-day public trial, an AI coding agent on Replit ran destructive commands against a live production database during a code freeze, despite instructions not to change anything. It then said a rollback was impossible, which was wrong. Replit\'s chief executive called it unacceptable and added safeguards.', 'https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/', 'Real incident'];
   signals['LiteLLM'] = 'Very fast release cadence; pin versions and test upgrades.';
-  shared.push('aigw', 'aigov');
+  shared.push('aigw', 'aigov', 'agentid');
   return { cat, apps, shelf, patterns, traits, glossary, stepTerms, hopDef, hopOrder, stores, layerNames, shared, introAt, implIntro, implStages, implMoves, aiMoves, lvlOf, nonCrit, signals, tour, quizzes, incidents,
     baseKeys: ['ecom','genai','iot','data'], implKeys: ['sap','hr','crm','itsm','procure'] };
 }

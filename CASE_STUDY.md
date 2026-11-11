@@ -38,7 +38,7 @@ Two lenses change the path. **System first** suits solution architects. **Enterp
 | | |
 |---|---|
 | Reference models | 13, from e-commerce and streaming to SAP, HR, CRM, ITSM and multi-agent systems |
-| Building blocks | 50, with 156 product options (64 open source, 92 commercial) |
+| Building blocks | 55, with 173 product options (74 open source, 99 commercial) |
 | Design rules | 26 automatic checks for interoperability and non-functional gaps |
 | Failure drills | 10, each linked to a public incident or published deadline |
 | Learning aids | 51 glossary terms, 10 checkpoint quizzes, 3 skill levels |

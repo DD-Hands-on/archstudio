@@ -13,8 +13,8 @@ A practice studio for designing system and enterprise architectures, from a plai
 ## How to work on it
 
 1. Edit `src/` only. Never edit `app/index.html` or `dist/` by hand.
-2. `npm install`, `npm test` (69 unit tests), `npm run typecheck`, `npm run build`, `npm run check` (includes the provenance check).
-3. `npm run e2e` runs the six browser suites (standalone, tracks, workload fit, board, saves, sovereignty; Python Playwright 1.63.0, Chromium).
+2. `npm install`, `npm test` (83 unit tests), `npm run typecheck`, `npm run build`, `npm run check` (includes the provenance check).
+3. `npm run e2e` runs the seven browser suites (standalone, tracks, workload fit, board, saves, sovereignty, agentic; Python Playwright 1.63.0, Chromium).
 4. `npm run fingerprint` compares 702 evaluations, 1,053 step screens and 879 rules cases (libraries, team standards, scenarios, sovereignty) with the committed baseline. After an intended screen or score change, run `npm run fingerprint:update` and commit the baseline in the same commit.
 5. Commit, push to `main` (CI runs unit tests, the build check, all browser suites and the fingerprint), then republish the Claude artifact from `dist/archstudio-claude.html`.
 
@@ -48,7 +48,7 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 ## Backlog from the expert review (11 Nov 2026), in priority order
 
 **Functionality**
-1. Agentic systems as a first-class design area: agent identity and least privilege, sandboxing, durable execution, approval tiers, MCP and A2A as choices with trade-offs.
+1. Done in Stage 4: agent identity, sandboxed execution, durable execution, approval tiers and an agent-to-agent protocol are blocks with dated products; five rules, six Workload questions, a destructive-action drill (Replit, July 2025) and agent evidence for the board. MCP and A2A are separate choices with trade-offs.
 2. AI production patterns: gateway with model routing and tiered fallbacks, semantic cache, time to first token and streaming, AI monitoring, golden-set evaluation, knowledge-graph block, an "AI provider outage" drill. Detail is in the Project doc `reference-system-design-llm-era-alignment.md`.
 3. Real AI cost: cost per query and per user from tokens a day.
 4. Done in Stage 3: the regulation drill now cites Regulation (EU) 2026/1744 (high-risk duties from 2 December 2027, 2 August 2028 for AI in regulated products), dated Nov 2026. It never taught August 2026; it was only vague. Sovereignty option added.

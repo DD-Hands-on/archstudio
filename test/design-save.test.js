@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildCatalogue } from '../src/engine/catalogue.js';
-import { SAVE_VERSION, APP_VERSION, pickNamesFor, migrateDesign } from '../src/engine/design-save.js';
+import { SAVE_VERSION, APP_VERSION, V1_PRODUCT_ORDER, pickNamesFor, migrateDesign } from '../src/engine/design-save.js';
 
 const cat = buildCatalogue().cat;
 const fx = name => JSON.parse(readFileSync(new URL('./fixtures/saves/' + name, import.meta.url), 'utf8'));
@@ -83,4 +83,27 @@ test('bad input never throws', () => {
 
 test('pickNamesFor stores names only for valid picks', () => {
   assert.deepEqual(pickNamesFor({ ui: 1, db: 99, nope: 0 }, cat), { ui: name('ui', 1) });
+});
+
+test('position-only saves are read against the v2.1 list where it has changed', () => {
+  // In v2.1 the tools list was MCP, A2A, OpenAPI. A2A has since moved to its own block.
+  const { design, notes } = migrateDesign({ comps: ['tools'], picks: { tools: 1 }, canvas: { nodes: [{ id: 'n1', cid: 'tools', x: 0, y: 0, p: 2 }], edges: [] } }, cat);
+  assert.equal(design.picks.tools, undefined, 'A2A is not silently swapped for another tool interface');
+  assert.equal(name('tools', design.canvas.nodes[0].p), 'OpenAPI tool adapters');
+  assert.ok(notes.some(n => /^1 product in this save is/.test(n)));
+  const kept = migrateDesign({ comps: ['tools'], picks: { tools: 0 } }, cat).design;
+  assert.equal(name('tools', kept.picks.tools), 'Model Context Protocol (MCP)');
+  const named = migrateDesign({ schemaVersion: 2, comps: ['tools'], picks: { tools: 1 }, pickNames: { tools: 'Direct tool calls and CLIs' } }, cat).design;
+  assert.equal(name('tools', named.picks.tools), 'Direct tool calls and CLIs', 'version 2 saves use their names');
+});
+
+test('every product list changed since v2.1 has its v2.1 order recorded for old saves', () => {
+  // Saves and team standards from v2.1 store positions only. If a list is reordered or loses a product,
+  // its v2.1 order must be in V1_PRODUCT_ORDER, or old saves would silently point at the wrong product.
+  const v21 = fx('../v2.1-product-order.json');
+  for (const [cid, names] of Object.entries(v21)) {
+    const now = cat[cid] ? cat[cid].o.map(o => o.n) : [];
+    const samePositions = names.every((n, i) => now[i] === n);
+    if (!samePositions) assert.deepEqual(V1_PRODUCT_ORDER[cid], names, cid + ' changed since v2.1: add its v2.1 order to V1_PRODUCT_ORDER');
+  }
 });

@@ -9,14 +9,14 @@ const ids = Object.keys(D.cat);
 const options = ids.flatMap(c => D.cat[c].o.map(o => ({ c, o })));
 
 test('catalogue size matches what the case study states', () => {
-  assert.equal(ids.length, 50, 'building blocks');
-  assert.equal(options.length, 156, 'product options');
-  assert.equal(options.filter(x => x.o.k === 'OSS').length, 64, 'open source options');
-  assert.equal(options.filter(x => x.o.k === 'Proprietary').length, 92, 'commercial options');
+  assert.equal(ids.length, 55, 'building blocks');
+  assert.equal(options.length, 173, 'product options');
+  assert.equal(options.filter(x => x.o.k === 'OSS').length, 74, 'open source options');
+  assert.equal(options.filter(x => x.o.k === 'Proprietary').length, 99, 'commercial options');
   assert.equal(Object.keys(D.apps).length, 13, 'reference models');
   assert.equal(Object.keys(D.quizzes).length, 10, 'checkpoint quizzes');
-  assert.equal(Object.keys(D.incidents).length, 10, 'incidents');
-  assert.equal(Object.keys(D.glossary).length + Object.keys(buildAdmContent().glossary).length, 51, 'glossary terms (studio + ADM)');
+  assert.equal(Object.keys(D.incidents).length, 11, 'incidents');
+  assert.equal(Object.keys(D.glossary).length + Object.keys(buildAdmContent().glossary).length, 56, 'glossary terms (studio + ADM)');
 });
 
 test('every building block is well formed', () => {

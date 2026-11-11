@@ -98,3 +98,12 @@ test('older team standards without names are read by position', () => {
   assert.deepEqual(lost, ['idp']);
   assert.deepEqual(std.obs, { i: -1, status: 'none' }, 'blocks with no stored entry have no standard');
 });
+
+test('older team standards for a changed list are read against the v2.1 order', () => {
+  const { std, lost } = standardsFromStore({ tools: { i: 1, status: 'approved' }, db: { i: 1, status: 'approved' } }, cat);
+  assert.deepEqual(std.tools, { i: -1, status: 'none' }, 'the A2A standard is cleared, not swapped');
+  assert.deepEqual(lost, ['tools']);
+  assert.equal(nameOf('db', std.db.i), 'Amazon Aurora PostgreSQL', 'unchanged lists still read by position');
+  const mcp = standardsFromStore({ tools: { i: 2, status: 'approved' } }, cat).std.tools;
+  assert.equal(nameOf('tools', mcp.i), 'OpenAPI tool adapters');
+});
