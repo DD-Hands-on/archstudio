@@ -1,15 +1,17 @@
 import { AGENT_DEFAULTS } from './agentic.js';
+import { AI_DEFAULTS, INPUT_TOKENS } from './ai.js';
 
 // Workload sizing from first principles: users, requests per second, reads and writes, storage, concurrency and AI tokens.
 // Pure functions: the same inputs always give the same numbers, so they can be unit tested.
 
-// Agent answers join the cache key only when changed, so designs without agents keep their key.
-const agentKey = W => { const ch = Object.keys(AGENT_DEFAULTS).filter(k => W[k] !== AGENT_DEFAULTS[k]); return ch.length ? '|ag:' + ch.map(k => k + '=' + W[k]).join(',') : ''; };
+// Agent and AI answers join the cache key only when changed, so designs without agents keep their key.
+const ASKED = Object.assign({}, AGENT_DEFAULTS, AI_DEFAULTS);
+const agentKey = W => { const ch = Object.keys(ASKED).filter(k => W[k] !== ASKED[k]); return ch.length ? '|ag:' + ch.map(k => k + '=' + W[k]).join(',') : ''; };
 
 // Starting assumptions for a reference model (A): actions per user, read/write ratio, latency budget and so on.
 export function wlDefaults(A) {
   const c = A.c; const impl = A.kind === 'impl';
-  const d = { ...AGENT_DEFAULTS, actions: impl ? 150 : 40, ratio: impl ? '10:1' : '100:1', lat: impl ? 1000 : 200, cons: 'strong', peak: 5, growth: 1000, pattern: 'interactive' };
+  const d = { ...AGENT_DEFAULTS, ...AI_DEFAULTS, actions: impl ? 150 : 40, ratio: impl ? '10:1' : '100:1', lat: impl ? 1000 : 200, cons: 'strong', peak: 5, growth: 1000, pattern: 'interactive' };
   if (c.indexOf('llm') >= 0 || c.indexOf('agents') >= 0) { d.lat = 5000; if (c.indexOf('agents') >= 0) d.pattern = 'async'; }
   if (c.indexOf('ingest') >= 0) { d.ratio = '1:10'; d.pattern = 'realtime'; d.cons = 'eventual'; d.growth = 100000; }
   if (c.indexOf('geo') >= 0) { d.ratio = '1:1'; d.pattern = 'realtime'; }
@@ -29,7 +31,7 @@ export function workloadNumbers(A, st) {
   const avgRps = dau * W.actions / 86400; const peakRps = avgRps * W.peak;
   const rN = { '1:10': 0.1, '1:1': 1, '10:1': 10, '100:1': 100 }[W.ratio] || 10;
   const writeRps = peakRps / (rN + 1); const readRps = peakRps * rN / (rN + 1);
-  const tokensDay = st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) * 3000 : 0;
+  const tokensDay = st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) * (INPUT_TOKENS + W.out) : 0;
   return { W, users, impl, activeShare, dau, rN, perInst: 400, bw: peakRps * 30 / 1000, aiCallsDay: st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) : 0, avgRps, peakRps, readRps, writeRps, events: W.pattern === 'realtime' ? peakRps : writeRps, store3: W.growth * 9, lat: W.lat, cons: W.cons, pattern: W.pattern,
     inflight: peakRps * W.lat / 1000, inst: Math.ceil(peakRps / 400) + 1, tokensDay,
     sov: st.sov || 'any',

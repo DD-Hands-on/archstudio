@@ -8,6 +8,7 @@ import { workloadNumbers } from '../src/engine/workload.js';
 import { sovFromText, sovOf, SOV_OPTIONS } from '../src/engine/sovereignty.js';
 import { provenanceOf, asOfLabel, monthYear } from '../src/engine/provenance.js';
 import { checkProvenance, expectedKeys } from '../build/provenance-check.mjs';
+import { AI_TIERS } from '../src/engine/ai.js';
 
 const D = buildCatalogue();
 const opt = (c, name) => D.cat[c].o.find(o => o.n === name);
@@ -61,7 +62,7 @@ test('the workload cache key changes only when sovereignty is set', () => {
 });
 
 test('every catalogue entry has valid, dated provenance today', () => {
-  const r = checkProvenance(json('src/data/provenance.json'), json('src/data/provenance.schema.json'), { cat: D.cat, fitRules: FIT_RULES, incidents: D.incidents, apps: D.apps }, '2026-11-11');
+  const r = checkProvenance(json('src/data/provenance.json'), json('src/data/provenance.schema.json'), { cat: D.cat, fitRules: FIT_RULES, incidents: D.incidents, apps: D.apps, tiers: AI_TIERS }, '2026-11-11');
   assert.deepEqual(r.errors, []);
   assert.deepEqual(r.warnings, []);
 });
@@ -70,7 +71,7 @@ test('the provenance check catches gaps, orphans, drift and stale entries', () =
   const schema = json('src/data/provenance.schema.json');
   const cat = { cat: { db: { o: [{ n: 'PostgreSQL', u: 'https://www.postgresql.org/docs/' }] } }, fitRules: [['db', 'PostgreSQL']], incidents: { outage: ['t', 'd', 'https://example.org/x'] }, apps: { ecom: {} } };
   const e = (o = {}) => Object.assign({ source: 'curated', asOf: '2026-10-23', reviewedBy: 'unreviewed', reviewBy: '2027-10-23' }, o);
-  const good = { products: { 'db/PostgreSQL': e({ source: 'https://www.postgresql.org/docs/' }) }, fitRules: { 'db/PostgreSQL#1': e() }, incidents: { outage: e({ source: 'https://example.org/x' }) }, referenceModels: { ecom: e() } };
+  const good = { products: { 'db/PostgreSQL': e({ source: 'https://www.postgresql.org/docs/' }) }, fitRules: { 'db/PostgreSQL#1': e() }, incidents: { outage: e({ source: 'https://example.org/x' }) }, referenceModels: { ecom: e() }, prices: {} };
   assert.deepEqual(checkProvenance(good, schema, cat, '2026-11-11'), { errors: [], warnings: [] });
   const bad = JSON.parse(JSON.stringify(good));
   delete bad.referenceModels.ecom; bad.referenceModels.gone = e();
@@ -84,7 +85,7 @@ test('the provenance check catches gaps, orphans, drift and stale entries', () =
   assert.deepEqual(checkProvenance(good, schema, cat, '2028-01-01').warnings.length, 4, 'past reviewBy warns');
   const noSource = JSON.parse(JSON.stringify(good)); noSource.fitRules['db/PostgreSQL#1'].source = 'a blog';
   assert.match(checkProvenance(noSource, schema, cat, '2026-11-11').errors[0], /^schema:/);
-  assert.deepEqual(Object.keys(expectedKeys(cat)), ['products', 'fitRules', 'incidents', 'referenceModels']);
+  assert.deepEqual(Object.keys(expectedKeys(cat)), ['products', 'fitRules', 'incidents', 'referenceModels', 'prices']);
 });
 
 test('as-of labels for screens', () => {

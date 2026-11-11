@@ -2,37 +2,91 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://dd-hands-on.github.io/archstudio/provenance.schema.json",
   "title": "ArchStudio Dojo catalogue provenance",
-  "description": "Where each catalogue entry comes from, when it was last checked, who reviewed it and when it must be checked again. Keys match the catalogue: products and fit rules use block/product (fit rules add #n), incidents and reference models use their id.",
+  "description": "Where each catalogue entry comes from, when it was last checked, who reviewed it and when it must be checked again. Keys match the catalogue: products and fit rules use block/product (fit rules add #n), incidents and reference models and price tiers use their id.",
   "type": "object",
-  "required": ["products", "fitRules", "incidents", "referenceModels"],
+  "required": [
+    "products",
+    "fitRules",
+    "incidents",
+    "referenceModels",
+    "prices"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
-    "products": { "$ref": "#/$defs/section" },
-    "fitRules": { "$ref": "#/$defs/section" },
-    "incidents": { "$ref": "#/$defs/section" },
-    "referenceModels": { "$ref": "#/$defs/section" }
+    "$schema": {
+      "type": "string"
+    },
+    "products": {
+      "$ref": "#/$defs/section"
+    },
+    "fitRules": {
+      "$ref": "#/$defs/section"
+    },
+    "incidents": {
+      "$ref": "#/$defs/section"
+    },
+    "referenceModels": {
+      "$ref": "#/$defs/section"
+    },
+    "prices": {
+      "$ref": "#/$defs/section",
+      "description": "Planning price and speed figures per model tier (src/engine/ai.js AI_TIERS). Short review dates: prices change often."
+    }
   },
   "$defs": {
-    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "format": "date" },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "format": "date"
+    },
     "section": {
       "type": "object",
-      "propertyNames": { "minLength": 1 },
-      "additionalProperties": { "$ref": "#/$defs/entry" }
+      "propertyNames": {
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/entry"
+      }
     },
     "entry": {
       "type": "object",
-      "required": ["source", "asOf", "reviewedBy", "reviewBy"],
+      "required": [
+        "source",
+        "asOf",
+        "reviewedBy",
+        "reviewBy"
+      ],
       "additionalProperties": false,
       "properties": {
         "source": {
           "description": "An https link to the source, or \"curated\" for a judgement written for the studio (the reason shown to learners states its basis).",
-          "anyOf": [{ "type": "string", "pattern": "^https://\\S+$" }, { "const": "curated" }]
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^https://\\S+$"
+            },
+            {
+              "const": "curated"
+            }
+          ]
         },
-        "asOf": { "$ref": "#/$defs/date", "description": "When the entry was last written or checked." },
-        "reviewedBy": { "type": "string", "minLength": 1, "description": "Who reviewed it, or \"unreviewed\"." },
-        "reviewBy": { "$ref": "#/$defs/date", "description": "Check again by this date." },
-        "note": { "type": "string", "description": "Optional: what was checked and against what." }
+        "asOf": {
+          "$ref": "#/$defs/date",
+          "description": "When the entry was last written or checked."
+        },
+        "reviewedBy": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Who reviewed it, or \"unreviewed\"."
+        },
+        "reviewBy": {
+          "$ref": "#/$defs/date",
+          "description": "Check again by this date."
+        },
+        "note": {
+          "type": "string",
+          "description": "Optional: what was checked and against what."
+        }
       }
     }
   }

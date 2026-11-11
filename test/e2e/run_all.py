@@ -3,7 +3,7 @@ Usage: python3 test/e2e/run_all.py   (build first: npm run build)"""
 import os, sys, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SUITES = ['standalone', 'tracks', 'workload_fit', 'board', 'saves', 'sovereignty', 'agentic']
+SUITES = ['standalone', 'tracks', 'workload_fit', 'board', 'saves', 'sovereignty', 'agentic', 'ai']
 failed = []
 for s in SUITES:
     print('\n== %s' % s, flush=True)

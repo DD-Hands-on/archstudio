@@ -13,6 +13,7 @@ import { baselineFor, gapAnalysis } from '../engine/gap.js';
 import { provenanceOf, asOfLabel, monthYear } from '../engine/provenance.js';
 import { SOV_OPTIONS, SOV_PHRASE, sovOf, sovFromText } from '../engine/sovereignty.js';
 import { AGENT_QUESTIONS, isAgentic, agentAnswers } from '../engine/agentic.js';
+import { AI_TIERS, AI_QUESTIONS, aiAnswers, aiCost, aiLatency, formatUsd } from '../engine/ai.js';
 import { BOARD_ROLES } from '../app/board-roles.js';
 import { TRACKS } from '../app/tracks.js';
 import { localStore } from '../standalone/local-store.js';
@@ -274,7 +275,7 @@ export class Component extends DCLogic {
     const cap = capOverride || { beginner: 1, intermediate: 2, advanced: 3 }[this.state.level];
     const ai = this.state.ai; const impl = A.kind === 'impl';
     const aiAdd = ai === 'none' ? [] : (impl ? (ai === 'native' ? ['agents','agentid','tools','approve','aigw','llm','guard','aigov','embai'] : ['embai','aigw','guard','aigov'])
-      : (ai === 'native' ? ['agents','agentid','tools','mem','aigw','llm','vec','guard','sandbox','durable','approve','aigov'] : ['aigw','llm','vec','guard','aigov']));
+      : (ai === 'native' ? ['agents','agentid','tools','mem','aigw','llm','vec','guard','aimon','sandbox','durable','approve','aigov'] : ['aigw','llm','vec','guard','aimon','aigov']));
     const forced = A.forced || [], removed = A.removed || [];
     const all = A.c.concat(aiAdd.filter(x => A.c.indexOf(x) < 0)).filter(x => removed.indexOf(x) < 0);
     const c = all.filter(x => (D.lvlOf[x] || 1) <= cap || forced.indexOf(x) >= 0);
@@ -784,6 +785,10 @@ export class Component extends DCLogic {
     const Nw = this.wlNums();
     lines.push('WORKLOAD (from the Workload step): peak ' + fmtW(Nw.peakRps) + ' requests/s (average ' + fmtW(Nw.avgRps) + '); ' + fmtW(Nw.readRps) + ' reads/s and ' + fmtW(Nw.writeRps) + ' writes/s at peak; ' + fmtGBW(Nw.store3) + ' stored after 3 years; latency budget ' + Nw.lat + ' ms; ' + Nw.cons + ' consistency; main pattern ' + Nw.pattern + (Nw.tokensDay ? '; about ' + fmtW(Nw.tokensDay) + ' AI tokens a day' : '') + '.');
     const fitFlags = []; ds.comps.forEach(c => { const p = ds.picks[c]; const cc = D.cat[c]; if (p == null || !cc || !cc.o[p]) return; fitFor(c, cc.o[p], Nw).forEach(f => fitFlags.push(cc.o[p].n + ': ' + f.why)); });
+    if (st.ai !== 'none' && ds.comps.indexOf('llm') >= 0) {
+      const aa = aiAnswers(Nw.W); const lt = aiLatency(Nw.W); const lp = ds.picks.llm != null ? D.cat.llm.o[ds.picks.llm] : null; const ac = aiCost({ W: Nw.W, aiCallsDay: Nw.aiCallsDay, dau: Nw.dau, llm: lp });
+      lines.push('AI (from the Workload step, planning prices): ' + AI_TIERS[aa.tier].l.toLowerCase() + ' tier; ' + Math.round(aa.route * 100) + '% routed to a small model; ' + aa.out + ' output tokens an answer; ' + (aa.stream === 'yes' ? 'streamed' : 'not streamed') + '; ' + Math.round(aa.cache * 100) + '% from cache. Users wait about ' + lt.wait.toFixed(1) + ' s. ' + (ac.selfHosted ? 'Self-hosted model: paid in GPU hours.' : 'Model spend about ' + formatUsd(ac.perQuery) + ' a query, ' + formatUsd(ac.perUserMonth) + ' per active user a month, ' + formatUsd(ac.perMonth) + ' a month.'));
+    }
     if (isAgentic(ds.comps)) {
       const ag = agentAnswers(Nw.W); const pk = c => { const p = ds.picks[c]; return ds.comps.indexOf(c) < 0 ? 'NOT IN DESIGN' : p != null && D.cat[c].o[p] ? D.cat[c].o[p].n : 'no product chosen'; };
       lines.push('AGENTS (from the Workload step): ' + ag.agents + ' agent(s); the most an agent can do: ' + { read: 'read and suggest', write: 'change records that can be undone', irreversible: 'pay, delete or message outside' }[ag.impact] + '; runs code or commands: ' + ag.code + '; one run takes ' + ag.run + '; owned by ' + (ag.cross === 'many' ? 'several teams or vendors' : 'one team') + '; ' + ag.tools + ' tools.');
@@ -1179,7 +1184,7 @@ export class Component extends DCLogic {
     const isImplApp = A.kind === 'impl';
     const implTerms = { brief: ['gxp'], blueprint: ['cleancore','mdmg','fts'], outcomes: ['cleancore'], evolve: ['fts','cutover','gxp'], drill: ['cutover','sod'], review: ['sod'] };
     const aiOn = st.ai !== 'none';
-    const aiTerms = { brief: ['agentic'], blueprint: ['aigw','agentic','hitl'], outcomes: ['aigw','evals'], compare: ['evals'], evolve: ['evals','hitl'], enterprise: ['euaiact'], drill: ['hitl','evals'], review: ['euaiact','evals'] };
+    const aiTerms = { brief: ['agentic'], workload: ['ttft','routing'], blueprint: ['aigw','agentic','hitl','routing','semcache','graphrag'], outcomes: ['aigw','evals','routing'], compare: ['evals','ttft'], evolve: ['evals','hitl'], enterprise: ['euaiact'], drill: ['hitl','evals'], review: ['euaiact','evals'] };
     const agentTerms = { workload: ['durable','approvals'], blueprint: ['agentid','sandbox','durable','approvals','mcp','a2a'], outcomes: ['mcp','a2a'], drill: ['agentid','approvals','sandbox'], review: ['agentid','approvals'] };
     const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? (implTerms[step] || []) : []).concat(aiOn ? (aiTerms[step] || []) : []).concat(isAgentic(this.comps()) ? (agentTerms[step] || []) : []).filter((k, i, a) => a.indexOf(k) === i);
     const terms = termKeys.map(k => Object.assign({ l: D.glossary[k][0], on: st.term === k ? 'true' : 'false', pick: () => this.setState({ term: st.term === k ? null : k }) }, sel(st.term === k)));
@@ -1249,7 +1254,7 @@ export class Component extends DCLogic {
     if (itsmAI) {
       basePath = st.ai === 'native' ? ['obs','aiops','agents','agentid','tools','aigw','llm','guard','hitl','runbook','itsm'] : ['obs','aiops','itsm','embai','aigw','guard','runbook'];
     } else if (st.ai === 'native') {
-      basePath = ['agents','agentid','tools','aigw','llm','guard','sandbox','durable','hitl'].concat(basePath.filter(c => ['ui','ux','bi','edge','agents','agentid','tools','aigw','llm','guard','sandbox','durable','embai'].indexOf(c) < 0));
+      basePath = ['agents','agentid','tools','semcache','aigw','llm','guard','sandbox','durable','hitl'].concat(basePath.filter(c => ['ui','ux','bi','edge','agents','agentid','tools','semcache','aigw','llm','guard','sandbox','durable','embai'].indexOf(c) < 0));
     } else if (st.ai === 'enabled' && A.path) {
       const at = basePath.indexOf('idp') >= 0 ? basePath.indexOf('idp') + 1 : 1;
       basePath.splice(at, 0, 'embai', 'aigw', 'guard');
@@ -1329,7 +1334,7 @@ export class Component extends DCLogic {
       wq('Peak versus average', 'Sale days, month-end close, outages, Monday log-ins.', 'peak', [[2,'2x'],[5,'5x'],[20,'20x']]),
       wq('New data per year', 'Records, documents, events and media.', 'growth', [[10,'10 GB'],[1000,'1 TB'],[100000,'100 TB']]),
       wq('Main work pattern', 'What most of the work looks like.', 'pattern', [['interactive','People waiting on screens'],['async','Background tasks'],['realtime','Continuous streams'],['batch','Scheduled bulk runs']])
-    ].concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
+    ].concat(st.ai !== 'none' && this.comps().indexOf('llm') >= 0 ? AI_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []).concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
     const wlN = workloadNumbers(A, st);
     const { users: usersN, activeShare, dau, avgRps, peakRps, rN, readRps, writeRps, store3, perInst, inst, inflight, bw, aiCallsDay } = wlN;
     const fmtN = n => n >= 1e9 ? (n / 1e9).toFixed(1) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : n >= 10 ? String(Math.round(n)) : n.toFixed(1);
@@ -1342,13 +1347,21 @@ export class Component extends DCLogic {
       { v: fmtGB(store3), l: 'Storage after 3 years', n: fmtGB(W.growth) + ' a year × 3 years × 3 copies' },
       { v: isImplApp ? 'Vendor-run' : String(inst), l: isImplApp ? 'Compute' : 'App instances', n: isImplApp ? 'The SaaS vendor sizes compute' : 'Peak ÷ ' + perInst + ' per instance, + 1 spare' }
     ];
-    if (aiOn) wFig.push({ v: fmtN(aiCallsDay * 3000), l: 'AI tokens per day', n: fmtN(aiCallsDay) + ' AI calls × about 3,000 tokens' });
+    const llmHere = aiOn && this.comps().indexOf('llm') >= 0;
+    const wAi = llmHere ? aiAnswers(W) : null; const wLat = llmHere ? aiLatency(W) : null;
+    const wLlm = (() => { const o = (this.getOuts()[st.active || 0] || {}).picks || {}; return o.llm != null && D.cat.llm.o[o.llm] ? D.cat.llm.o[o.llm] : null; })();
+    const wCost = llmHere ? aiCost({ W, aiCallsDay, dau, llm: wLlm }) : null;
+    if (aiOn) wFig.push({ v: fmtN(aiCallsDay * (wCost ? wCost.tokensPerCall : 3000)), l: 'AI tokens per day', n: fmtN(aiCallsDay) + ' AI calls × ' + (wCost ? wCost.tokensPerCall.toLocaleString('en-GB') : 'about 3,000') + ' tokens' });
+    if (wLat) wFig.push({ v: wLat.wait.toFixed(1) + ' s', l: 'Wait for an AI answer', n: wAi.stream === 'yes' ? 'Time to first token, streaming' : 'Whole answer, not streaming' });
+    if (wCost && !wCost.selfHosted) wFig.push({ v: formatUsd(wCost.perMonth), l: 'AI model spend a month', n: formatUsd(wCost.perQuery) + ' a query · ' + formatUsd(wCost.perUserMonth) + ' per active user' });
     const wCalc = [
       { h: 'ACTIVE USERS', t: fmtN(usersN) + ' users × ' + Math.round(activeShare * 100) + '% active on a typical day = ' + fmtN(dau) },
       { h: 'AVERAGE LOAD', t: fmtN(dau) + ' × ' + W.actions + ' actions ÷ 86,400 seconds = ' + fmtN(avgRps) + ' requests/s' },
       { h: 'PEAK LOAD', t: fmtN(avgRps) + ' × ' + W.peak + ' = ' + fmtN(peakRps) + ' requests/s. Size for this, not the average.' },
       { h: 'BANDWIDTH', t: fmtN(peakRps) + ' × about 30 KB per response = ' + fmtN(bw) + ' MB/s at peak' }
     ];
+    if (wLat) wCalc.push({ h: 'AI WAIT', t: wLat.working });
+    if (wCost) wCost.working.forEach((t, k) => wCalc.push({ h: k === 0 ? 'AI COST (' + AI_TIERS[wAi.tier].l.toUpperCase() + ' TIER PLANNING PRICES' + (wLlm ? '' : ', NO MODEL CHOSEN YET') + ')' : '', t }));
     if (aiOn) wCalc.push({ h: 'AI CALLS', t: fmtN(dau) + ' active users × ' + (st.ai === 'native' ? 20 : 3) + ' AI calls each (' + (st.ai === 'native' ? 'agents take many steps' : 'occasional copilot use') + ') = ' + fmtN(aiCallsDay) + ' a day' });
     const wBasis = 'Assumptions: ' + Math.round(activeShare * 100) + '% of ' + fmtN(usersN) + ' users active on a typical day (scale is set in the Brief), 400 requests/s per app instance, 30 KB per response, 3,000 tokens per AI call. They are planning figures, not measurements.';
     const inBp = c => comps.indexOf(c) >= 0;
@@ -1577,8 +1590,8 @@ export class Component extends DCLogic {
         { h: 'OVERALL', t: Math.round(e.base) + ' − ' + (e.realIssues * 4 + e.missing.length * 6) + ' = ' + e.overall + ' (capped 0 to 100)' },
         { h: 'AVAILABILITY CHAIN', t: (e.chain.join(' ×\n') || 'No critical components chosen') + '\n= ' + (e.avail * 100).toFixed(3) + '%' },
         { h: 'ASSUMED SLAS', t: 'Managed service 99.99%. Simple self-run 99.95%. Complex self-run 99.9%. Observability and analytics are left out because users do not wait on them.' + (st.ai === 'enabled' ? ' AI-enabled: AI features degrade gracefully, so they sit off the critical path unless AI is the product itself.' : st.ai === 'native' ? ' AI-native: agents are the path, so model, gateway and tool availability all count.' : '') },
-        { h: 'COST INDEX', t: 'Per component: (6 − cost score), plus 1.5 for complex self-run. Managed scales with users (×1, ×10, ×60). Open source scales slower (tier^0.8) because you pay for infrastructure, not per use. Relative only.' }
-      ];
+        { h: 'COST INDEX', t: 'Per component: (6 − cost score), plus 1.5 for complex self-run. Managed scales with users (×1, ×10, ×60). Open source scales slower (tier^0.8) because you pay for infrastructure, not per use. Relative only.' + (e.aiCost && !e.aiCost.selfHosted ? ' The hosted model is left out here and costed in money instead.' : '') }
+      ].concat(e.aiCost ? [{ h: 'AI MODEL SPEND (PLANNING PRICES, AS OF ' + (provenanceOf('prices', aiAnswers(this.wlNums().W).tier) ? monthYear(provenanceOf('prices', aiAnswers(this.wlNums().W).tier).asOf).toUpperCase() : '') + ')', t: e.aiCost.working.join('\n') }] : []);
       const F = fits[i];
       const fitLines = [{ l: 'On enterprise standards', v: F.conf == null ? 'Not measured' : F.conf + '%' }, { l: 'Portability', v: F.port.toFixed(1) + ' / 5' }, { l: 'Cost efficiency', v: F.cost.toFixed(1) + ' / 5' }, { l: 'Integration conflicts', v: String(F.interop) }, { l: 'Proprietary products', v: F.prop + ' of ' + F.n }];
       const fitHow = F.conf == null ? 'Portability 38%, cost 38%, clean integration 23%. Standards are not counted because no pattern library is set.' : 'Standards 35%, portability 25%, cost 25%, clean integration 15%.';
@@ -1587,6 +1600,7 @@ export class Component extends DCLogic {
         availPct: (e.avail * 100).toFixed(3) + '%', availLine: (e.meets ? 'Meets' : 'Misses') + ' the ' + st.avail + '% target · about ' + Math.round((1 - e.avail) * 43800) + ' min downtime a month',
         availBg: e.meets ? 'var(--good-soft)' : 'var(--warn-soft)', availFg: e.meets ? 'var(--good)' : 'var(--warn)',
         cost: ['10k','1M','50M'].map((l, t) => ({ l, v: e.cost[t], pct: Math.round(e.cost[t] / maxCost[t] * 100) + '%' })),
+        hasAi: !!(e.aiCost && !e.aiCost.selfHosted), aiMonth: e.aiCost ? formatUsd(e.aiCost.perMonth) + ' a month' : '', aiLine: e.aiCost ? formatUsd(e.aiCost.perQuery) + ' a query · ' + formatUsd(e.aiCost.perUserMonth) + ' per active user a month · planning prices' : '',
         showWork, work, workPressed: showWork ? 'true' : 'false', workLabel: showWork ? 'Hide the working' : 'Show the working', toggleWork: () => this.setState({ work: Object.assign({}, st.work, { [i]: !showWork }) }),
         issues: e.issues.map(x => ({ cat: x.cat, text: x.text, bg: catStyle[x.cat][0], fg: catStyle[x.cat][1], hasFix: !!x.cid, fixLabel: x.cid ? C[x.cid].l : '',
           fix: () => { if (!x.cid) return; const n = this.cloneOuts(); this.setOuts(n, { step: 'outcomes', active: i, focus: { cid: x.cid, tip: x.tip, outcome: i } }); } })),
@@ -1680,7 +1694,7 @@ export class Component extends DCLogic {
           c === 'ipaas' ? (p.k === 'OSS' ? [false, 'At risk', 'Interfaces you run yourself need a tested switch-over runbook.'] : [true, 'Holds', 'Switch interfaces in a planned sequence with rollback.']) :
           c === 'payroll' ? [false, 'Critical path', 'Run parallel payroll and reconcile before the first live pay date.'] :
           [true, 'Holds', 'Not on the cutover critical path.'] },
-      model: { l: 'Model outage or retirement', advice: 'Put every model behind a gateway, keep a tested fallback model with an evaluation set that proves it is good enough, and track provider retirement dates like any other end-of-life date.',
+      model: { l: 'Model retirement or change', advice: 'Put every model behind a gateway, keep a tested fallback model with an evaluation set that proves it is good enough, and track provider retirement dates like any other end-of-life date.',
         f: (p, c) => c === 'llm' ? (p.k === 'OSS' ? [true, 'Holds', 'Self-hosted weights cannot be retired on you, but you own GPU capacity.'] : [false, 'At risk', 'Single provider: add a fallback model through the gateway and re-run evaluations.']) :
           c === 'aigw' ? [true, 'Holds', 'Routes traffic to a fallback model.'] :
           c === 'embai' ? [false, 'At risk', 'The vendor controls the model and when it changes.'] :
@@ -1693,6 +1707,15 @@ export class Component extends DCLogic {
           c === 'vec' ? [false, 'At risk', 'Poisoned documents in the index become trusted context.'] :
           c === 'idp' ? [true, 'Holds', 'Agent identities limit what a hijacked agent can reach.'] :
           [true, 'Holds', 'Not directly exposed to model input.'] },
+      provider: { l: 'AI provider outage', advice: 'Put every model call behind a gateway with a tiered fallback: the same model in another region, a second provider, a smaller model, a cached answer, then a clear message to the user. Test the fallback with your evaluation set before you need it.',
+        f: (p, c) => { const on = x => ce.picks.some(q => q.c === x);
+          return c === 'llm' ? (p.t.indexOf('gpu') >= 0 ? [true, 'Holds', 'Self-hosted: a provider outage does not reach it.'] : on('aigw') ? [true, 'Holds', 'The gateway fails over to the fallback tier.'] : [false, 'Down', 'Every AI feature stops until the provider recovers.']) :
+            c === 'aigw' ? [true, 'Holds', 'Routes calls to a second provider or a smaller model.'] :
+            c === 'semcache' ? [true, 'Holds', 'Still answers repeat questions while the provider is down.'] :
+            c === 'embai' ? [false, 'At risk', 'Embedded vendor AI depends on that vendor\'s model provider.'] :
+            c === 'agents' || c === 'orch' ? (on('durable') ? [true, 'Holds', 'Runs pause and resume when a model is back.'] : [false, 'At risk', 'Runs fail midway and, without durable execution, restart from the beginning.']) :
+            c === 'aimon' ? [true, 'Holds', 'Shows errors and fallback traffic as they happen.'] :
+            [true, 'Holds', 'Not directly affected.']; } },
       agentact: { l: 'An agent takes a destructive action', advice: 'Give each agent its own identity with no standing rights to production, run its commands in a sandbox, put destructive and irreversible actions behind an approval tier, and make sure you can restore from backup without the agent\'s help.',
         f: (p, c) => { const on = x => ce.picks.some(q => q.c === x);
           return c === 'agentid' ? [true, 'Holds', 'A scoped identity has no rights to delete production data.'] :
@@ -1718,7 +1741,7 @@ export class Component extends DCLogic {
         c === 'obs' ? [true, 'Holds', 'The signals are there; the challenge is volume.'] :
         c === 'embai' ? [true, 'Holds', 'Summarises the flood for engineers and drafts status updates.'] :
         [true, 'Holds', 'Not directly affected.'] };
-    const okScenario = k => (k !== 'cutover' || isImplApp) && ((k !== 'model' && k !== 'inject') || aiOn) && (k !== 'agentact' || isAgentic(comps)) && (k !== 'storm' || comps.indexOf('itsm') >= 0);
+    const okScenario = k => (k !== 'cutover' || isImplApp) && ((k !== 'model' && k !== 'inject') || aiOn) && (k !== 'provider' || (aiOn && comps.indexOf('llm') >= 0)) && (k !== 'agentact' || isAgentic(comps)) && (k !== 'storm' || comps.indexOf('itsm') >= 0);
     const drillPref = st.drillSet ? st.drill : (ent ? 'exit' : 'surge');
     const drillKey = sc[drillPref] && okScenario(drillPref) ? drillPref : 'surge';
     const scOrder = ent ? ['exit', 'regulation'].concat(Object.keys(sc).filter(k => k !== 'exit' && k !== 'regulation')) : Object.keys(sc);

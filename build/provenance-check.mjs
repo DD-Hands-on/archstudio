@@ -12,13 +12,14 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = p => JSON.parse(readFileSync(join(root, p), 'utf8'));
 
 /** Keys every section must have, from the catalogue itself. */
-export function expectedKeys({ cat, fitRules, incidents, apps }) {
+export function expectedKeys({ cat, fitRules, incidents, apps, tiers = {} }) {
   const products = {}; Object.keys(cat).forEach(c => cat[c].o.forEach(o => { products[c + '/' + o.n] = o.u; }));
   const fit = {}; const seen = {};
   fitRules.forEach(r => { const b = r[0] + '/' + r[1]; seen[b] = (seen[b] || 0) + 1; fit[b + '#' + seen[b]] = 'curated'; });
   const inc = {}; Object.keys(incidents).forEach(k => { inc[k] = incidents[k][2]; });
   const models = {}; Object.keys(apps).forEach(k => { models[k] = null; });
-  return { products, fitRules: fit, incidents: inc, referenceModels: models };
+  const prices = {}; Object.keys(tiers).forEach(k => { prices[k] = null; });
+  return { products, fitRules: fit, incidents: inc, referenceModels: models, prices };
 }
 
 /**
@@ -52,9 +53,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const strict = process.argv.includes('--strict');
   const { buildCatalogue } = await import(pathToFileURL(join(root, 'src/engine/catalogue.js')).href);
   const { FIT_RULES } = await import(pathToFileURL(join(root, 'src/engine/fit-rules.js')).href);
+  const { AI_TIERS } = await import(pathToFileURL(join(root, 'src/engine/ai.js')).href);
   const D = buildCatalogue();
   const { errors, warnings } = checkProvenance(readJson('src/data/provenance.json'), readJson('src/data/provenance.schema.json'),
-    { cat: D.cat, fitRules: FIT_RULES, incidents: D.incidents, apps: D.apps }, today);
+    { cat: D.cat, fitRules: FIT_RULES, incidents: D.incidents, apps: D.apps, tiers: AI_TIERS }, today);
   warnings.forEach(w => console.log('WARN ' + w));
   errors.forEach(e => console.log('FAIL ' + e));
   const fail = errors.length || (strict && warnings.length);

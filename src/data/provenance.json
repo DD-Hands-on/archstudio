@@ -1057,6 +1057,76 @@
    "reviewedBy": "unreviewed",
    "reviewBy": "2027-05-11",
    "note": "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+  },
+  "semcache/RedisVL semantic cache": {
+   "source": "https://redis.io/docs/latest/develop/use-cases/semantic-cache/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. RedisVL SemanticCache checked against redis.io docs."
+  },
+  "semcache/Redis LangCache": {
+   "source": "https://redis.io/docs/latest/develop/ai/redisvl/user_guide/how_to_guides/langcache_semantic_cache/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Managed LangCache service checked against redis.io docs."
+  },
+  "semcache/Azure API Management semantic caching": {
+   "source": "https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
+  },
+  "kg/Microsoft GraphRAG": {
+   "source": "https://github.com/microsoft/graphrag",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. Open source repository checked."
+  },
+  "kg/Neo4j": {
+   "source": "https://neo4j.com/docs/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Checked live on 11 Nov 2026. GraphRAG integrations checked against Neo4j and Microsoft Learn."
+  },
+  "kg/Amazon Neptune": {
+   "source": "https://docs.aws.amazon.com/neptune/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
+  },
+  "aimon/Langfuse": {
+   "source": "https://langfuse.com/docs",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
+  },
+  "aimon/OpenTelemetry GenAI conventions": {
+   "source": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
+  },
+  "aimon/LangSmith": {
+   "source": "https://www.langchain.com/langsmith",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
+  },
+  "aimon/Datadog LLM Observability": {
+   "source": "https://docs.datadoghq.com/llm_observability/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Written 11 Nov 2026 from existing knowledge; not checked live."
   }
  },
  "fitRules": {
@@ -1477,6 +1547,13 @@
    "reviewedBy": "unreviewed",
    "reviewBy": "2028-11-11",
    "note": "Checked 11 Nov 2026 against The Register, eWeek and the AI Incident Database (incident 1152)."
+  },
+  "provider": {
+   "source": "https://status.openai.com/incidents/ctrsv3lwd797/write-up",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-11-11",
+   "note": "Checked 11 Nov 2026 against OpenAI's published postmortem."
   }
  },
  "referenceModels": {
@@ -1558,6 +1635,29 @@
    "asOf": "2026-10-23",
    "reviewedBy": "unreviewed",
    "reviewBy": "2027-10-23"
+  }
+ },
+ "prices": {
+  "small": {
+   "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-02-11",
+   "note": "Planning figure, not a quote. Rounded from small-tier list prices (Claude Haiku, GPT mini, Gemini Flash-Lite classes), roughly $0.10 to $1 input and $0.50 to $5 output per million tokens in late 2026. Speeds are planning figures. Secondary sources disagreed on exact model prices; check the provider pages."
+  },
+  "mid": {
+   "source": "https://ai.google.dev/gemini-api/docs/pricing",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-02-11",
+   "note": "Planning figure, not a quote. Rounded from mid-tier list prices (Claude Sonnet, GPT standard, Gemini Flash and Pro classes), roughly $1.50 to $3 input and $9 to $15 output per million tokens in late 2026. A third-party listing showed 0.67 s to first token and 83 tokens a second for a comparable model. Secondary sources disagreed on exact model prices; check the provider pages."
+  },
+  "frontier": {
+   "source": "https://openai.com/api/pricing/",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-02-11",
+   "note": "Planning figure, not a quote. Rounded from flagship list prices (Claude Opus, GPT flagship classes), roughly $4 to $5 input and $20 to $30 output per million tokens in late 2026. Speeds are planning figures. Secondary sources disagreed on exact model prices; check the provider pages."
   }
  }
 }

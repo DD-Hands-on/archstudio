@@ -4,7 +4,7 @@
 import data from '../data/provenance.json' with { type: 'json' };
 
 /** @typedef {{ source: string, asOf: string, reviewedBy: string, reviewBy: string, note?: string }} Provenance */
-/** @typedef {'products' | 'fitRules' | 'incidents' | 'referenceModels'} Section */
+/** @typedef {'products' | 'fitRules' | 'incidents' | 'referenceModels' | 'prices'} Section */
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 

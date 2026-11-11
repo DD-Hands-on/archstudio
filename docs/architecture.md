@@ -18,6 +18,7 @@ src/
     provenance.js   Reads src/data/provenance.json; "as of" labels for screens
     sovereignty.js  Where data and models may run: options, wording, reading it from a brief
     agentic.js      Agent questions for the Workload step and the rules for agentic designs
+    ai.js           Model tiers with planning prices and speeds, AI questions, real AI cost, wait time and AI rules
   data/
     provenance.json         Source, as-of date, reviewer and review date for every product, fit rule, incident and reference model
     provenance.schema.json  JSON Schema for it
@@ -68,7 +69,7 @@ npm run fingerprint         # fail if any screen, score or rule result differs f
 npm run fingerprint:update  # after an intended change: rewrite the baseline and commit it
 ```
 
-Browser tests live in `test/e2e/` (Python Playwright): `standalone.py`, `tracks.py`, `workload_fit.py`, `board.py`, `saves.py`, `sovereignty.py` and `agentic.py`. CI runs them all, then compares the fingerprint (702 evaluations, 1,053 step screens and 840 rules cases across every example library, team standards and scenario) with `test/e2e/fingerprint-baseline.json`. The fingerprint covers the main step screens, not side panels such as Frameworks, Portfolio or AI settings.
+Browser tests live in `test/e2e/` (Python Playwright): `standalone.py`, `tracks.py`, `workload_fit.py`, `board.py`, `saves.py`, `sovereignty.py`, `agentic.py` and `ai.py`. CI runs them all, then compares the fingerprint (702 evaluations, 1,053 step screens and 840 rules cases across every example library, team standards and scenario) with `test/e2e/fingerprint-baseline.json`. The fingerprint covers the main step screens, not side panels such as Frameworks, Portfolio or AI settings.
 
 **Saved designs** carry `schemaVersion` (now 2) and `appVersion`. Products are stored by name as well as position (`pickNames`, and `pn` on canvas nodes), because positions shift when the catalogue changes. Every save passes through `migrateDesign()` when loaded; anything no longer in the catalogue is cleared and the learner sees a note. When the save format changes, raise `SAVE_VERSION`, extend `migrateDesign()` and add a fixture to `test/fixtures/saves/`. Team standards (`team/standards`) are stored with product names too (`standardsForStore` and `standardsFromStore` in `standards.js`); a standard whose product has gone becomes "no standard" and the Canvas says so. See [HANDOFF.md](HANDOFF.md) for project state, settled rules and the backlog.
 
@@ -77,6 +78,8 @@ Edit files in `src/`, never the built files. To add a product, add an option to 
 **Every catalogue entry is dated.** Products, workload-fit rules, the incidents behind drills and reference models each have an entry in `src/data/provenance.json`: `source` (an https link, or `curated` for a judgement whose reason states its basis), `asOf`, `reviewedBy` (`unreviewed` until a person checks it) and `reviewBy`. Adding, renaming or removing a catalogue entry without its provenance fails `npm run check`; a product's source must equal its catalogue link. Entries past `reviewBy` print a warning and show "review due" on screen. The October 2026 entries were backfilled from git history (the date each line last changed); none has been reviewed by a person yet.
 
 **Agentic designs** (any design with the `agents` block) get six Workload questions (agents, the most an agent can do, code, run length, who owns the agents and tools, tool count) and five rules in `agentic.js`: agent identity, sandbox for code, durable execution for long runs, approval tiers for irreversible actions, and a shared protocol when agents cross teams or vendors. Each names the block that fixes it. Blocks the learner's level hides (`deferredComps()`) are not asked for until the level shows them. MCP and A2A are separate blocks (agent-to-tool, agent-to-agent), and fit rules make each a trade-off rather than a default.
+
+**AI in production** (designs that call a model): five Workload questions (tier, routing, answer length, streaming, cache) drive `aiCost()` (money per query, per active user and per month, with the working) and `aiLatency()` (time to first token or the whole answer). Hosted models leave the relative cost index and are costed in money instead; self-hosted models are costed in GPU hours. `aiIssues()` flags latency over budget, no gateway for a hosted model, routing or cache assumptions the design cannot deliver, no AI monitoring or golden-set evaluation, and a knowledge graph without vector search. Tier prices are planning figures in `AI_TIERS`, dated in the `prices` section of `provenance.json` with three-month review dates.
 
 **Changing a product list** (reordering, removing or replacing a product): add the block's v2.1 order to `V1_PRODUCT_ORDER` in `design-save.js`. Saves and team standards from v2.1 hold positions only, and are read against that order. A unit test compares every list with `test/fixtures/v2.1-product-order.json` and fails if you forget.
 

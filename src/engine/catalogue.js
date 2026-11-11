@@ -44,6 +44,19 @@ export function buildCatalogue() {
       o('Agent2Agent (A2A) protocol', 'OSS', 'Open protocol, under the Linux Foundation, for agents from different teams and vendors to discover each other and delegate tasks.', 'https://github.com/a2aproject/A2A', [4,5,3,5,3]),
       o('Framework hand-offs (LangGraph)', 'OSS', 'Sub-agents and hand-offs inside one runtime. Simplest when one team owns every agent.', 'https://langchain-ai.github.io/langgraph/', [3,5,4,3,5]),
       o('Events on a message broker', 'OSS', 'Agents publish and consume task events. Loosely coupled, but you design the contract and identity yourself.', 'https://kafka.apache.org/documentation/', [5,4,3,4,3])]),
+    semcache: C('Semantic cache', 'data', 'Returns a stored answer when a new question means the same as one already answered, skipping the model.', 'a help desk that keeps answers to the questions it hears every day.', 'every repeat question pays for a full model call and waits for it.', [
+      o('RedisVL semantic cache', 'OSS', 'Open source library: a semantic cache on a Redis you run, with similarity thresholds and expiry.', 'https://redis.io/docs/latest/develop/use-cases/semantic-cache/', [4,5,3,5,4]),
+      o('Redis LangCache', 'Proprietary', 'Managed semantic cache service with a REST API; no index to run.', 'https://redis.io/docs/latest/develop/ai/redisvl/user_guide/how_to_guides/langcache_semantic_cache/', [4,4,5,3,5], ['saas']),
+      o('Azure API Management semantic caching', 'Proprietary', 'Semantic caching in the Azure AI gateway, for models inside Azure.', 'https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities', [4,4,4,2,4], ['azure'])]),
+    kg: C('Knowledge graph (GraphRAG)', 'data', 'Stores entities and their relationships, so retrieval can follow connections across documents instead of only finding similar text.', 'a family tree rather than a pile of letters: you can follow who is related to whom.', 'questions that span several documents or relationships get partial answers from isolated chunks.', [
+      o('Microsoft GraphRAG', 'OSS', 'Open source pipeline that builds a knowledge graph and community summaries from documents with an LLM. Indexing uses many tokens.', 'https://github.com/microsoft/graphrag', [3,3,2,5,3]),
+      o('Neo4j', 'OSS', 'Graph database with vector and full-text search for hybrid retrieval; open source community edition or managed AuraDB.', 'https://neo4j.com/docs/', [4,4,3,4,4]),
+      o('Amazon Neptune', 'Proprietary', 'Managed graph database on AWS; Bedrock knowledge bases can use it for GraphRAG.', 'https://docs.aws.amazon.com/neptune/', [5,3,5,1,4], ['aws'])]),
+    aimon: C('AI monitoring and evaluation', 'x', 'Traces every AI call with cost, time to first token, tokens and quality scores, and runs golden-set evaluations before each model or prompt change.', 'a flight recorder, plus a driving test before every new model goes on the road.', 'you cannot see what each answer costs, or whether a change made answers worse, until users complain.', [
+      o('Langfuse', 'OSS', 'Open source tracing, cost tracking, prompt versions and evaluations.', 'https://langfuse.com/docs', [4,5,4,5,4]),
+      o('OpenTelemetry GenAI conventions', 'OSS', 'Vendor-neutral standard for AI traces and metrics, sent to the observability tools you already run.', 'https://opentelemetry.io/docs/specs/semconv/gen-ai/', [5,5,3,5,3]),
+      o('LangSmith', 'Proprietary', 'Tracing, datasets and evaluations from the LangChain team; managed or self-hosted.', 'https://www.langchain.com/langsmith', [4,3,5,3,5], ['saas']),
+      o('Datadog LLM Observability', 'Proprietary', 'AI traces, cost and quality next to the rest of your Datadog monitoring.', 'https://docs.datadoghq.com/llm_observability/', [5,2,5,2,5], ['saas'])]),
     agentid: C('Agent identity', 'x', 'Gives each agent its own identity, with access scoped to its tools, short-lived tokens and a named owner.', 'a badge for each contractor, not one master key shared by all.', 'agents act under a shared service account or the user\'s own rights, so one manipulated agent reaches everything.', [
       o('SPIFFE and SPIRE', 'OSS', 'Open standard for workload identity (CNCF); issues short-lived identities to each agent process you run.', 'https://spiffe.io/docs/latest/', [5,5,2,5,2], ['k8s']),
       o('Microsoft Entra Agent ID', 'Proprietary', 'Agent identities in Entra with owners, conditional access and audit; generally available since May 2026.', 'https://learn.microsoft.com/entra/agent-id/', [5,3,4,2,4], ['azure','saas']),
@@ -384,7 +397,7 @@ export function buildCatalogue() {
   const traits = [
     [['video','media','streaming'], ['media','edge']], [['search'], ['search']], [['real-time','realtime'], ['stream','mq']],
     [['recommend','personalis','personaliz'], ['reco']], [['location','geo','nearby'], ['geo']], [['agent'], ['agents','tools','mem']],
-    [['ai','llm','gpt','claude','genai'], ['llm','guard']], [['report','dashboard','analytics','bi'], ['lake','bi']],
+    [['ai','llm','gpt','claude','genai'], ['llm','guard']], [['knowledge graph','graphrag','relationships','multi-hop'], ['kg','vec']], [['report','dashboard','analytics','bi'], ['lake','bi']],
     [['global','million','billion','scale'], ['edge','cache']], [['iot','device','sensor'], ['ingest','tsdb']], [['event'], ['mq']],
     [['microservice','mesh'], ['mesh']], [['document','knowledge'], ['vec']]
   ];
@@ -440,8 +453,8 @@ export function buildCatalogue() {
     aigw: ['AI gateway checks quota, routes to the right model and logs the call', 15], embai: ['Embedded copilot drafts the next step from the user\'s context', 1200],
     hitl: ['A person reviews and approves before anything irreversible happens', -1],
     obs: ['Monitoring detects a problem and raises an alert', 5], aiops: ['Correlation groups related alerts into one incident with a likely cause', 30], runbook: ['Approved runbook runs the fix: restart, scale or roll back', 2000] };
-  hopDef.agentid = ['Agent gets a short-lived token scoped to this task', 10]; hopDef.sandbox = ['Generated code runs in an isolated sandbox', 300]; hopDef.durable = ['Durable workflow records the step before it runs', 5];
-  const hopOrder = ['ui','bi','edge','lb','gw','mesh','app','ingest','agents','orch','tools','mem','vec','media','reco','geo','stream','cache','db','nosql','tsdb','search','lake','aigw','llm','guard','mq'];
+  hopDef.agentid = ['Agent gets a short-lived token scoped to this task', 10]; hopDef.sandbox = ['Generated code runs in an isolated sandbox', 300]; hopDef.durable = ['Durable workflow records the step before it runs', 5]; hopDef.semcache = ['Semantic cache checks for an answer to a similar question', 15]; hopDef.kg = ['Knowledge graph follows relationships to related facts', 40];
+  const hopOrder = ['ui','bi','edge','lb','gw','mesh','app','ingest','agents','orch','tools','mem','vec','kg','media','reco','geo','stream','cache','db','nosql','tsdb','search','lake','semcache','aigw','llm','guard','mq'];
   const stores = ['db','nosql','tsdb','search'];
   const layerNames = { exp: 'Experience', edge: 'Edge and access', app: 'Application and intelligence', data: 'Data and events', x: 'Cross-cutting' };
   const shared = ['idp','obs','gw','edge','lake','catalog','integ','mesh','ipaas','mdm','grc','alm'];
@@ -460,8 +473,8 @@ export function buildCatalogue() {
     impl: { enabled: ['AI: use-case inventory and risk classification','AI: decide embedded vendor AI versus your own assistants; check data readiness','AI: ground copilots in governed master data; evaluation sets per use case','AI: monitor adoption, accuracy and cost after go-live'],
       native: ['AI: redesign processes around agents; decide which steps an agent can own end to end','AI: expose processes as governed tools (APIs or MCP) with agent roles and permissions','AI: agents run approved steps; people approve postings above thresholds','AI: review agent accuracy, cost and exceptions like any team\'s performance'] }
   };
-  const lvlOf = { sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
-  const nonCrit = ['approve','obs','lake','bi','catalog','reco','search','guard','integ','media','mem','migr','proc','alm','grc','talent','payroll','ipaas'];
+  const lvlOf = { aimon: 2, semcache: 3, kg: 3, sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
+  const nonCrit = ['aimon','approve','obs','lake','bi','catalog','reco','search','guard','integ','media','mem','migr','proc','alm','grc','talent','payroll','ipaas'];
   const tour = [
     ['The brief', 'An online shop: 1M users, sales-day peaks, card payments. Before naming any product, a senior architect asks how many requests, how much data, how bad downtime is, and how sensitive the data is.', [], 'Constraints decide trade-offs. Products come last.'],
     ['Users arrive', 'Customers use a web front end. Static files such as images and scripts come from a CDN close to them, which also filters attacks.', ['Web and mobile front end','CDN and web firewall'], 'Most of a page is static. Serve it from the edge and your servers see far less traffic.'],
@@ -539,6 +552,11 @@ export function buildCatalogue() {
   glossary.approvals = ['Approval tiers','Agent actions grouped by impact: run alone, notify a person, or wait for sign-off. Irreversible actions sit in the top tier.','a spending limit with a manager\'s signature above it.'];
   glossary.mcp = ['MCP (Model Context Protocol)','An open standard for agents to reach tools and data. Useful for shared tools and OAuth boundaries; not needed for every integration.','a universal power adaptor.'];
   glossary.a2a = ['A2A (Agent2Agent)','An open protocol for agents from different teams or vendors to discover each other and delegate tasks.','a shipping manifest carriers all accept.'];
+  glossary.ttft = ['Time to first token','How long until the model starts answering. With streaming it is the wait users feel; the rest arrives while they read.','the first line of a reply, not the whole letter.'];
+  glossary.semcache = ['Semantic cache','Stores answers and returns one when a new question means the same as an old one, so the model is not called again.','a help desk that keeps answers to common questions.'];
+  glossary.graphrag = ['GraphRAG','Retrieval that uses a knowledge graph of entities and relationships, usually alongside vector search, for questions that span documents.','following a family tree instead of reading every letter.'];
+  glossary.routing = ['Model routing and fallback','Sending each request to the cheapest model that does it well, and to a backup model or provider when one fails.','a dispatcher with juniors for small jobs and a deputy when the lead is out.'];
+  incidents.provider = ['OpenAI outage, December 2024', 'On 11 December 2024 a new telemetry service overloaded OpenAI\'s Kubernetes control planes. ChatGPT, the API and Sora were degraded or down for about four hours and twenty minutes. Products that called only that API had no answers until it recovered.', 'https://status.openai.com/incidents/ctrsv3lwd797/write-up', 'Real incident'];
   incidents.agentact = ['Replit agent deletes a production database, July 2025', 'During a 12-day public trial, an AI coding agent on Replit ran destructive commands against a live production database during a code freeze, despite instructions not to change anything. It then said a rollback was impossible, which was wrong. Replit\'s chief executive called it unacceptable and added safeguards.', 'https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/', 'Real incident'];
   signals['LiteLLM'] = 'Very fast release cadence; pin versions and test upgrades.';
   shared.push('aigw', 'aigov', 'agentid');

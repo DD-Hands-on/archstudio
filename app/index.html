@@ -1114,6 +1114,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 </sc-for>
 </div>
+<sc-if value="{{o.hasAi}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 2px; background: var(--fill); border-radius: var(--r-md); padding: 10px 12px">
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-3)">AI model spend</span>
+<span style="font-size: 18px; font-weight: 700">{{o.aiMonth}}</span>
+<span style="font-size: 12px; color: var(--ink-2)">{{o.aiLine}}</span>
+</div>
+</sc-if>
 <button type="button" onClick="{{o.toggleWork}}" aria-expanded="{{o.workPressed}}" style="align-self: flex-start; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 13px">{{o.workLabel}}</button>
 <sc-if value="{{o.showWork}}" hint-placeholder-val="{{false}}">
 <div style="background: var(--inverse); color: var(--on-inverse); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 13px">
@@ -2196,6 +2203,22 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         o("Framework hand-offs (LangGraph)", "OSS", "Sub-agents and hand-offs inside one runtime. Simplest when one team owns every agent.", "https://langchain-ai.github.io/langgraph/", [3, 5, 4, 3, 5]),
         o("Events on a message broker", "OSS", "Agents publish and consume task events. Loosely coupled, but you design the contract and identity yourself.", "https://kafka.apache.org/documentation/", [5, 4, 3, 4, 3])
       ]),
+      semcache: C("Semantic cache", "data", "Returns a stored answer when a new question means the same as one already answered, skipping the model.", "a help desk that keeps answers to the questions it hears every day.", "every repeat question pays for a full model call and waits for it.", [
+        o("RedisVL semantic cache", "OSS", "Open source library: a semantic cache on a Redis you run, with similarity thresholds and expiry.", "https://redis.io/docs/latest/develop/use-cases/semantic-cache/", [4, 5, 3, 5, 4]),
+        o("Redis LangCache", "Proprietary", "Managed semantic cache service with a REST API; no index to run.", "https://redis.io/docs/latest/develop/ai/redisvl/user_guide/how_to_guides/langcache_semantic_cache/", [4, 4, 5, 3, 5], ["saas"]),
+        o("Azure API Management semantic caching", "Proprietary", "Semantic caching in the Azure AI gateway, for models inside Azure.", "https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities", [4, 4, 4, 2, 4], ["azure"])
+      ]),
+      kg: C("Knowledge graph (GraphRAG)", "data", "Stores entities and their relationships, so retrieval can follow connections across documents instead of only finding similar text.", "a family tree rather than a pile of letters: you can follow who is related to whom.", "questions that span several documents or relationships get partial answers from isolated chunks.", [
+        o("Microsoft GraphRAG", "OSS", "Open source pipeline that builds a knowledge graph and community summaries from documents with an LLM. Indexing uses many tokens.", "https://github.com/microsoft/graphrag", [3, 3, 2, 5, 3]),
+        o("Neo4j", "OSS", "Graph database with vector and full-text search for hybrid retrieval; open source community edition or managed AuraDB.", "https://neo4j.com/docs/", [4, 4, 3, 4, 4]),
+        o("Amazon Neptune", "Proprietary", "Managed graph database on AWS; Bedrock knowledge bases can use it for GraphRAG.", "https://docs.aws.amazon.com/neptune/", [5, 3, 5, 1, 4], ["aws"])
+      ]),
+      aimon: C("AI monitoring and evaluation", "x", "Traces every AI call with cost, time to first token, tokens and quality scores, and runs golden-set evaluations before each model or prompt change.", "a flight recorder, plus a driving test before every new model goes on the road.", "you cannot see what each answer costs, or whether a change made answers worse, until users complain.", [
+        o("Langfuse", "OSS", "Open source tracing, cost tracking, prompt versions and evaluations.", "https://langfuse.com/docs", [4, 5, 4, 5, 4]),
+        o("OpenTelemetry GenAI conventions", "OSS", "Vendor-neutral standard for AI traces and metrics, sent to the observability tools you already run.", "https://opentelemetry.io/docs/specs/semconv/gen-ai/", [5, 5, 3, 5, 3]),
+        o("LangSmith", "Proprietary", "Tracing, datasets and evaluations from the LangChain team; managed or self-hosted.", "https://www.langchain.com/langsmith", [4, 3, 5, 3, 5], ["saas"]),
+        o("Datadog LLM Observability", "Proprietary", "AI traces, cost and quality next to the rest of your Datadog monitoring.", "https://docs.datadoghq.com/llm_observability/", [5, 2, 5, 2, 5], ["saas"])
+      ]),
       agentid: C("Agent identity", "x", "Gives each agent its own identity, with access scoped to its tools, short-lived tokens and a named owner.", "a badge for each contractor, not one master key shared by all.", "agents act under a shared service account or the user's own rights, so one manipulated agent reaches everything.", [
         o("SPIFFE and SPIRE", "OSS", "Open standard for workload identity (CNCF); issues short-lived identities to each agent process you run.", "https://spiffe.io/docs/latest/", [5, 5, 2, 5, 2], ["k8s"]),
         o("Microsoft Entra Agent ID", "Proprietary", "Agent identities in Entra with owners, conditional access and audit; generally available since May 2026.", "https://learn.microsoft.com/entra/agent-id/", [5, 3, 4, 2, 4], ["azure", "saas"]),
@@ -2678,6 +2701,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       [["location", "geo", "nearby"], ["geo"]],
       [["agent"], ["agents", "tools", "mem"]],
       [["ai", "llm", "gpt", "claude", "genai"], ["llm", "guard"]],
+      [["knowledge graph", "graphrag", "relationships", "multi-hop"], ["kg", "vec"]],
       [["report", "dashboard", "analytics", "bi"], ["lake", "bi"]],
       [["global", "million", "billion", "scale"], ["edge", "cache"]],
       [["iot", "device", "sensor"], ["ingest", "tsdb"]],
@@ -2778,7 +2802,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     hopDef.agentid = ["Agent gets a short-lived token scoped to this task", 10];
     hopDef.sandbox = ["Generated code runs in an isolated sandbox", 300];
     hopDef.durable = ["Durable workflow records the step before it runs", 5];
-    const hopOrder = ["ui", "bi", "edge", "lb", "gw", "mesh", "app", "ingest", "agents", "orch", "tools", "mem", "vec", "media", "reco", "geo", "stream", "cache", "db", "nosql", "tsdb", "search", "lake", "aigw", "llm", "guard", "mq"];
+    hopDef.semcache = ["Semantic cache checks for an answer to a similar question", 15];
+    hopDef.kg = ["Knowledge graph follows relationships to related facts", 40];
+    const hopOrder = ["ui", "bi", "edge", "lb", "gw", "mesh", "app", "ingest", "agents", "orch", "tools", "mem", "vec", "kg", "media", "reco", "geo", "stream", "cache", "db", "nosql", "tsdb", "search", "lake", "semcache", "aigw", "llm", "guard", "mq"];
     const stores = ["db", "nosql", "tsdb", "search"];
     const layerNames = { exp: "Experience", edge: "Edge and access", app: "Application and intelligence", data: "Data and events", x: "Cross-cutting" };
     const shared = ["idp", "obs", "gw", "edge", "lake", "catalog", "integ", "mesh", "ipaas", "mdm", "grc", "alm"];
@@ -2801,8 +2827,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         native: ["AI: redesign processes around agents; decide which steps an agent can own end to end", "AI: expose processes as governed tools (APIs or MCP) with agent roles and permissions", "AI: agents run approved steps; people approve postings above thresholds", "AI: review agent accuracy, cost and exceptions like any team's performance"]
       }
     };
-    const lvlOf = { sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
-    const nonCrit = ["approve", "obs", "lake", "bi", "catalog", "reco", "search", "guard", "integ", "media", "mem", "migr", "proc", "alm", "grc", "talent", "payroll", "ipaas"];
+    const lvlOf = { aimon: 2, semcache: 3, kg: 3, sandbox: 2, durable: 2, a2a: 3, aiops: 2, runbook: 2, edge: 2, lb: 2, cache: 2, mq: 2, search: 2, mem: 2, aigw: 2, aigov: 3, stream: 2, nosql: 2, mesh: 3, catalog: 3, reco: 3, migr: 2, mdm: 2, ext: 2, alm: 2, talent: 2, proc: 3, grc: 3 };
+    const nonCrit = ["aimon", "approve", "obs", "lake", "bi", "catalog", "reco", "search", "guard", "integ", "media", "mem", "migr", "proc", "alm", "grc", "talent", "payroll", "ipaas"];
     const tour = [
       ["The brief", "An online shop: 1M users, sales-day peaks, card payments. Before naming any product, a senior architect asks how many requests, how much data, how bad downtime is, and how sensitive the data is.", [], "Constraints decide trade-offs. Products come last."],
       ["Users arrive", "Customers use a web front end. Static files such as images and scripts come from a CDN close to them, which also filters attacks.", ["Web and mobile front end", "CDN and web firewall"], "Most of a page is static. Serve it from the edge and your servers see far less traffic."],
@@ -2890,6 +2916,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     glossary.approvals = ["Approval tiers", "Agent actions grouped by impact: run alone, notify a person, or wait for sign-off. Irreversible actions sit in the top tier.", "a spending limit with a manager's signature above it."];
     glossary.mcp = ["MCP (Model Context Protocol)", "An open standard for agents to reach tools and data. Useful for shared tools and OAuth boundaries; not needed for every integration.", "a universal power adaptor."];
     glossary.a2a = ["A2A (Agent2Agent)", "An open protocol for agents from different teams or vendors to discover each other and delegate tasks.", "a shipping manifest carriers all accept."];
+    glossary.ttft = ["Time to first token", "How long until the model starts answering. With streaming it is the wait users feel; the rest arrives while they read.", "the first line of a reply, not the whole letter."];
+    glossary.semcache = ["Semantic cache", "Stores answers and returns one when a new question means the same as an old one, so the model is not called again.", "a help desk that keeps answers to common questions."];
+    glossary.graphrag = ["GraphRAG", "Retrieval that uses a knowledge graph of entities and relationships, usually alongside vector search, for questions that span documents.", "following a family tree instead of reading every letter."];
+    glossary.routing = ["Model routing and fallback", "Sending each request to the cheapest model that does it well, and to a backup model or provider when one fails.", "a dispatcher with juniors for small jobs and a deputy when the lead is out."];
+    incidents.provider = ["OpenAI outage, December 2024", "On 11 December 2024 a new telemetry service overloaded OpenAI's Kubernetes control planes. ChatGPT, the API and Sora were degraded or down for about four hours and twenty minutes. Products that called only that API had no answers until it recovered.", "https://status.openai.com/incidents/ctrsv3lwd797/write-up", "Real incident"];
     incidents.agentact = ["Replit agent deletes a production database, July 2025", "During a 12-day public trial, an AI coding agent on Replit ran destructive commands against a live production database during a code freeze, despite instructions not to change anything. It then said a rollback was impossible, which was wrong. Replit's chief executive called it unacceptable and added safeguards.", "https://www.theregister.com/2025/07/21/replit_saastr_vibe_coding_incident/", "Real incident"];
     signals["LiteLLM"] = "Very fast release cadence; pin versions and test upgrades.";
     shared.push("aigw", "aigov", "agentid");
@@ -3070,15 +3101,103 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return out;
   }
 
+  // src/engine/ai.js
+  var AI_TIERS = {
+    small: { l: "Small", examples: "Haiku, mini or Flash-Lite class", pin: 0.5, pout: 3, ttft: 0.4, tps: 150 },
+    mid: { l: "Mid", examples: "Sonnet, standard or Flash class", pin: 2, pout: 12, ttft: 0.8, tps: 80 },
+    frontier: { l: "Frontier", examples: "Opus or flagship class", pin: 5, pout: 25, ttft: 1.5, tps: 50 }
+  };
+  var INPUT_TOKENS = 2250;
+  var AI_DEFAULTS = (
+    /** @type {AiAnswers} */
+    { tier: "mid", route: 0, out: 750, stream: "yes", cache: 0 }
+  );
+  var AI_QUESTIONS = (
+    /** @type {[keyof AiAnswers, string, string, [any, string][]][]} */
+    [
+      ["tier", "Model tier for most calls", "Bigger models reason better, cost more and answer more slowly.", [["small", "Small"], ["mid", "Mid"], ["frontier", "Frontier"]]],
+      ["route", "Calls routed to a small model", "Simple requests (classify, extract, short replies) can go to a cheaper tier.", [[0, "None"], [0.5, "Half"], [0.8, "Most"]]],
+      ["out", "Length of a typical answer", "Output tokens cost several times input tokens.", [[300, "Short"], [750, "Medium"], [2e3, "Long"]]],
+      ["stream", "Answers stream as they are written", "Streaming shows the first words quickly instead of the whole answer at the end.", [["yes", "Yes"], ["no", "No"]]],
+      ["cache", "Questions answered from a cache", "Repeat or similar questions served from a semantic cache skip the model.", [[0, "None"], [0.2, "A fifth"], [0.5, "Half"]]]
+    ]
+  );
+  function aiAnswers(W) {
+    const a = (
+      /** @type {any} */
+      Object.assign({}, AI_DEFAULTS)
+    );
+    Object.keys(AI_DEFAULTS).forEach((k) => {
+      if (W && W[k] != null) a[k] = W[k];
+    });
+    if (!AI_TIERS[
+      /** @type {Tier} */
+      a.tier
+    ]) a.tier = "mid";
+    return a;
+  }
+  var selfHosted = (p) => !!p && p.t.indexOf("gpu") >= 0;
+  var usd = (n) => n >= 1e6 ? "$" + (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? "$" + Math.round(n / 1e3) + "k" : n >= 100 ? "$" + Math.round(n).toLocaleString("en-GB") : n >= 1 ? "$" + n.toFixed(2) : n >= 0.01 ? "$" + n.toFixed(3) : "$" + n.toFixed(4);
+  function aiCost({ W, aiCallsDay, dau, llm }) {
+    const a = aiAnswers(W);
+    const t = AI_TIERS[a.tier];
+    const s = AI_TIERS.small;
+    const tokensPerCall = INPUT_TOKENS + a.out;
+    if (selfHosted(llm)) return { selfHosted: true, perQuery: 0, perUserMonth: 0, perMonth: 0, tokensPerCall, working: ["Self-hosted model: paid in GPU hours, not per token. Size GPUs from tokens a day (" + Math.round(aiCallsDay * tokensPerCall / 1e6) + "M) and the model's throughput."] };
+    const call = (x) => (INPUT_TOKENS * x.pin + a.out * x.pout) / 1e6;
+    const blended = a.route * call(s) + (1 - a.route) * call(t);
+    const perQuery = blended * (1 - a.cache);
+    const callsPerUser = dau ? aiCallsDay / dau : 0;
+    const perUserMonth = perQuery * callsPerUser * 30;
+    const perMonth = perQuery * aiCallsDay * 30;
+    const working = [
+      "One call: " + INPUT_TOKENS.toLocaleString("en-GB") + " input tokens × $" + t.pin + " + " + a.out.toLocaleString("en-GB") + " output tokens × $" + t.pout + ", per million (" + t.l.toLowerCase() + " tier) = " + usd(call(t)) + ".",
+      a.route ? Math.round(a.route * 100) + "% routed to the small tier at " + usd(call(s)) + " a call: blended " + usd(blended) + "." : "No routing: every call uses the " + t.l.toLowerCase() + " tier.",
+      a.cache ? Math.round(a.cache * 100) + "% answered from the cache, which costs almost nothing: " + usd(perQuery) + " a query on average." : "No cache: every query calls the model.",
+      usd(perQuery) + " × " + Math.round(callsPerUser) + " AI calls a day per active user × 30 days = " + usd(perUserMonth) + " per active user a month.",
+      usd(perQuery) + " × " + Math.round(aiCallsDay).toLocaleString("en-GB") + " calls a day × 30 days = " + usd(perMonth) + " a month."
+    ];
+    return { selfHosted: false, perQuery, perUserMonth, perMonth, tokensPerCall, working };
+  }
+  function aiLatency(W) {
+    const a = aiAnswers(W);
+    const t = AI_TIERS[a.tier];
+    const full = t.ttft + a.out / t.tps;
+    const wait = a.stream === "yes" ? t.ttft : full;
+    const working = "First token after about " + t.ttft + " s (" + t.l.toLowerCase() + " tier); " + a.out + " tokens at about " + t.tps + " a second take " + (a.out / t.tps).toFixed(1) + " s more. " + (a.stream === "yes" ? "Streaming: the user starts reading after " + t.ttft + " s." : "Not streaming: the user waits " + full.toFixed(1) + " s for the whole answer.");
+    return { ttft: t.ttft, full, wait, working };
+  }
+  function aiIssues({ comps, get, W, ai, deferred = [] }) {
+    const llm = get("llm");
+    if (ai === "none" || !llm) return [];
+    const a = aiAnswers(W);
+    const out = [];
+    const ask = (c) => !get(c) && deferred.indexOf(c) < 0;
+    const at = (c) => comps.indexOf(c) >= 0 ? c : null;
+    const tip = (c, name) => comps.indexOf(c) >= 0 ? "Pick an option for " + name + "." : "Add the " + name + " block on the Blueprint or Canvas.";
+    const hosted = !selfHosted(llm);
+    const lat = aiLatency(W);
+    const budget = (W && W.lat ? W.lat : 1e3) / 1e3;
+    if ((W && W.pattern) === "interactive" && lat.wait > budget) out.push(["Non-functional", "Users wait about " + lat.wait.toFixed(1) + " s for " + (a.stream === "yes" ? "the first words" : "the whole answer") + ", over the " + budget + " s latency budget. " + (a.stream === "yes" ? "Route to a smaller tier, cache repeat questions, or move AI off the request path." : "Stream the answer so people start reading after the first token."), "llm", a.stream === "yes" ? "Pick a faster tier on the Workload step, or raise the latency budget for AI answers." : "Turn on streaming on the Workload step."]);
+    if (hosted && ask("aigw")) out.push(["Non-functional", "Services call the model provider directly: when it fails there is no fallback, and nothing enforces budgets or routing.", at("aigw"), tip("aigw", "AI gateway and model routing")]);
+    if (a.route > 0 && ask("aigw")) out.push(["Interoperability", Math.round(a.route * 100) + "% of calls are meant to go to a smaller model, but nothing in the design routes them.", at("aigw"), tip("aigw", "AI gateway and model routing")]);
+    if (a.cache > 0 && !get("semcache")) out.push(["Non-functional", "The cost figures assume " + Math.round(a.cache * 100) + "% of questions come from a cache, but the design has no semantic cache.", at("semcache"), tip("semcache", "Semantic cache")]);
+    const evals = get("aimon") || (get("guard") || { n: "" }).n === "Langfuse";
+    if (!evals && deferred.indexOf("aimon") < 0) out.push(["Non-functional", "No AI monitoring or golden-set evaluation: you cannot see cost per query, time to first token or answer quality, or tell whether a model or prompt change made answers worse.", at("aimon"), tip("aimon", "AI monitoring and evaluation")]);
+    if (get("kg") && !get("vec")) out.push(["Interoperability", "A knowledge graph answers questions about relationships; most designs pair it with vector search for plain lookups (hybrid retrieval).", at("vec"), tip("vec", "Vector store")]);
+    return out;
+  }
+
   // src/engine/workload.js
+  var ASKED = Object.assign({}, AGENT_DEFAULTS, AI_DEFAULTS);
   var agentKey = (W) => {
-    const ch = Object.keys(AGENT_DEFAULTS).filter((k) => W[k] !== AGENT_DEFAULTS[k]);
+    const ch = Object.keys(ASKED).filter((k) => W[k] !== ASKED[k]);
     return ch.length ? "|ag:" + ch.map((k) => k + "=" + W[k]).join(",") : "";
   };
   function wlDefaults(A) {
     const c = A.c;
     const impl = A.kind === "impl";
-    const d = { ...AGENT_DEFAULTS, actions: impl ? 150 : 40, ratio: impl ? "10:1" : "100:1", lat: impl ? 1e3 : 200, cons: "strong", peak: 5, growth: 1e3, pattern: "interactive" };
+    const d = { ...AGENT_DEFAULTS, ...AI_DEFAULTS, actions: impl ? 150 : 40, ratio: impl ? "10:1" : "100:1", lat: impl ? 1e3 : 200, cons: "strong", peak: 5, growth: 1e3, pattern: "interactive" };
     if (c.indexOf("llm") >= 0 || c.indexOf("agents") >= 0) {
       d.lat = 5e3;
       if (c.indexOf("agents") >= 0) d.pattern = "async";
@@ -3118,7 +3237,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     const rN = { "1:10": 0.1, "1:1": 1, "10:1": 10, "100:1": 100 }[W.ratio] || 10;
     const writeRps = peakRps / (rN + 1);
     const readRps = peakRps * rN / (rN + 1);
-    const tokensDay = st.ai !== "none" ? dau * (st.ai === "native" ? 20 : 3) * 3e3 : 0;
+    const tokensDay = st.ai !== "none" ? dau * (st.ai === "native" ? 20 : 3) * (INPUT_TOKENS + W.out) : 0;
     return {
       W,
       users,
@@ -3203,10 +3322,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     if (ai !== "none" && st.reg && !get("aigov")) add("Non-functional", "Regulated AI use: classify each use case (for example under the EU AI Act), keep human oversight, and log model inputs, outputs and approvals.", comps.indexOf("aigov") >= 0 ? "aigov" : null, "Choose an AI governance platform and record each use case's risk class in an ADR.");
     if (ai === "native" && llm && !get("guard") && comps.indexOf("guard") >= 0) add("Non-functional", "Agents act without guardrails or evaluation: wrong or manipulated actions go unchecked.", "guard", "Pick a guardrail and evaluation option before agents touch real systems.");
     fitted.forEach((q) => q.p.fit.filter((f) => f.v <= -2).forEach((f) => add("Non-functional", q.p.n + " at your workload: " + f.why, q.c, "Pick an option that fits the Workload numbers, or record in an ADR why this one is still right.")));
-    if (llm && comps.indexOf("llm") >= 0) {
-      const Nw = workload;
-      if (Nw.lat <= 200 && Nw.pattern === "interactive") add("Non-functional", "A model call takes from half a second to several seconds, but the latency budget is 200 ms. Keep AI off the request path: stream, precompute or answer asynchronously.", "llm", "Raise the latency budget for AI features in the Workload step, or design AI as a background task.");
-    }
+    if (llm && comps.indexOf("llm") >= 0) aiIssues({ comps, get, W: workload && workload.W || {}, ai: st.ai, deferred }).forEach(([c, t, cid, tip]) => add(c, t, cid, tip));
     const saas = picks.filter((q) => q.p.t.indexOf("saas") >= 0);
     if (st.reg && saas.length) add("Non-functional", saas.length + " SaaS service(s) (" + saas.map((q) => q.p.n).join(", ") + ") touch regulated data: confirm residency, GxP validation and exit terms.", saas[0].c, "Pick a self-hosted or region-pinned option for regulated data.");
     if (st.scale === "50M") {
@@ -3234,7 +3350,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const weak = crit.slice().sort((a, b) => avOf(a.p) - avOf(b.p))[0];
       add("Non-functional", "Serial availability of the critical path is " + (avail * 100).toFixed(3) + "%, below the " + st.avail + "% target. Add redundancy or higher-SLA tiers on the critical path.", weak ? weak.c : null, "Pick a managed tier for this critical-path component.");
     }
-    const cost = [1, 10, 60].map((m) => Math.round(picks.reduce((a, q) => {
+    const hostedLlm = llm && llm.t.indexOf("gpu") < 0 && st.ai !== "none";
+    const ai$ = llm && st.ai !== "none" ? aiCost({ W: workload && workload.W || {}, aiCallsDay: workload && workload.aiCallsDay || 0, dau: workload && workload.dau || 0, llm }) : null;
+    const cost = [1, 10, 60].map((m) => Math.round(picks.filter((q) => !(hostedLlm && q.c === "llm")).reduce((a, q) => {
       const b = 6 - q.p.s[1] + (q.p.k === "OSS" && q.p.s[2] <= 2 ? 1.5 : 0);
       return a + b * (q.p.k === "OSS" ? Math.pow(m, 0.8) : m);
     }, 0)));
@@ -3242,7 +3360,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     const realIssues = issues.filter((i) => i.cat !== "Functional").length;
     const overall = Math.max(0, Math.min(100, Math.round(base - realIssues * 4 - missing.length * 6)));
     const chain = crit.map((q) => q.p.n + " " + (avOf(q.p) * 100).toFixed(2) + "%");
-    return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, heavy, saas, missing, base, realIssues, chain, fitted };
+    return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, aiCost: ai$, heavy, saas, missing, base, realIssues, chain, fitted };
   }
 
   // src/engine/design-save.js
@@ -4592,6 +4710,76 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         reviewedBy: "unreviewed",
         reviewBy: "2027-05-11",
         note: "Written 11 Nov 2026 from existing knowledge; not checked live. Agent tooling changes fast."
+      },
+      "semcache/RedisVL semantic cache": {
+        source: "https://redis.io/docs/latest/develop/use-cases/semantic-cache/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. RedisVL SemanticCache checked against redis.io docs."
+      },
+      "semcache/Redis LangCache": {
+        source: "https://redis.io/docs/latest/develop/ai/redisvl/user_guide/how_to_guides/langcache_semantic_cache/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Managed LangCache service checked against redis.io docs."
+      },
+      "semcache/Azure API Management semantic caching": {
+        source: "https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
+      },
+      "kg/Microsoft GraphRAG": {
+        source: "https://github.com/microsoft/graphrag",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. Open source repository checked."
+      },
+      "kg/Neo4j": {
+        source: "https://neo4j.com/docs/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Checked live on 11 Nov 2026. GraphRAG integrations checked against Neo4j and Microsoft Learn."
+      },
+      "kg/Amazon Neptune": {
+        source: "https://docs.aws.amazon.com/neptune/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
+      },
+      "aimon/Langfuse": {
+        source: "https://langfuse.com/docs",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
+      },
+      "aimon/OpenTelemetry GenAI conventions": {
+        source: "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
+      },
+      "aimon/LangSmith": {
+        source: "https://www.langchain.com/langsmith",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
+      },
+      "aimon/Datadog LLM Observability": {
+        source: "https://docs.datadoghq.com/llm_observability/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Written 11 Nov 2026 from existing knowledge; not checked live."
       }
     },
     fitRules: {
@@ -5012,6 +5200,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         reviewedBy: "unreviewed",
         reviewBy: "2028-11-11",
         note: "Checked 11 Nov 2026 against The Register, eWeek and the AI Incident Database (incident 1152)."
+      },
+      provider: {
+        source: "https://status.openai.com/incidents/ctrsv3lwd797/write-up",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-11-11",
+        note: "Checked 11 Nov 2026 against OpenAI's published postmortem."
       }
     },
     referenceModels: {
@@ -5093,6 +5288,29 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         asOf: "2026-10-23",
         reviewedBy: "unreviewed",
         reviewBy: "2027-10-23"
+      }
+    },
+    prices: {
+      small: {
+        source: "https://platform.claude.com/docs/en/about-claude/pricing",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-02-11",
+        note: "Planning figure, not a quote. Rounded from small-tier list prices (Claude Haiku, GPT mini, Gemini Flash-Lite classes), roughly $0.10 to $1 input and $0.50 to $5 output per million tokens in late 2026. Speeds are planning figures. Secondary sources disagreed on exact model prices; check the provider pages."
+      },
+      mid: {
+        source: "https://ai.google.dev/gemini-api/docs/pricing",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-02-11",
+        note: "Planning figure, not a quote. Rounded from mid-tier list prices (Claude Sonnet, GPT standard, Gemini Flash and Pro classes), roughly $1.50 to $3 input and $9 to $15 output per million tokens in late 2026. A third-party listing showed 0.67 s to first token and 83 tokens a second for a comparable model. Secondary sources disagreed on exact model prices; check the provider pages."
+      },
+      frontier: {
+        source: "https://openai.com/api/pricing/",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-02-11",
+        note: "Planning figure, not a quote. Rounded from flagship list prices (Claude Opus, GPT flagship classes), roughly $4 to $5 input and $20 to $30 output per million tokens in late 2026. Speeds are planning figures. Secondary sources disagreed on exact model prices; check the provider pages."
       }
     }
   };
@@ -5876,7 +6094,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const cap = capOverride || { beginner: 1, intermediate: 2, advanced: 3 }[this.state.level];
       const ai = this.state.ai;
       const impl = A.kind === "impl";
-      const aiAdd = ai === "none" ? [] : impl ? ai === "native" ? ["agents", "agentid", "tools", "approve", "aigw", "llm", "guard", "aigov", "embai"] : ["embai", "aigw", "guard", "aigov"] : ai === "native" ? ["agents", "agentid", "tools", "mem", "aigw", "llm", "vec", "guard", "sandbox", "durable", "approve", "aigov"] : ["aigw", "llm", "vec", "guard", "aigov"];
+      const aiAdd = ai === "none" ? [] : impl ? ai === "native" ? ["agents", "agentid", "tools", "approve", "aigw", "llm", "guard", "aigov", "embai"] : ["embai", "aigw", "guard", "aigov"] : ai === "native" ? ["agents", "agentid", "tools", "mem", "aigw", "llm", "vec", "guard", "aimon", "sandbox", "durable", "approve", "aigov"] : ["aigw", "llm", "vec", "guard", "aimon", "aigov"];
       const forced = A.forced || [], removed = A.removed || [];
       const all = A.c.concat(aiAdd.filter((x) => A.c.indexOf(x) < 0)).filter((x) => removed.indexOf(x) < 0);
       const c = all.filter((x) => (D.lvlOf[x] || 1) <= cap || forced.indexOf(x) >= 0);
@@ -6806,6 +7024,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         if (p == null || !cc || !cc.o[p]) return;
         fitFor(c, cc.o[p], Nw).forEach((f) => fitFlags.push(cc.o[p].n + ": " + f.why));
       });
+      if (st.ai !== "none" && ds.comps.indexOf("llm") >= 0) {
+        const aa = aiAnswers(Nw.W);
+        const lt = aiLatency(Nw.W);
+        const lp = ds.picks.llm != null ? D.cat.llm.o[ds.picks.llm] : null;
+        const ac = aiCost({ W: Nw.W, aiCallsDay: Nw.aiCallsDay, dau: Nw.dau, llm: lp });
+        lines.push("AI (from the Workload step, planning prices): " + AI_TIERS[aa.tier].l.toLowerCase() + " tier; " + Math.round(aa.route * 100) + "% routed to a small model; " + aa.out + " output tokens an answer; " + (aa.stream === "yes" ? "streamed" : "not streamed") + "; " + Math.round(aa.cache * 100) + "% from cache. Users wait about " + lt.wait.toFixed(1) + " s. " + (ac.selfHosted ? "Self-hosted model: paid in GPU hours." : "Model spend about " + usd(ac.perQuery) + " a query, " + usd(ac.perUserMonth) + " per active user a month, " + usd(ac.perMonth) + " a month."));
+      }
       if (isAgentic(ds.comps)) {
         const ag = agentAnswers(Nw.W);
         const pk = (c) => {
@@ -7489,7 +7714,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const isImplApp = A.kind === "impl";
       const implTerms = { brief: ["gxp"], blueprint: ["cleancore", "mdmg", "fts"], outcomes: ["cleancore"], evolve: ["fts", "cutover", "gxp"], drill: ["cutover", "sod"], review: ["sod"] };
       const aiOn = st.ai !== "none";
-      const aiTerms = { brief: ["agentic"], blueprint: ["aigw", "agentic", "hitl"], outcomes: ["aigw", "evals"], compare: ["evals"], evolve: ["evals", "hitl"], enterprise: ["euaiact"], drill: ["hitl", "evals"], review: ["euaiact", "evals"] };
+      const aiTerms = { brief: ["agentic"], workload: ["ttft", "routing"], blueprint: ["aigw", "agentic", "hitl", "routing", "semcache", "graphrag"], outcomes: ["aigw", "evals", "routing"], compare: ["evals", "ttft"], evolve: ["evals", "hitl"], enterprise: ["euaiact"], drill: ["hitl", "evals"], review: ["euaiact", "evals"] };
       const agentTerms = { workload: ["durable", "approvals"], blueprint: ["agentid", "sandbox", "durable", "approvals", "mcp", "a2a"], outcomes: ["mcp", "a2a"], drill: ["agentid", "approvals", "sandbox"], review: ["agentid", "approvals"] };
       const termKeys = (D.stepTerms[step] || []).concat(isImplApp ? implTerms[step] || [] : []).concat(aiOn ? aiTerms[step] || [] : []).concat(isAgentic(this.comps()) ? agentTerms[step] || [] : []).filter((k, i, a) => a.indexOf(k) === i);
       const terms = termKeys.map((k) => Object.assign({ l: D.glossary[k][0], on: st.term === k ? "true" : "false", pick: () => this.setState({ term: st.term === k ? null : k }) }, sel(st.term === k)));
@@ -7559,7 +7784,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       if (itsmAI) {
         basePath = st.ai === "native" ? ["obs", "aiops", "agents", "agentid", "tools", "aigw", "llm", "guard", "hitl", "runbook", "itsm"] : ["obs", "aiops", "itsm", "embai", "aigw", "guard", "runbook"];
       } else if (st.ai === "native") {
-        basePath = ["agents", "agentid", "tools", "aigw", "llm", "guard", "sandbox", "durable", "hitl"].concat(basePath.filter((c) => ["ui", "ux", "bi", "edge", "agents", "agentid", "tools", "aigw", "llm", "guard", "sandbox", "durable", "embai"].indexOf(c) < 0));
+        basePath = ["agents", "agentid", "tools", "semcache", "aigw", "llm", "guard", "sandbox", "durable", "hitl"].concat(basePath.filter((c) => ["ui", "ux", "bi", "edge", "agents", "agentid", "tools", "semcache", "aigw", "llm", "guard", "sandbox", "durable", "embai"].indexOf(c) < 0));
       } else if (st.ai === "enabled" && A.path) {
         const at = basePath.indexOf("idp") >= 0 ? basePath.indexOf("idp") + 1 : 1;
         basePath.splice(at, 0, "embai", "aigw", "guard");
@@ -7707,7 +7932,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         wq("Peak versus average", "Sale days, month-end close, outages, Monday log-ins.", "peak", [[2, "2x"], [5, "5x"], [20, "20x"]]),
         wq("New data per year", "Records, documents, events and media.", "growth", [[10, "10 GB"], [1e3, "1 TB"], [1e5, "100 TB"]]),
         wq("Main work pattern", "What most of the work looks like.", "pattern", [["interactive", "People waiting on screens"], ["async", "Background tasks"], ["realtime", "Continuous streams"], ["batch", "Scheduled bulk runs"]])
-      ].concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
+      ].concat(st.ai !== "none" && this.comps().indexOf("llm") >= 0 ? AI_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []).concat(isAgentic(this.comps()) ? AGENT_QUESTIONS.map(([k, l, h, o]) => wq(l, h, k, o)) : []);
       const wlN = workloadNumbers(A, st);
       const { users: usersN, activeShare, dau, avgRps, peakRps, rN, readRps, writeRps, store3, perInst, inst, inflight, bw, aiCallsDay } = wlN;
       const fmtN = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : n >= 10 ? String(Math.round(n)) : n.toFixed(1);
@@ -7720,13 +7945,25 @@ Give the board's decision. Each member's concern must be resolved in the answers
         { v: fmtGB(store3), l: "Storage after 3 years", n: fmtGB(W.growth) + " a year × 3 years × 3 copies" },
         { v: isImplApp ? "Vendor-run" : String(inst), l: isImplApp ? "Compute" : "App instances", n: isImplApp ? "The SaaS vendor sizes compute" : "Peak ÷ " + perInst + " per instance, + 1 spare" }
       ];
-      if (aiOn) wFig.push({ v: fmtN(aiCallsDay * 3e3), l: "AI tokens per day", n: fmtN(aiCallsDay) + " AI calls × about 3,000 tokens" });
+      const llmHere = aiOn && this.comps().indexOf("llm") >= 0;
+      const wAi = llmHere ? aiAnswers(W) : null;
+      const wLat = llmHere ? aiLatency(W) : null;
+      const wLlm = (() => {
+        const o = (this.getOuts()[st.active || 0] || {}).picks || {};
+        return o.llm != null && D.cat.llm.o[o.llm] ? D.cat.llm.o[o.llm] : null;
+      })();
+      const wCost = llmHere ? aiCost({ W, aiCallsDay, dau, llm: wLlm }) : null;
+      if (aiOn) wFig.push({ v: fmtN(aiCallsDay * (wCost ? wCost.tokensPerCall : 3e3)), l: "AI tokens per day", n: fmtN(aiCallsDay) + " AI calls × " + (wCost ? wCost.tokensPerCall.toLocaleString("en-GB") : "about 3,000") + " tokens" });
+      if (wLat) wFig.push({ v: wLat.wait.toFixed(1) + " s", l: "Wait for an AI answer", n: wAi.stream === "yes" ? "Time to first token, streaming" : "Whole answer, not streaming" });
+      if (wCost && !wCost.selfHosted) wFig.push({ v: usd(wCost.perMonth), l: "AI model spend a month", n: usd(wCost.perQuery) + " a query · " + usd(wCost.perUserMonth) + " per active user" });
       const wCalc = [
         { h: "ACTIVE USERS", t: fmtN(usersN) + " users × " + Math.round(activeShare * 100) + "% active on a typical day = " + fmtN(dau) },
         { h: "AVERAGE LOAD", t: fmtN(dau) + " × " + W.actions + " actions ÷ 86,400 seconds = " + fmtN(avgRps) + " requests/s" },
         { h: "PEAK LOAD", t: fmtN(avgRps) + " × " + W.peak + " = " + fmtN(peakRps) + " requests/s. Size for this, not the average." },
         { h: "BANDWIDTH", t: fmtN(peakRps) + " × about 30 KB per response = " + fmtN(bw) + " MB/s at peak" }
       ];
+      if (wLat) wCalc.push({ h: "AI WAIT", t: wLat.working });
+      if (wCost) wCost.working.forEach((t, k) => wCalc.push({ h: k === 0 ? "AI COST (" + AI_TIERS[wAi.tier].l.toUpperCase() + " TIER PLANNING PRICES" + (wLlm ? "" : ", NO MODEL CHOSEN YET") + ")" : "", t }));
       if (aiOn) wCalc.push({ h: "AI CALLS", t: fmtN(dau) + " active users × " + (st.ai === "native" ? 20 : 3) + " AI calls each (" + (st.ai === "native" ? "agents take many steps" : "occasional copilot use") + ") = " + fmtN(aiCallsDay) + " a day" });
       const wBasis = "Assumptions: " + Math.round(activeShare * 100) + "% of " + fmtN(usersN) + " users active on a typical day (scale is set in the Brief), 400 requests/s per app instance, 30 KB per response, 3,000 tokens per AI call. They are planning figures, not measurements.";
       const inBp = (c) => comps.indexOf(c) >= 0;
@@ -8180,8 +8417,8 @@ Give the board's decision. Each member's concern must be resolved in the answers
           { h: "OVERALL", t: Math.round(e.base) + " − " + (e.realIssues * 4 + e.missing.length * 6) + " = " + e.overall + " (capped 0 to 100)" },
           { h: "AVAILABILITY CHAIN", t: (e.chain.join(" ×\n") || "No critical components chosen") + "\n= " + (e.avail * 100).toFixed(3) + "%" },
           { h: "ASSUMED SLAS", t: "Managed service 99.99%. Simple self-run 99.95%. Complex self-run 99.9%. Observability and analytics are left out because users do not wait on them." + (st.ai === "enabled" ? " AI-enabled: AI features degrade gracefully, so they sit off the critical path unless AI is the product itself." : st.ai === "native" ? " AI-native: agents are the path, so model, gateway and tool availability all count." : "") },
-          { h: "COST INDEX", t: "Per component: (6 − cost score), plus 1.5 for complex self-run. Managed scales with users (×1, ×10, ×60). Open source scales slower (tier^0.8) because you pay for infrastructure, not per use. Relative only." }
-        ];
+          { h: "COST INDEX", t: "Per component: (6 − cost score), plus 1.5 for complex self-run. Managed scales with users (×1, ×10, ×60). Open source scales slower (tier^0.8) because you pay for infrastructure, not per use. Relative only." + (e.aiCost && !e.aiCost.selfHosted ? " The hosted model is left out here and costed in money instead." : "") }
+        ].concat(e.aiCost ? [{ h: "AI MODEL SPEND (PLANNING PRICES, AS OF " + (provenanceOf("prices", aiAnswers(this.wlNums().W).tier) ? monthYear(provenanceOf("prices", aiAnswers(this.wlNums().W).tier).asOf).toUpperCase() : "") + ")", t: e.aiCost.working.join("\n") }] : []);
         const F = fits[i];
         const fitLines = [{ l: "On enterprise standards", v: F.conf == null ? "Not measured" : F.conf + "%" }, { l: "Portability", v: F.port.toFixed(1) + " / 5" }, { l: "Cost efficiency", v: F.cost.toFixed(1) + " / 5" }, { l: "Integration conflicts", v: String(F.interop) }, { l: "Proprietary products", v: F.prop + " of " + F.n }];
         const fitHow = F.conf == null ? "Portability 38%, cost 38%, clean integration 23%. Standards are not counted because no pattern library is set." : "Standards 35%, portability 25%, cost 25%, clean integration 15%.";
@@ -8200,6 +8437,9 @@ Give the board's decision. Each member's concern must be resolved in the answers
           availBg: e.meets ? "var(--good-soft)" : "var(--warn-soft)",
           availFg: e.meets ? "var(--good)" : "var(--warn)",
           cost: ["10k", "1M", "50M"].map((l, t) => ({ l, v: e.cost[t], pct: Math.round(e.cost[t] / maxCost[t] * 100) + "%" })),
+          hasAi: !!(e.aiCost && !e.aiCost.selfHosted),
+          aiMonth: e.aiCost ? usd(e.aiCost.perMonth) + " a month" : "",
+          aiLine: e.aiCost ? usd(e.aiCost.perQuery) + " a query · " + usd(e.aiCost.perUserMonth) + " per active user a month · planning prices" : "",
           showWork,
           work,
           workPressed: showWork ? "true" : "false",
@@ -8335,7 +8575,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
           f: (p, c) => c === "migr" ? p.s[2] >= 4 ? [true, "Holds", "Proven tooling; still run at least three mock loads."] : [false, "At risk", "Custom pipelines: reconciliation errors surface during cutover."] : c === "mdm" ? [false, "Critical path", "Master data must be cleansed and frozen before cutover starts."] : c === "erpcore" || c === "hcm" || c === "crmcore" || c === "p2p" || c === "itsm" ? [true, "Go/no-go gate", "Go live only when balances and records reconcile."] : c === "ipaas" ? p.k === "OSS" ? [false, "At risk", "Interfaces you run yourself need a tested switch-over runbook."] : [true, "Holds", "Switch interfaces in a planned sequence with rollback."] : c === "payroll" ? [false, "Critical path", "Run parallel payroll and reconcile before the first live pay date."] : [true, "Holds", "Not on the cutover critical path."]
         },
         model: {
-          l: "Model outage or retirement",
+          l: "Model retirement or change",
           advice: "Put every model behind a gateway, keep a tested fallback model with an evaluation set that proves it is good enough, and track provider retirement dates like any other end-of-life date.",
           f: (p, c) => c === "llm" ? p.k === "OSS" ? [true, "Holds", "Self-hosted weights cannot be retired on you, but you own GPU capacity."] : [false, "At risk", "Single provider: add a fallback model through the gateway and re-run evaluations."] : c === "aigw" ? [true, "Holds", "Routes traffic to a fallback model."] : c === "embai" ? [false, "At risk", "The vendor controls the model and when it changes."] : c === "agents" ? p.k === "OSS" ? [true, "Holds", "Model-agnostic, if prompts are tested on a second model."] : [false, "At risk", "Tied to one model family."] : st.ai === "native" && ["tools", "mem", "guard", "vec"].indexOf(c) < 0 ? [true, "Holds", "Keeps running; work queues up until agents recover or people take over."] : [true, "Holds", "Unaffected; AI features degrade gracefully."]
         },
@@ -8343,6 +8583,14 @@ Give the board's decision. Each member's concern must be resolved in the answers
           l: "Prompt injection or wrong answer",
           advice: "Treat all retrieved and user content as untrusted, give agents least privilege, require human approval for irreversible actions, ground answers with sources, and red-team before every release.",
           f: (p, c) => c === "guard" ? [true, "Holds", "Screens inputs and outputs, and logs evaluations."] : c === "agents" || c === "tools" ? [false, "At risk", "Untrusted content can steer tool calls; scope permissions and require approval."] : c === "llm" || c === "embai" ? [false, "At risk", "Can be manipulated or confidently wrong; ground answers and show sources."] : c === "vec" ? [false, "At risk", "Poisoned documents in the index become trusted context."] : c === "idp" ? [true, "Holds", "Agent identities limit what a hijacked agent can reach."] : [true, "Holds", "Not directly exposed to model input."]
+        },
+        provider: {
+          l: "AI provider outage",
+          advice: "Put every model call behind a gateway with a tiered fallback: the same model in another region, a second provider, a smaller model, a cached answer, then a clear message to the user. Test the fallback with your evaluation set before you need it.",
+          f: (p, c) => {
+            const on = (x) => ce.picks.some((q) => q.c === x);
+            return c === "llm" ? p.t.indexOf("gpu") >= 0 ? [true, "Holds", "Self-hosted: a provider outage does not reach it."] : on("aigw") ? [true, "Holds", "The gateway fails over to the fallback tier."] : [false, "Down", "Every AI feature stops until the provider recovers."] : c === "aigw" ? [true, "Holds", "Routes calls to a second provider or a smaller model."] : c === "semcache" ? [true, "Holds", "Still answers repeat questions while the provider is down."] : c === "embai" ? [false, "At risk", "Embedded vendor AI depends on that vendor's model provider."] : c === "agents" || c === "orch" ? on("durable") ? [true, "Holds", "Runs pause and resume when a model is back."] : [false, "At risk", "Runs fail midway and, without durable execution, restart from the beginning."] : c === "aimon" ? [true, "Holds", "Shows errors and fallback traffic as they happen."] : [true, "Holds", "Not directly affected."];
+          }
         },
         agentact: {
           l: "An agent takes a destructive action",
@@ -8369,7 +8617,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         advice: "Declare one major incident and link child incidents to it, pause non-essential automation that could amplify the fault, and let agents summarise and route while a named incident commander owns decisions and communication.",
         f: (p, c) => c === "aiops" ? [true, "Holds", "Groups thousands of alerts into a few incidents."] : c === "runbook" ? [false, "At risk", "Automated fixes can amplify a widespread fault; pause non-essential automation."] : c === "agents" ? [false, "At risk", "Agents must hand control to the incident commander and stop acting alone."] : c === "itsm" ? [true, "Holds", "One major incident record with linked child incidents."] : c === "obs" ? [true, "Holds", "The signals are there; the challenge is volume."] : c === "embai" ? [true, "Holds", "Summarises the flood for engineers and drafts status updates."] : [true, "Holds", "Not directly affected."]
       };
-      const okScenario = (k) => (k !== "cutover" || isImplApp) && (k !== "model" && k !== "inject" || aiOn) && (k !== "agentact" || isAgentic(comps)) && (k !== "storm" || comps.indexOf("itsm") >= 0);
+      const okScenario = (k) => (k !== "cutover" || isImplApp) && (k !== "model" && k !== "inject" || aiOn) && (k !== "provider" || aiOn && comps.indexOf("llm") >= 0) && (k !== "agentact" || isAgentic(comps)) && (k !== "storm" || comps.indexOf("itsm") >= 0);
       const drillPref = st.drillSet ? st.drill : ent ? "exit" : "surge";
       const drillKey = sc[drillPref] && okScenario(drillPref) ? drillPref : "surge";
       const scOrder = ent ? ["exit", "regulation"].concat(Object.keys(sc).filter((k) => k !== "exit" && k !== "regulation")) : Object.keys(sc);

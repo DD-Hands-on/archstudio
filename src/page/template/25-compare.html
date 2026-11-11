@@ -64,6 +64,13 @@
 </div>
 </sc-for>
 </div>
+<sc-if value="{{o.hasAi}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 2px; background: var(--fill); border-radius: var(--r-md); padding: 10px 12px">
+<span style="font-size: 12px; font-weight: 600; color: var(--ink-3)">AI model spend</span>
+<span style="font-size: 18px; font-weight: 700">{{o.aiMonth}}</span>
+<span style="font-size: 12px; color: var(--ink-2)">{{o.aiLine}}</span>
+</div>
+</sc-if>
 <button type="button" onClick="{{o.toggleWork}}" aria-expanded="{{o.workPressed}}" style="align-self: flex-start; min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--hair-strong); background: var(--bg); color: var(--ink); font-size: 13px">{{o.workLabel}}</button>
 <sc-if value="{{o.showWork}}" hint-placeholder-val="{{false}}">
 <div style="background: var(--inverse); color: var(--on-inverse); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; font-size: 13px">

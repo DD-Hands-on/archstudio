@@ -6,6 +6,7 @@
 //   cat        the catalogue; nonCrit: blocks users do not wait on
 //   fitOpts(c) options for block c with scores adjusted to the workload; workload: workloadNumbers()
 import { agenticIssues } from './agentic.js';
+import { aiIssues, aiCost } from './ai.js';
 
 //   deferred   blocks the learner's level hides for now; rules do not ask for them yet
 export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts, workload, deferred = [] }) {
@@ -52,7 +53,7 @@ export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts,
   if (ai !== 'none' && st.reg && !get('aigov')) add('Non-functional', 'Regulated AI use: classify each use case (for example under the EU AI Act), keep human oversight, and log model inputs, outputs and approvals.', comps.indexOf('aigov') >= 0 ? 'aigov' : null, 'Choose an AI governance platform and record each use case\'s risk class in an ADR.');
   if (ai === 'native' && llm && !get('guard') && comps.indexOf('guard') >= 0) add('Non-functional', 'Agents act without guardrails or evaluation: wrong or manipulated actions go unchecked.', 'guard', 'Pick a guardrail and evaluation option before agents touch real systems.');
   fitted.forEach(q => q.p.fit.filter(f => f.v <= -2).forEach(f => add('Non-functional', q.p.n + ' at your workload: ' + f.why, q.c, 'Pick an option that fits the Workload numbers, or record in an ADR why this one is still right.')));
-  if (llm && comps.indexOf('llm') >= 0) { const Nw = workload; if (Nw.lat <= 200 && Nw.pattern === 'interactive') add('Non-functional', 'A model call takes from half a second to several seconds, but the latency budget is 200 ms. Keep AI off the request path: stream, precompute or answer asynchronously.', 'llm', 'Raise the latency budget for AI features in the Workload step, or design AI as a background task.'); }
+  if (llm && comps.indexOf('llm') >= 0) aiIssues({ comps, get, W: (workload && workload.W) || {}, ai: st.ai, deferred }).forEach(([c, t, cid, tip]) => add(c, t, cid, tip));
   const saas = picks.filter(q => q.p.t.indexOf('saas') >= 0);
   if (st.reg && saas.length) add('Non-functional', saas.length + ' SaaS service(s) (' + saas.map(q => q.p.n).join(', ') + ') touch regulated data: confirm residency, GxP validation and exit terms.', saas[0].c, 'Pick a self-hosted or region-pinned option for regulated data.');
   if (st.scale === '50M') { const low = picks.filter(q => q.p.s[0] < 4); if (low.length) add('Non-functional', low.map(q => q.p.n).join(', ') + ' may cap out at 50M users.', low[0].c, 'Pick an option with scale 4 or 5.'); }
@@ -67,10 +68,13 @@ export function evaluateOutcome({ o, st, comps, appComps, cat, nonCrit, fitOpts,
   const avail = crit.reduce((a, q) => a * avOf(q.p), 1);
   const target = parseFloat(st.avail) / 100; const meets = avail >= target;
   if (picks.length && !meets) { const weak = crit.slice().sort((a, b) => avOf(a.p) - avOf(b.p))[0]; add('Non-functional', 'Serial availability of the critical path is ' + (avail * 100).toFixed(3) + '%, below the ' + st.avail + '% target. Add redundancy or higher-SLA tiers on the critical path.', weak ? weak.c : null, 'Pick a managed tier for this critical-path component.'); }
-  const cost = [1, 10, 60].map(m => Math.round(picks.reduce((a, q) => { const b = (6 - q.p.s[1]) + (q.p.k === 'OSS' && q.p.s[2] <= 2 ? 1.5 : 0); return a + b * (q.p.k === 'OSS' ? Math.pow(m, 0.8) : m); }, 0)));
+  // Hosted models are costed in real money (aiCost) instead of the relative index.
+  const hostedLlm = llm && llm.t.indexOf('gpu') < 0 && st.ai !== 'none';
+  const ai$ = llm && st.ai !== 'none' ? aiCost({ W: (workload && workload.W) || {}, aiCallsDay: (workload && workload.aiCallsDay) || 0, dau: (workload && workload.dau) || 0, llm }) : null;
+  const cost = [1, 10, 60].map(m => Math.round(picks.filter(q => !(hostedLlm && q.c === 'llm')).reduce((a, q) => { const b = (6 - q.p.s[1]) + (q.p.k === 'OSS' && q.p.s[2] <= 2 ? 1.5 : 0); return a + b * (q.p.k === 'OSS' ? Math.pow(m, 0.8) : m); }, 0)));
   const base = avg.reduce((a, b) => a + b, 0) / 5 * 20;
   const realIssues = issues.filter(i => i.cat !== 'Functional').length;
   const overall = Math.max(0, Math.min(100, Math.round(base - realIssues * 4 - missing.length * 6)));
   const chain = crit.map(q => q.p.n + ' ' + (avOf(q.p) * 100).toFixed(2) + '%');
-  return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, heavy, saas, missing, base, realIssues, chain, fitted };
+  return { avg, issues, overall, filled: picks.length, total: comps.length, picks, avail, meets, cost, aiCost: ai$, heavy, saas, missing, base, realIssues, chain, fitted };
 }
