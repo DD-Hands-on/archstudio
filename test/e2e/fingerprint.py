@@ -55,6 +55,27 @@ async () => {
       const canon = n => n.nodeType === 3 ? n.nodeValue : n.nodeType !== 1 ? '' : '<' + n.localName + Array.from(n.attributes).map(a => a.name + '=' + a.value).sort().map(x => ' ' + x).join('') + '>' + Array.from(n.childNodes).map(canon).join('') + '</' + n.localName + '>'; res.html[key] = h(canon(document.getElementById('app')));
     }
   }
+  // 3. rules: standards libraries, team standards, conformance, principles, gap analysis and contract
+  res.rules = {};
+  const ad = I.admData(); const prinIds = ad.principles.map(p => p.id);
+  const teamStd = {}; Object.keys(D.cat).forEach((c, i) => { teamStd[c] = { i: i % 4 === 3 ? -1 : (i % D.cat[c].o.length), status: i % 5 === 0 ? 'review' : i % 4 === 3 ? 'none' : 'approved' }; });
+  const cases = [];
+  for (const app of apps) for (const field of ['green', 'brown']) for (const ai of ['none', 'native']) cases.push({ app, field, ai, scenario: null, reg: ai === 'native' });
+  for (const sc of ad.scenarios) cases.push({ app: sc.app, field: sc.set.field, ai: sc.set.ai || 'none', scenario: sc.id, reg: !!sc.set.reg });
+  for (const cs of cases) for (const lib of ['none', 'sapms', 'aws', 'oss', 'team']) for (const kind of ['oss', 'managed', 'scale']) {
+    reset({ app: cs.app, field: cs.field, ai: cs.ai, reg: cs.reg, scenario: cs.scenario, lens: 'enterprise', level: 'advanced', guided: false, stdLib: lib === 'team' ? 'none' : lib, std: lib === 'team' ? JSON.parse(JSON.stringify(teamStd)) : null,
+      chat: cs.app === 'erp' ? [{ role: 'user', text: 'Our ERP runs on SAP and ServiceNow' }] : [] });
+    const picks = I.build(kind); const comps = I.comps();
+    I.state.canvas = { app: cs.app, nodes: comps.map((cid, i) => ({ id: 'n' + i, cid, x: 0, y: 0, p: picks[cid] != null ? picks[cid] : null })), edges: [] };
+    const key = [cs.scenario || cs.app, cs.field, cs.ai, lib, kind].join('|');
+    let v;
+    try {
+      const ds = I.designState(); const adm = I.admVals(() => () => {}, {});
+      v = strip({ std: I.stdMap(), plat: I.platformOf(ds.picks), check: I.checkDesign(ds.comps, c => ds.picks[c]), libNone: I.libNone(),
+        prin: prinIds.map(id => I.principleCheck(id, ds)), gap: adm.gap, contract: adm.contract.facts, devs: adm.contract.devs, board: I.boardContext ? I.boardContext() : null });
+    } catch (e) { v = 'ERR ' + e.message; }
+    res.rules[key] = h(v);
+  }
   return res;
 }
 """
@@ -68,5 +89,5 @@ with sync_playwright() as p:
     res = pg.evaluate(RUN)
     res['errors'] = errs
     json.dump(res, open(out, 'w'), indent=0, sort_keys=True)
-    print('evals', len(res['evals']), 'vals', len(res['vals']), 'html', len(res['html']), 'errors', errs[:3])
+    print('evals', len(res['evals']), 'vals', len(res['vals']), 'html', len(res['html']), 'rules', len(res['rules']), 'errors', errs[:3])
     b.close()

@@ -28,7 +28,7 @@ if not os.path.exists(BASELINE):
 
 base = json.load(open(BASELINE))
 changed = 0
-for section, label in (('evals', 'evaluations'), ('vals', 'view values'), ('html', 'rendered screens'), ('samples', 'samples')):
+for section, label in (('evals', 'evaluations'), ('vals', 'view values'), ('html', 'rendered screens'), ('rules', 'rules checks'), ('samples', 'samples')):
     a, b = base.get(section, {}), cur.get(section, {})
     keys = sorted(set(a) | set(b))
     diff = [k for k in keys if a.get(k) != b.get(k)]

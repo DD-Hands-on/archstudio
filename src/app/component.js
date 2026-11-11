@@ -7,6 +7,9 @@ import { buildAdmContent } from '../engine/adm-content.js';
 import { wlDefaults, workloadNumbers } from '../engine/workload.js';
 import { evaluateOutcome } from '../engine/evaluate.js';
 import { SAVE_VERSION, APP_VERSION, pickNamesFor, migrateDesign } from '../engine/design-save.js';
+import { platformOf, noStandards, exampleStandards, checkDesign, standardsForStore, standardsFromStore } from '../engine/standards.js';
+import { principleCheck } from '../engine/principles.js';
+import { baselineFor, gapAnalysis } from '../engine/gap.js';
 import { BOARD_ROLES } from '../app/board-roles.js';
 import { TRACKS } from '../app/tracks.js';
 import { localStore } from '../standalone/local-store.js';
@@ -372,15 +375,7 @@ export class Component extends DCLogic {
       outcomes: [], outcomesApp: null, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null }, flags));
   }
 
-  platformOf(picks) {
-    const C = this.data().cat; const names = [];
-    Object.keys(picks).forEach(c => { if (c !== 'embai' && c !== 'ux' && C[c] && C[c].o[picks[c]]) names.push(C[c].o[picks[c]]); });
-    if (names.some(p => p.n.indexOf('ServiceNow') >= 0)) return 'servicenow';
-    if (names.some(p => p.n.indexOf('Salesforce') >= 0)) return 'salesforce';
-    if (names.some(p => p.t.indexOf('sap') >= 0 && ['ipaas','alm','migr','proc','mdm','grc','ext'].every(x => C[x].o.indexOf(p) < 0))) return 'sap';
-    if (names.some(p => p.t.indexOf('azure') >= 0)) return 'microsoft';
-    return 'other';
-  }
+  platformOf(picks) { return platformOf(picks, this.data().cat); }
 
   pickIdx(kind, cid, picks) {
     const opts = this.fitOpts(cid); const cloud = this.state.cloud;
@@ -462,48 +457,13 @@ export class Component extends DCLogic {
   // Nothing is preferred by default. Example libraries follow a written rule, and ties are broken alphabetically.
   stdMap() {
     if (this.state.std) return this.state.std;
-    const D = this.data(); const m = {}; const lib = this.state.stdLib || 'none';
-    if (lib === 'none') { Object.keys(D.cat).forEach(k => { m[k] = { i: -1, status: 'none' }; }); return m; }
-    const review = ['agents', 'tools', 'mem', 'llm', 'vec', 'aigw', 'orch'];
-    const sum = o => o.s.reduce((x, y) => x + y, 0);
-    const rank = (opts, idx) => idx.slice().sort((x, y) => sum(opts[y]) - sum(opts[x]) || opts[x].n.localeCompare(opts[y].n))[0];
-    const prefer = { sapms: o => o.t.indexOf('sap') >= 0 ? 2 : o.t.indexOf('azure') >= 0 ? 1 : 0, aws: o => o.t.indexOf('aws') >= 0 ? 1 : 0, oss: o => o.k === 'OSS' ? 1 : 0 }[lib] || (() => 0);
-    // Core business platforms follow a vendor named in the brief, such as SAP or ServiceNow
-    const A = this.getApp(); const said = ((A && A.n) || '') + ' ' + (this.state.chat || []).filter(x => x.role === 'user').map(x => x.text).join(' ');
-    const named = ['SAP', 'Oracle', 'Workday', 'ServiceNow', 'Salesforce', 'Coupa', 'Jira', 'Microsoft'].filter(v => new RegExp('\\b' + v + '\\b', 'i').test(said));
-    const coreK = ['erpcore', 'hcm', 'payroll', 'crmcore', 'itsm', 'p2p'];
-    const pickFor = (k, plat) => {
-      const opts = D.cat[k].o; let idx = opts.map((_, j) => j);
-      if (coreK.indexOf(k) >= 0) { const h = idx.filter(j => named.some(v => opts[j].n.toLowerCase().indexOf(v.toLowerCase()) >= 0)); if (h.length) idx = h; }
-      if (k === 'ux') idx = idx.filter(j => opts[j].t.indexOf('sap') < 0 || plat === 'sap');
-      if (k === 'embai') { const want = { sap: 'Joule', salesforce: 'Agentforce', servicenow: 'Now Assist' }[plat] || 'Copilot Studio'; idx = idx.filter(j => opts[j].n.indexOf(want) >= 0); }
-      const top = Math.max.apply(null, idx.map(j => prefer(opts[j])));
-      return rank(opts, idx.filter(j => prefer(opts[j]) === top));
-    };
-    Object.keys(D.cat).filter(k => k !== 'ux' && k !== 'embai').forEach(k => { m[k] = { i: pickFor(k, null), status: review.indexOf(k) >= 0 ? 'review' : 'approved' }; });
-    // Platform-bound blocks (user experience, embedded AI) follow the platform this design actually uses
-    const ds = this.designState(); const core = {};
-    ds.comps.forEach(k => { if (k !== 'ux' && k !== 'embai' && m[k]) core[k] = ds.picks[k] != null ? ds.picks[k] : m[k].i; });
-    const plat = this.platformOf(core);
-    ['ux', 'embai'].forEach(k => { m[k] = { i: pickFor(k, plat), status: 'approved' }; });
-    if (plat === 'other' && lib !== 'sapms') m.embai = { i: -1, status: 'none' };
-    return m;
+    const cat = this.data().cat; const lib = this.state.stdLib || 'none';
+    if (lib === 'none') return noStandards(cat);
+    const A = this.getApp();
+    return exampleStandards({ cat, lib, appName: (A && A.n) || '', userText: (this.state.chat || []).filter(x => x.role === 'user').map(x => x.text).join(' '), design: this.designState() });
   }
 
-  checkDesign(cids, pickOf) {
-    const D = this.data(); const std = this.stdMap();
-    const checks = (cids || []).filter(c => D.cat[c]).map(c => {
-      const cc = D.cat[c]; const sd = std[c] || { i: -1, status: 'none' }; const p = pickOf(c);
-      if (p == null || !cc.o[p]) return { c: cc.l, st: 'open', t: 'No product chosen yet' };
-      const name = cc.o[p].n;
-      if (sd.status === 'none' || sd.i < 0) return { c: cc.l, st: 'free', t: name + ' (' + cc.o[p].k + '). No enterprise standard set, so it is judged on its trade-offs.' };
-      if (sd.status !== 'approved') return { c: cc.l, st: 'review', t: name + '. The pattern is still under review.' };
-      return p === sd.i ? { c: cc.l, st: 'ok', t: name + ', the enterprise standard.' } : { c: cc.l, st: 'dev', t: name + '. The standard is ' + cc.o[sd.i].n + '.' };
-    });
-    const measured = checks.filter(x => x.st === 'ok' || x.st === 'dev' || x.st === 'review');
-    const ok = checks.filter(x => x.st === 'ok').length;
-    return { checks, conf: measured.length ? Math.round(ok / measured.length * 100) : null, devN: checks.filter(x => x.st === 'dev' || x.st === 'review').length, chosen: checks.filter(x => x.st !== 'open').length };
-  }
+  checkDesign(cids, pickOf) { return checkDesign({ cat: this.data().cat, std: this.stdMap(), comps: cids, pickOf }); }
 
   // The design as it stands: the canvas once someone has edited it, otherwise the active outcome.
   designState() {
@@ -526,30 +486,8 @@ export class Component extends DCLogic {
   }
 
   principleCheck(id, ds) {
-    const st = this.state; const D = this.data(); const has = c => ds.comps.indexOf(c) >= 0;
-    const r = this.checkDesign(ds.comps, c => ds.picks[c]);
-    const R = (ok, t) => ({ state: ok ? 'met' : 'risk', t });
-    if (this.libNone() && (id === 'benefit' || id === 'reuse' || id === 'diversity')) return { state: 'open', t: 'No pattern library is set, so reuse of standards is not measured. Choose one on the Canvas.' };
-    switch (id) {
-      case 'primacy': return R(true, 'Applied through every check on this page.');
-      case 'benefit': return r.conf == null ? { state: 'open', t: 'Choose products to check reuse of shared standards.' } : R(r.conf >= 70, r.conf + '% of chosen blocks are shared enterprise standards.');
-      case 'continuity': return R(has('obs') && Number(st.avail) >= 99.9, (has('obs') ? 'Observability in place' : 'No observability block') + ', ' + st.avail + '% availability target.');
-      case 'compliance': return !st.reg ? R(true, 'No regulated data in scope.') : R(has('idp') && (has('grc') || has('aigov') || has('catalog') || has('guard')), has('idp') ? 'Regulated data: identity in place; governance block ' + ((has('grc') || has('aigov') || has('catalog') || has('guard')) ? 'present.' : 'missing.') : 'Regulated data with no identity and access block.');
-      case 'asset': return R(has('catalog') || has('mdm'), has('catalog') || has('mdm') ? 'Catalogue or master data block present.' : 'No data catalogue or master data block.');
-      case 'shared': return R(has('mdm') || has('lake') || has('catalog'), has('mdm') || has('lake') || has('catalog') ? 'Shared data platform or master data in the design.' : 'No shared data platform or master data.');
-      case 'security': return R(has('idp'), has('idp') ? 'Identity and access at the boundary.' : 'No identity and access block.');
-      case 'reuse': return r.conf == null ? { state: 'open', t: 'Choose products to check against the pattern library.' } : R(r.conf >= 80, r.conf + '% follow the pattern library.');
-      case 'interop': return R(has('gw') || has('ipaas'), has('gw') || has('ipaas') ? 'API gateway or integration platform present.' : 'No API gateway or integration platform.');
-      case 'diversity': return r.conf == null ? { state: 'open', t: 'Choose products to count deviations.' } : R(r.devN <= 2, r.devN + (r.devN === 1 ? ' block' : ' blocks') + ' off standard or under review.');
-      case 'independence': {
-        const ps = ds.comps.filter(c => ds.picks[c] != null && D.cat[c]).map(c => D.cat[c].o[ds.picks[c]].s[3]);
-        if (!ps.length) return { state: 'open', t: 'Choose products to score portability.' };
-        const avg = ps.reduce((a, b) => a + b, 0) / ps.length;
-        return R(avg >= 3.5, 'Average portability ' + avg.toFixed(1) + ' out of 5.');
-      }
-      case 'rai': return st.ai === 'none' ? R(true, 'No AI in scope.') : R(has('guard') && has('aigov'), (has('guard') ? 'Guardrails present' : 'No guardrails') + '; ' + (has('aigov') ? 'model registry present.' : 'no AI governance block.'));
-      default: return { state: 'open', t: '' };
-    }
+    const st = this.state;
+    return principleCheck(id, { cat: this.data().cat, design: ds, check: this.checkDesign(ds.comps, c => ds.picks[c]), libNone: this.libNone(), settings: { avail: st.avail, reg: st.reg, ai: st.ai } });
   }
 
   // ---------- Canvas ----------
@@ -770,30 +708,16 @@ export class Component extends DCLogic {
     const entScen = ad.scenarios.map(s => { const sl = st.scenario === s.id; return { n: s.n, d: s.d, tags: D.apps[s.app].n + ' · ' + (s.set.field === 'brown' ? 'brownfield' : 'greenfield') + (s.set.reg ? ' · regulated' : '') + (s.set.ai === 'native' ? ' · AI-native' : ''),
       on: sl ? 'true' : 'false', bg: sl ? 'var(--accent-soft)' : 'var(--surface)', bd: sl ? 'var(--accent)' : 'var(--hair)', ring: sl ? '0 0 0 1px var(--accent)' : 'none', pick: () => this.pickScenario(s.id) }; });
 
-    // Gap analysis
-    const std = this.stdMap();
-    let base, baseNote;
-    if (sc) { base = sc.base; baseNote = 'Baseline from the scenario: the estate as it runs today.'; }
-    else if (st.field === 'brown') { base = [['Legacy core system', 'app', 'replace'], ['On-premises database', 'db', 'replace'], ['Point-to-point integrations', null, 'retire'], ['Identity provider', 'idp', 'keep']]; baseNote = 'Brownfield: a typical baseline estate is assumed. Pick a scenario for a specific one.'; }
-    else { base = []; baseNote = 'Greenfield: there is no baseline, so every building block is new.'; }
-    const used = {}; const rows = [];
-    ds.comps.forEach(c => {
-      const cc = D.cat[c]; if (!cc) return; const p = ds.picks[c]; const tgt = p != null && cc.o[p] ? cc.o[p].n : (std[c] && std[c].i >= 0 ? cc.o[std[c].i].n + ' (standard)' : 'Product not chosen');
-      const bi = base.findIndex(b => b[1] === c);
-      if (bi >= 0) { used[bi] = 1; const b = base[bi]; rows.push(b[2] === 'keep' ? { c: cc.l, base: b[0], tgt, gap: 'Keep', layer: cc.layer, wp: 'No change' } : { c: cc.l, base: b[0], tgt, gap: 'Change', layer: cc.layer, wp: 'Replace ' + b[0] + ' with ' + tgt }); }
-      else rows.push({ c: cc.l, base: 'Not in place', tgt, gap: 'New', layer: cc.layer, wp: 'Introduce ' + tgt });
-    });
-    base.forEach((b, i) => { if (!used[i]) rows.push({ c: b[1] && D.cat[b[1]] ? D.cat[b[1]].l : 'Baseline system', base: b[0], tgt: 'Removed', gap: 'Retire', layer: 'retire', wp: 'Decommission ' + b[0] }); });
+    // Gap analysis (rules in src/engine/gap.js; colours here)
+    const { base, note: baseNote } = baselineFor(sc, st.field);
+    const ga = gapAnalysis({ cat: D.cat, design: ds, std: this.stdMap(), base });
     const gc = { New: ['var(--accent-soft)', 'var(--accent-ink)'], Change: ['var(--warn-soft)', 'var(--warn)'], Keep: ['var(--good-soft)', 'var(--good)'], Retire: ['var(--bad-soft)', 'var(--bad)'] };
-    const ord = { Retire: 0, Change: 1, New: 2, Keep: 3 };
-    rows.sort((a, b) => ord[a.gap] - ord[b.gap]);
-    const gapRows = rows.map(r => Object.assign({}, r, { bg: gc[r.gap][0], fg: gc[r.gap][1] }));
-    const cnt = k => rows.filter(r => r.gap === k).length;
-    const wp = rows.filter(r => r.gap !== 'Keep');
-    const plat = [['T1', 'Foundations', 'Identity, data, integration and shared services stand up alongside the baseline.', ['x', 'data', 'edge'], 'var(--accent)'], ['T2', 'Core services', 'Core applications move onto the target while the baseline runs in parallel for cutover.', ['app'], 'var(--warn)'], ['T3', 'Target and retirement', 'People move to the new experience and baseline systems are decommissioned.', ['exp', 'retire'], 'var(--good)']];
+    const gapRows = ga.rows.map(r => Object.assign({}, r, { bg: gc[r.gap][0], fg: gc[r.gap][1] }));
+    const cnt = k => ga.count[k];
+    const platC = { T1: 'var(--accent)', T2: 'var(--warn)', T3: 'var(--good)' };
     const gap = { intro: baseNote + ' Compare it with your target design to find what is new, changed, kept and retired, then group the work into transition architectures.',
       stats: ['New', 'Change', 'Keep', 'Retire'].map(k => ({ t: cnt(k) + ' ' + k.toLowerCase(), bg: gc[k][0], fg: gc[k][1] })), rows: gapRows,
-      plateaus: plat.map(([k, n, d, layers, c]) => { const items = wp.filter(r => layers.indexOf(r.layer) >= 0).map(r => ({ t: r.wp })); return { k: 'Transition architecture ' + k, n, d, c, items, empty: !items.length }; }) };
+      plateaus: ga.plateaus.map(pl => { const items = pl.items.map(t => ({ t })); return { k: 'Transition architecture ' + pl.k, n: pl.n, d: pl.d, c: platC[pl.k], items, empty: !items.length }; }) };
 
     // Change management
     const chg = st.chg || {};
@@ -984,7 +908,7 @@ export class Component extends DCLogic {
           const ids = docs.map(d => d.ownerId).filter((v, i, a) => v && a.indexOf(v) === i);
           if (this._user && ids.length) this._user.profiles(ids).then(ps => { const names = {}; ids.forEach(k => { names[k] = (ps[k] && ps[k].name) || ''; }); this.setState({ names }); }).catch(() => {});
         }, err),
-        db.doc('team/standards').onSnapshot(s => { const d = s.exists ? s.data() : null; if (d && d.std) this.setState({ std: d.std }); }, err),
+        db.doc('team/standards').onSnapshot(s => { const d = s.exists ? s.data() : null; if (d && d.std) { const r = standardsFromStore(d.std, this.data().cat); this.setState(Object.assign({ std: r.std }, r.lost.length ? { teamMsg: r.lost.length + (r.lost.length === 1 ? ' team standard names a product' : ' team standards name products') + ' no longer in the catalogue, so ' + (r.lost.length === 1 ? 'it was' : 'they were') + ' cleared. Set ' + (r.lost.length === 1 ? 'it' : 'them') + ' again in the pattern library.' } : {})); } }, err),
         db.doc('team/approvals').onSnapshot(s => { const d = s.exists ? s.data() : null; this.setState({ appr: (d && d.ids) || {} }); }, err)
       ];
     } catch (e) { /* the page works without a store */ }
@@ -1160,7 +1084,7 @@ export class Component extends DCLogic {
 
     // Pattern library
     const usedBy = {}; designs.forEach(d => d.r.checks.forEach(x => { usedBy[x.c] = (usedBy[x.c] || 0) + 1; }));
-    const setStd = (cid, patch) => { if (!lead) return; const cur = this.stdMap(); const next = Object.assign({}, cur, { [cid]: Object.assign({}, cur[cid], patch) }); this.setState({ std: next }); if (this._db) this.writeTeam('team/standards', { std: next }); };
+    const setStd = (cid, patch) => { if (!lead) return; const cur = this.stdMap(); const next = Object.assign({}, cur, { [cid]: Object.assign({}, cur[cid], patch) }); this.setState({ std: next }); if (this._db) this.writeTeam('team/standards', { std: standardsForStore(next, D.cat) }); };
     const library = ['exp', 'edge', 'app', 'data', 'x'].map(k => {
       const ids = Object.keys(D.cat).filter(c => D.cat[c].layer === k);
       const rows = ids.map(cid => {
@@ -1368,7 +1292,7 @@ export class Component extends DCLogic {
       sapms: 'An illustrative standard set for an estate built on SAP and Microsoft. Use it to practise designing within standards.',
       aws: 'An illustrative standard set for an AWS-first estate. Use it to practise designing within standards.',
       oss: 'An illustrative standard set for an estate that prefers open source. Use it to practise designing within standards.',
-      team: 'Your team\'s standards, set in Team mode.' }[libCur] + (libCur === 'none' || libCur === 'team' ? '' : ' The rule: prefer the estate\'s products, otherwise the best overall score, with ties broken alphabetically. Platform-bound blocks such as SAP Fiori or embedded AI only become standard when your design uses that platform.');
+      team: 'Your team\'s standards, set in Team mode.' + (st.teamMsg ? ' ' + st.teamMsg : '') }[libCur] + (libCur === 'none' || libCur === 'team' ? '' : ' The rule: prefer the estate\'s products, otherwise the best overall score, with ties broken alphabetically. Platform-bound blocks such as SAP Fiori or embedded AI only become standard when your design uses that platform.');
     const timeNm = ['Tolerate', 'Invest', 'Migrate', 'Eliminate']; const timeSt = [['var(--fill)', 'var(--ink-2)'], ['var(--good-soft)', 'var(--good)'], ['var(--accent-soft)', 'var(--accent-ink)'], ['var(--warn-soft)', 'var(--warn)']];
     const nbAll = (aiOn ? A.nb.concat([['AI platform and model providers', st.ai === 'native' ? 'Models, agent runtimes, evaluation' : 'Models and copilots', 'AI gateway']]) : A.nb).map(([n, d, p], i) => { const t = (st.time || {})[i] || 0; return { n, d, p, time: timeNm[t], tbg: timeSt[t][0], tfg: timeSt[t][1] }; });
     const half = Math.ceil(nbAll.length / 2);

@@ -13,7 +13,7 @@ A practice studio for designing system and enterprise architectures, from a plai
 ## How to work on it
 
 1. Edit `src/` only. Never edit `app/index.html` or `dist/` by hand.
-2. `npm install`, `npm test` (39 unit tests), `npm run build`, `npm run check`.
+2. `npm install`, `npm test` (60 unit tests), `npm run typecheck`, `npm run build`, `npm run check`.
 3. `npm run e2e` runs the five browser suites (standalone, tracks, workload fit, board, saves; Python Playwright 1.63.0, Chromium).
 4. `npm run fingerprint` compares 702 evaluations and 1,053 step screens with the committed baseline. After an intended screen or score change, run `npm run fingerprint:update` and commit the baseline in the same commit.
 5. Commit, push to `main` (CI runs unit tests, the build check, all browser suites and the fingerprint), then republish the Claude artifact from `dist/archstudio-claude.html`.
@@ -42,7 +42,7 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 4. A chair agent runs the rounds and gives the decision; the contract gate stays.
 5. Keep a single-call "quick board" and show expected AI usage before convening.
 - **Memory:** agents hold none. Working memory is the single call; the design session (with a change log) and learner history live in the portfolio; knowledge is the versioned catalogue. No vector database at this size.
-- **Prerequisite:** move standards checks, principle checks and gap analysis from `src/app/component.js` into `src/engine`.
+- **Prerequisite (done in Stage 2):** standards checks, principle checks and gap analysis now live in `src/engine`.
 - Rejected: a general orchestrator, event bus, long-term memory layer, and AI versions of validation or visualisation.
 
 ## Backlog from the expert review (11 Nov 2026), in priority order
@@ -57,9 +57,10 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 7. Platform engineering and supply-chain blocks.
 
 **App architecture**
-1. Finish moving rules into the engine; split `component.js` per step; add types. (Save versioning done in Stage 1.)
+1. Split `component.js` per step (Stage 7). Done: rules moved into the engine and type checks added (Stage 2), save versioning (Stage 1). Still to type: catalogue, evaluate, fit-rules, workload, adm-content.
 2. Done in Stage 1: browser tests and fingerprint run in CI.
-2a. Team standards (`team/standards`) store the chosen product by position. Store by name before Stage 3 or 4 change product lists.
+2a. Done in Stage 2: team standards stored by product name.
+2b. **Team mode has no screen.** Its view model (work in flight, pattern library, bench) is computed in `teamVals()` but no template renders it, since the first commit. Team standards can only come from stored data. Decide: build the screen or remove the code (ties to the product decision).
 3. Catalogue as dated data: source, "as of" date and reviewer per entry.
 4. Practise the AI patterns taught: versioned prompts, schema-checked replies, golden-set tests for the brief reader and board, a usage meter.
 5. One engine, three shells: web app, command line, MCP server.

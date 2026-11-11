@@ -70,5 +70,18 @@ with sync_playwright() as p:
         check(pg.locator('text=no longer in the catalogue').count() == 0, 're-saved design %d opens without a note' % (i + 1))
 
     check(not errs, 'no page errors' + (': ' + errs[0] if errs else ''))
+
+    # --- Team standards: an older store (positions only) loads; a removed product is cleared, not swapped
+    team = {'db': {'i': 1, 'status': 'approved'}, 'idp': {'i': 0, 'status': 'approved', 'n': 'Retired Identity Product'}, 'obs': {'i': 0, 'status': 'review'}}
+    store2 = {'portfolio': {}, 'docs': {'team/standards': {'std': team}}}
+    ctx2 = b.new_context(viewport={'width': 1440, 'height': 900})
+    ctx2.route('**/fonts.googleapis.com/**', lambda r: r.abort()); ctx2.route('**/fonts.gstatic.com/**', lambda r: r.abort())
+    ctx2.add_init_script('localStorage.setItem(%s, %s);' % (json.dumps(KEY), json.dumps(json.dumps(store2))))
+    pg2 = ctx2.new_page(); e2 = []; pg2.on('pageerror', lambda e: e2.append(str(e)))
+    pg2.goto(URL); pg2.wait_for_timeout(500)
+    pg2.click('.as-chev:has-text("Canvas")'); pg2.wait_for_timeout(300)
+    check(pg2.locator('button:has-text("Your team library")').count() == 1, 'team standards load from an older store')
+    check(pg2.locator('text=1 team standard names a product no longer in the catalogue').count() == 1, 'cleared team standard reported on the Canvas')
+    check(not e2, 'no page errors with team standards' + (': ' + e2[0] if e2 else ''))
     b.close()
 print('\n%d failures' % len(fails)); sys.exit(1 if fails else 0)

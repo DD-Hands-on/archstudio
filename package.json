@@ -10,10 +10,12 @@
     "test": "node --test test/*.test.js",
     "e2e": "python3 test/e2e/run_all.py",
     "fingerprint": "python3 test/e2e/fingerprint_check.py",
-    "fingerprint:update": "python3 test/e2e/fingerprint_check.py --update"
+    "fingerprint:update": "python3 test/e2e/fingerprint_check.py --update",
+    "typecheck": "tsc -p ."
   },
   "devDependencies": {
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20"
