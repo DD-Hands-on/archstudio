@@ -80,4 +80,4 @@ Edit `src/`, then run `npm install`, `npm test` and `npm run build`. See [docs/a
 
 Product scores are curated judgements to support learning, not benchmarks. They shift with the Workload numbers through stated rules of thumb (for example, about 5,000 writes a second for one Postgres primary), and every shift shows its reason. Product names belong to their owners; no vendor endorses this project.
 
-ArchStudio Dojo is not affiliated with UC Irvine's ArchStudio, an Eclipse-based research tool for modelling software architectures in the xADL language. ArchStudio Dojo is a browser-based practice studio: learners turn a brief into a system or enterprise design and defend it at a review board.
+ArchStudio Dojo is not affiliated with UC Irvine's ArchStudio, an Eclipse-based research tool for modelling software and systems architectures in the xADL language. ArchStudio Dojo is a browser-based practice studio: learners turn a brief into a system or enterprise design and defend it at a review board.
