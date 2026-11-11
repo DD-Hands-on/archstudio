@@ -1,6 +1,6 @@
-# How ArchStudio is built
+# How ArchStudio Dojo is built
 
-ArchStudio ships as one self-contained HTML file, so anyone can open it with nothing to install. The source is split into modules so it can be reviewed, tested and extended. A small build step puts the pieces back together.
+ArchStudio Dojo ships as one self-contained HTML file, so anyone can open it with nothing to install. The source is split into modules so it can be reviewed, tested and extended. A small build step puts the pieces back together.
 
 ```
 src/

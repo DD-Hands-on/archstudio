@@ -1,8 +1,8 @@
-# ArchStudio: handoff for a new working session
+# ArchStudio Dojo: handoff for a new working session
 
 Last updated 11 November 2026. Read this first, then `docs/architecture.md`. Together they replace the earlier conversation.
 
-## What ArchStudio is
+## What ArchStudio Dojo is
 
 A practice studio for designing system and enterprise architectures, from a plain-language brief to a design defended at a review board. Built for aspiring architects. Owner: Divya Dubey (GitHub `DD-Hands-on/archstudio`).
 
@@ -66,7 +66,7 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 
 ## Open items for the owner
 
-- **Name clash:** UC Irvine has a well-known academic tool called ArchStudio. Add a disclaimer or rename before wider sharing.
+- **Name:** renamed to ArchStudio Dojo on 11 Nov 2026 to set it apart from UC Irvine's ArchStudio. Repository name and both live links unchanged on purpose. A "not affiliated" note sits in the README and on the Frameworks page.
 - GitHub "About" box: description, website and topics.
 - Bring-your-own model has been tested with a simulated provider only, not a live key.
 - The app has not been tested with learners.

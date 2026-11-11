@@ -1,4 +1,4 @@
-// The ArchStudio app: state, step logic and the view model the template renders.
+// The ArchStudio Dojo app: state, step logic and the view model the template renders.
 // DCLogic comes from the runtime (src/runtime/dc-runtime.js), loaded before this bundle.
 import { fmtW, fmtGBW } from '../engine/format.js';
 import { fitFor, applyFit } from '../engine/fit-rules.js';
@@ -858,7 +858,7 @@ export class Component extends DCLogic {
   }
 
   boardRules() {
-    return 'You are an enterprise architecture review board inside ArchStudio, a studio where architects practise designing system and enterprise architectures using the TOGAF ADM. ' +
+    return 'You are an enterprise architecture review board inside ArchStudio Dojo, a studio where architects practise designing system and enterprise architectures using the TOGAF ADM. ' +
       'Be rigorous and specific: refer to the actual building blocks, products, connections, principles and gaps in the design. Never ask generic textbook questions. ' +
       'Pitch difficulty to the learner level: beginner gets clear, single-issue questions; advanced gets questions that combine trade-offs across layers. ' +
       'A strong answer names the trade-off the architect accepted and gives evidence from the design: a Workload number, a product choice, a decision record or a drill result. Adjectives without evidence are weak. ' +
@@ -1134,7 +1134,7 @@ export class Component extends DCLogic {
     const lvLabel = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
     const lvC = { beginner: ['var(--fill)', 'var(--ink-2)'], intermediate: [SOFT, 'var(--accent-ink)'], advanced: ['var(--good-soft)', GOOD] };
     const vis = this.visibleSteps(); const curStep = vis.find(s => s[0] === st.step) || vis[0];
-    const bench = [{ n: 'You', role: 'Learning in ArchStudio', level: st.level, sc: (st.portfolio || []).filter(d => d.ownerId && d.ownerId === st.uid).length || (mineC.chosen ? 1 : 0), cp: qRight + ' / ' + qTotal, next: 'Now on: ' + curStep[1].toLowerCase(), you: true }];
+    const bench = [{ n: 'You', role: 'Learning in ArchStudio Dojo', level: st.level, sc: (st.portfolio || []).filter(d => d.ownerId && d.ownerId === st.uid).length || (mineC.chosen ? 1 : 0), cp: qRight + ' / ' + qTotal, next: 'Now on: ' + curStep[1].toLowerCase(), you: true }];
     const byOwner = {};
     (st.portfolio || []).forEach(d => { if (!d.ownerId || d.ownerId === st.uid) return; const b = byOwner[d.ownerId] || (byOwner[d.ownerId] = { n: (st.names || {})[d.ownerId] || 'A colleague', role: 'Architect', level: d.level || 'beginner', sc: 0, cp: 'Not shared', next: 'Latest: ' + d.title }); b.sc++; });
     Object.keys(byOwner).forEach(k => bench.push(byOwner[k]));
@@ -1928,7 +1928,7 @@ export class Component extends DCLogic {
       const levelNames = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
       base.showFinish = !base.hasNext && !base.hasTodo;
       base.finishTitle = 'You have finished the ' + levelNames[st.level] + ' path';
-      base.finishBody = 'Checkpoints: ' + base.quizScore + ' correct. ' + (base.atLevelEnd ? 'The next level adds steps senior architects use every week.' : 'You have taken a design through every TOGAF ADM phase in ArchStudio.') + ' Save this design to show a mentor or manager, or start another.';
+      base.finishBody = 'Checkpoints: ' + base.quizScore + ' correct. ' + (base.atLevelEnd ? 'The next level adds steps senior architects use every week.' : 'You have taken a design through every TOGAF ADM phase in ArchStudio Dojo.') + ' Save this design to show a mentor or manager, or start another.';
       base.finishCanLevel = !!base.atLevelEnd; base.finishLevelLabel = base.levelUpLabel;
       base.finishCanSave = !!this._db;
       base.finishSaveCls = base.atLevelEnd ? 'as-secondary' : 'as-primary';

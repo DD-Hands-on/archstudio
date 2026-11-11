@@ -1,8 +1,8 @@
-# ArchStudio: a practice studio for system and enterprise architecture
+# ArchStudio Dojo: a practice studio for system and enterprise architecture
 
 **By:** Divya Dubey · **Role:** product owner and designer · **Timeline:** three days, more than 20 published iterations · **Status:** working prototype, not yet tested with learners
 
-![ArchStudio blueprint step](docs/screenshots/04-blueprint-flow.png)
+![ArchStudio Dojo blueprint step](docs/screenshots/04-blueprint-flow.png)
 
 ## The problem
 
@@ -10,7 +10,7 @@ Architects learn by designing systems at scale, and most people never get that c
 
 ## What I built
 
-ArchStudio takes a learner from a plain-language brief to a design they can defend at a review board. The path follows the TOGAF Architecture Development Method:
+ArchStudio Dojo takes a learner from a plain-language brief to a design they can defend at a review board. The path follows the TOGAF Architecture Development Method:
 
 - **Brief.** Describe the system in your own words. Claude maps the brief onto a catalogue of building blocks and asks clarifying questions.
 - **Workload.** Size the system from first principles: load, read/write ratio, latency budget and consistency. The numbers decide which building blocks are needed, and the working is shown.

@@ -1,4 +1,4 @@
-# ArchStudio
+# ArchStudio Dojo
 
 A practice studio for designing system and enterprise architectures, from a plain-language brief to a design you can defend at a review board.
 
@@ -8,7 +8,7 @@ A practice studio for designing system and enterprise architectures, from a plai
 
 ## Try it
 
-**[Open ArchStudio in your browser](https://dd-hands-on.github.io/archstudio/app/)**, or download [`app/index.html`](app/index.html) and open it. Nothing to install, no account needed.
+**[Open ArchStudio Dojo in your browser](https://dd-hands-on.github.io/archstudio/app/)**, or download [`app/index.html`](app/index.html) and open it. Nothing to install, no account needed.
 
 | | In your browser | Inside Claude |
 |---|---|---|
@@ -19,7 +19,7 @@ A practice studio for designing system and enterprise architectures, from a plai
 
 ### Connect your own AI model (optional)
 
-Open **View options → AI model** and choose Anthropic, OpenAI, Google Gemini or a local model through Ollama. ArchStudio calls the provider straight from your browser. It has no server, so your key never reaches this repository or anyone else. The key is forgotten when you close the tab unless you choose to remember it on your device. Use a key with a spending limit.
+Open **View options → AI model** and choose Anthropic, OpenAI, Google Gemini or a local model through Ollama. ArchStudio Dojo calls the provider straight from your browser. It has no server, so your key never reaches this repository or anyone else. The key is forgotten when you close the tab unless you choose to remember it on your device. Use a key with a spending limit.
 
 For Ollama, start it with `OLLAMA_ORIGINS` set to the site's address (for example `https://dd-hands-on.github.io`) so the browser is allowed to call it.
 
@@ -79,3 +79,5 @@ Edit `src/`, then run `npm install`, `npm test` and `npm run build`. See [docs/a
 ## Notes
 
 Product scores are curated judgements to support learning, not benchmarks. They shift with the Workload numbers through stated rules of thumb (for example, about 5,000 writes a second for one Postgres primary), and every shift shows its reason. Product names belong to their owners; no vendor endorses this project.
+
+ArchStudio Dojo is not affiliated with ArchStudio, the software architecture environment from the University of California, Irvine.

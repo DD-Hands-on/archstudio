@@ -1,4 +1,4 @@
-<title>ArchStudio</title>
+<title>ArchStudio Dojo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
@@ -230,7 +230,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div class="as-hide-sm" style="width: 28px; height: 28px; border-radius: 8px; background: var(--inverse); display: flex; align-items: center; justify-content: center; flex: 0 0 auto">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="8.5" y="14" width="7" height="7" rx="1"></rect><path d="M6.5 10v2h11v-2M12 12v2"></path></svg>
 </div>
-<span style="font-weight: 600; font-size: 15px; letter-spacing: -0.01em">ArchStudio</span>
+<span style="font-weight: 600; font-size: 15px; letter-spacing: -0.01em">ArchStudio Dojo</span>
 <span class="as-hide-xs" style="font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--fill); color: var(--ink-3)">v2.1</span>
 <span class="as-brief" style="font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-left: 10px; margin-left: 4px; border-left: 1px solid var(--hair)">{{briefLine}}</span>
 <span style="flex: 1 1 auto"></span>
@@ -375,7 +375,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <sc-if value="{{showAI}}" hint-placeholder-val="{{false}}">
 <section aria-label="AI model settings" style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
-<div style="display: flex; flex-direction: column; gap: 4px; max-width: 760px"><h2 style="margin: 0; font-size: 18px">Connect an AI model</h2><span style="font-size: 13px; color: var(--ink-3)">Outside Claude, ArchStudio can use a model you choose to read free-form briefs and to sit as the AI review board. Without one, briefs use keyword matching and every other step works as normal.</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 760px"><h2 style="margin: 0; font-size: 18px">Connect an AI model</h2><span style="font-size: 13px; color: var(--ink-3)">Outside Claude, ArchStudio Dojo can use a model you choose to read free-form briefs and to sit as the AI review board. Without one, briefs use keyword matching and every other step works as normal.</span></div>
 <button type="button" onClick="{{closeAI}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Close</button>
 </div>
 <div role="group" aria-label="Provider" style="display: flex; flex-wrap: wrap; gap: 6px">
@@ -391,7 +391,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </div>
 <sc-if value="{{aiNeedsKey}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; align-items: center; gap: 10px"><button type="button" role="switch" class="as-switch" onClick="{{toggleRemember}}" aria-checked="{{aiRemember}}" aria-label="Remember the key on this device"><span></span></button><span style="font-size: 13px; color: var(--ink-2)">Remember the key on this device. When off, the key is forgotten when you close the tab.</span></div>
-<span style="font-size: 12px; color: var(--ink-3); max-width: 760px">The key goes only from this browser to {{aiProvName}}. ArchStudio has no server and never sees it. Use a key with a spending limit, and do not remember it on a shared computer.</span>
+<span style="font-size: 12px; color: var(--ink-3); max-width: 760px">The key goes only from this browser to {{aiProvName}}. ArchStudio Dojo has no server and never sees it. Use a key with a spending limit, and do not remember it on a shared computer.</span>
 </sc-if>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
 <button type="button" class="as-primary" onClick="{{aiConnect}}">{{aiConnectLabel}}</button>
@@ -403,7 +403,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <sc-if value="{{showFw}}" hint-placeholder-val="{{false}}">
 <section aria-label="Frameworks" style="background: var(--surface); border: 1px solid var(--hair-soft); box-shadow: var(--shadow-1); border-radius: var(--r-lg); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
 <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
-<div style="display: flex; flex-direction: column; gap: 4px; max-width: 820px"><h2 style="margin: 0; font-size: 18px">Frameworks behind ArchStudio</h2><span style="font-size: 13px; color: var(--ink-3)">Each standard, where you use it here, and its official source. TOGAF Requirements Management runs through every phase; in ArchStudio your brief and constraints carry the requirements.</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 820px"><h2 style="margin: 0; font-size: 18px">Frameworks behind ArchStudio Dojo</h2><span style="font-size: 13px; color: var(--ink-3)">Each standard, where you use it here, and its official source. TOGAF Requirements Management runs through every phase; in ArchStudio Dojo your brief and constraints carry the requirements. ArchStudio Dojo is not affiliated with ArchStudio from the University of California, Irvine.</span></div>
 <button type="button" onClick="{{toggleFw}}" style="min-height: 40px; padding: 6px 14px; border-radius: 999px; border: 1px solid transparent; background: var(--fill); color: var(--ink); font-size: 14px">Close</button>
 </div>
 <div style="display: flex; flex-direction: column">
@@ -1481,7 +1481,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div>
 <div style="font-family: var(--mono); font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase">ADM preliminary phase · Architecture principles</div>
 <h1 style="margin: 6px 0 8px; font-size: 30px; line-height: 1.2; text-wrap: balance">Agree the principles before the design</h1>
-<p style="margin: 0; color: var(--ink-3); max-width: 780px">Principles are the rules every later decision is tested against. Adopt the ones your enterprise holds. ArchStudio checks your design against each one as you build, and carries them into the architecture contract.</p>
+<p style="margin: 0; color: var(--ink-3); max-width: 780px">Principles are the rules every later decision is tested against. Adopt the ones your enterprise holds. ArchStudio Dojo checks your design against each one as you build, and carries them into the architecture contract.</p>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
 <sc-for list="{{prinStats}}" as="k" hint-placeholder-count="3">
@@ -4927,7 +4927,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       return lines.join("\n");
     }
     boardRules() {
-      return "You are an enterprise architecture review board inside ArchStudio, a studio where architects practise designing system and enterprise architectures using the TOGAF ADM. Be rigorous and specific: refer to the actual building blocks, products, connections, principles and gaps in the design. Never ask generic textbook questions. Pitch difficulty to the learner level: beginner gets clear, single-issue questions; advanced gets questions that combine trade-offs across layers. A strong answer names the trade-off the architect accepted and gives evidence from the design: a Workload number, a product choice, a decision record or a drill result. Adjectives without evidence are weak. Use British spelling. Do not use em dashes. Keep sentences short and plain.";
+      return "You are an enterprise architecture review board inside ArchStudio Dojo, a studio where architects practise designing system and enterprise architectures using the TOGAF ADM. Be rigorous and specific: refer to the actual building blocks, products, connections, principles and gaps in the design. Never ask generic textbook questions. Pitch difficulty to the learner level: beginner gets clear, single-issue questions; advanced gets questions that combine trade-offs across layers. A strong answer names the trade-off the architect accepted and gives evidence from the design: a Workload number, a product choice, a decision record or a drill result. Adjectives without evidence are weak. Use British spelling. Do not use em dashes. Keep sentences short and plain.";
     }
     async boardCall(prompt, label, apply) {
       if (!this._sample) {
@@ -5401,7 +5401,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const lvC = { beginner: ["var(--fill)", "var(--ink-2)"], intermediate: [SOFT, "var(--accent-ink)"], advanced: ["var(--good-soft)", GOOD] };
       const vis = this.visibleSteps();
       const curStep = vis.find((s) => s[0] === st.step) || vis[0];
-      const bench = [{ n: "You", role: "Learning in ArchStudio", level: st.level, sc: (st.portfolio || []).filter((d) => d.ownerId && d.ownerId === st.uid).length || (mineC.chosen ? 1 : 0), cp: qRight + " / " + qTotal, next: "Now on: " + curStep[1].toLowerCase(), you: true }];
+      const bench = [{ n: "You", role: "Learning in ArchStudio Dojo", level: st.level, sc: (st.portfolio || []).filter((d) => d.ownerId && d.ownerId === st.uid).length || (mineC.chosen ? 1 : 0), cp: qRight + " / " + qTotal, next: "Now on: " + curStep[1].toLowerCase(), you: true }];
       const byOwner = {};
       (st.portfolio || []).forEach((d) => {
         if (!d.ownerId || d.ownerId === st.uid) return;
@@ -6833,7 +6833,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         const levelNames = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" };
         base.showFinish = !base.hasNext && !base.hasTodo;
         base.finishTitle = "You have finished the " + levelNames[st.level] + " path";
-        base.finishBody = "Checkpoints: " + base.quizScore + " correct. " + (base.atLevelEnd ? "The next level adds steps senior architects use every week." : "You have taken a design through every TOGAF ADM phase in ArchStudio.") + " Save this design to show a mentor or manager, or start another.";
+        base.finishBody = "Checkpoints: " + base.quizScore + " correct. " + (base.atLevelEnd ? "The next level adds steps senior architects use every week." : "You have taken a design through every TOGAF ADM phase in ArchStudio Dojo.") + " Save this design to show a mentor or manager, or start another.";
         base.finishCanLevel = !!base.atLevelEnd;
         base.finishLevelLabel = base.levelUpLabel;
         base.finishCanSave = !!this._db;

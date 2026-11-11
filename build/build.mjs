@@ -1,4 +1,4 @@
-// Builds ArchStudio from src/ into single self-contained HTML files.
+// Builds ArchStudio Dojo from src/ into single self-contained HTML files.
 //   app/index.html            for GitHub Pages and local use (loads morphdom from app/vendor)
 //   dist/archstudio-claude.html  for publishing inside Claude (no page skeleton; morphdom from a pinned CDN)
 // Usage: npm run build        (or: node build/build.mjs --check to fail if the committed output is stale)
