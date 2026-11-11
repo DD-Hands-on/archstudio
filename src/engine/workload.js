@@ -27,5 +27,6 @@ export function workloadNumbers(A, st) {
   const tokensDay = st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) * 3000 : 0;
   return { W, users, impl, activeShare, dau, rN, perInst: 400, bw: peakRps * 30 / 1000, aiCallsDay: st.ai !== 'none' ? dau * (st.ai === 'native' ? 20 : 3) : 0, avgRps, peakRps, readRps, writeRps, events: W.pattern === 'realtime' ? peakRps : writeRps, store3: W.growth * 9, lat: W.lat, cons: W.cons, pattern: W.pattern,
     inflight: peakRps * W.lat / 1000, inst: Math.ceil(peakRps / 400) + 1, tokensDay,
-    key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join('|') };
+    sov: st.sov || 'any',
+    key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join('|') + (st.sov && st.sov !== 'any' ? '|' + st.sov : '') };
 }

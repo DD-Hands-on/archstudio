@@ -15,7 +15,7 @@ A practice studio for designing system and enterprise architectures, from a plai
 | Every design step, drill and check | Yes | Yes |
 | Free-form briefs read by AI | Connect your own model (below); otherwise keyword matching | Claude |
 | AI review board | With your own model | Claude |
-| Saved portfolio | In this browser only | Shared, with team mode |
+| Saved portfolio | In this browser only | Shared with others who open it in Claude |
 
 ### Connect your own AI model (optional)
 

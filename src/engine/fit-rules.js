@@ -1,8 +1,19 @@
+// @ts-check
 import { fmtW, fmtGBW } from './format.js';
 
 // ---------- Workload fit: how a product's curated scores shift at the user's numbers ----------
 // Each rule: building block, product name, test on workload numbers N, score changes and the reason shown to the learner.
 // Dimensions: 0 Scale, 1 Cost, 2 Ops ease, 3 Portability, 4 Speed. Thresholds are rules of thumb, stated in the reason.
+/** @typedef {import('./types.js').Product} Product */
+/** @typedef {Record<string, any>} Numbers workload numbers from workloadNumbers(), plus settings such as sov */
+/** @typedef {[string, string, (N: Numbers) => boolean, Record<number, number>, (N: Numbers) => string]} FitRule
+ *  block id, product name prefix (or *hosted, or #tag), test, score changes by dimension, reason */
+/** @typedef {{ d: number, v: number, why: string, key: string }} FitNote */
+
+/** Tags that mark a product listed as a vendor-hosted or public-cloud service. */
+const HOSTED = ['saas', 'aws', 'azure', 'gcp'];
+
+/** @type {FitRule[]} */
 export const FIT_RULES = [
   ['db', 'PostgreSQL', N => N.writeRps > 20000, { 0: -2 }, N => 'One primary takes every write; ' + fmtW(N.writeRps) + ' writes/s means sharding (Citus or similar).'],
   ['db', 'PostgreSQL', N => N.writeRps > 5000 && N.writeRps <= 20000, { 0: -1 }, N => fmtW(N.writeRps) + ' writes/s is near what one primary handles comfortably (about 5k); plan partitioning early.'],
@@ -47,22 +58,43 @@ export const FIT_RULES = [
   ['geo', 'Amazon Location Service', N => N.peakRps > 1000, { 1: -1 }, N => 'Charged per request at ' + fmtW(N.peakRps) + '/s at peak.'],
   ['tsdb', 'TimescaleDB', N => N.writeRps > 50000, { 0: -1 }, N => 'Single-primary writes at ' + fmtW(N.writeRps) + '/s; consider multi-node or a purpose-built store.'],
   ['ingest', 'AWS IoT Core', N => N.writeRps > 50000, { 1: -1 }, N => 'Per-message pricing at ' + fmtW(N.writeRps) + ' messages/s.'],
-  ['ingest', 'Azure IoT Hub', N => N.writeRps > 50000, { 1: -1 }, N => 'Priced in units of messages a day; ' + fmtW(N.writeRps) + ' messages/s needs many units.']
+  ['ingest', 'Azure IoT Hub', N => N.writeRps > 50000, { 1: -1 }, N => 'Priced in units of messages a day; ' + fmtW(N.writeRps) + ' messages/s needs many units.'],
+  // Sovereignty: where data and models may run (N.sov). Tags say how a product is listed, not whether a
+  // self-managed edition exists, so the reasons ask the learner to check. * matches any block; #hosted
+  // matches products listed as vendor-hosted or public-cloud services, #saas only vendor-hosted ones.
+  ['*', '#hosted', N => N.sov === 'onprem', { 3: -2 }, () => 'Listed as a vendor-hosted or public-cloud service, so it does not run in your own data centre as listed. Check whether a self-managed edition exists.'],
+  ['*', '#hosted', N => N.sov === 'sovereign', { 3: -1 }, () => 'Check where it stores and processes data, which country\'s law the provider is subject to, and whether a sovereign-cloud option exists.'],
+  ['llm', '#hosted', N => N.sov === 'sovereign', { 3: -1 }, () => 'A hosted model API processes prompts and outputs on the provider\'s side. Look for a sovereign or in-country endpoint, or self-host open-weight models.'],
+  ['*', '#saas', N => N.sov === 'region', { 3: -1 }, () => 'Vendor-hosted: confirm it can keep your data in your region before you rely on it.'],
+  ['llm', '#hosted', N => N.sov === 'region', { 3: -1 }, () => 'Confirm the provider processes prompts and outputs in your region, not only stores them there.']
 ];
 
+/**
+ * Score changes for one product at the user's numbers.
+ * @param {string} cid @param {Product} o @param {Numbers | null | undefined} N
+ * @returns {FitNote[]}
+ */
 export function fitFor(cid, o, N) {
+  /** @type {FitNote[]} */
   const notes = [];
   if (!N) return notes;
+  /** @type {Record<string, number>} */
+  const seen = {};
   FIT_RULES.forEach(([c, name, test, d, why]) => {
-    if (c !== cid) return;
-    const hit = name === '*hosted' ? o.t.indexOf('gpu') < 0 : o.n.indexOf(name) === 0;
+    const base = c + '/' + name; seen[base] = (seen[base] || 0) + 1; const key = base + '#' + seen[base];
+    if (c !== cid && c !== '*') return;
+    const hit = name === '*hosted' ? o.t.indexOf('gpu') < 0 : name === '#hosted' ? HOSTED.some(t => o.t.indexOf(t) >= 0) : name === '#saas' ? o.t.indexOf('saas') >= 0 : o.n.indexOf(name) === 0;
     if (!hit) return;
     let ok = false; try { ok = !!test(N); } catch (e) {}
-    if (ok) Object.keys(d).forEach(k => notes.push({ d: +k, v: d[k], why: why(N) }));
+    if (ok) Object.keys(d).forEach(k => notes.push({ d: +k, v: d[+k], why: why(N), key }));
   });
   return notes;
 }
 
+/**
+ * @param {Product} o @param {FitNote[]} notes
+ * @returns {Product & { s0?: number[], fit?: FitNote[] }}
+ */
 export function applyFit(o, notes) {
   if (!notes.length) return o;
   const s2 = o.s.slice(); notes.forEach(f => { s2[f.d] = Math.max(1, Math.min(5, s2[f.d] + f.v)); });

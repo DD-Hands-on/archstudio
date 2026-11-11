@@ -15,6 +15,11 @@ src/
     principles.js   Architecture principle checks
     gap.js          Baseline, gap analysis and transition architectures
     types.js        Shared JSDoc types (no runtime code)
+    provenance.js   Reads src/data/provenance.json; "as of" labels for screens
+    sovereignty.js  Where data and models may run: options, wording, reading it from a brief
+  data/
+    provenance.json         Source, as-of date, reviewer and review date for every product, fit rule, incident and reference model
+    provenance.schema.json  JSON Schema for it
     format.js       Number formatting
   app/           The app itself
     component.js    State, step logic and the view model the template renders
@@ -54,18 +59,23 @@ Both are committed, so the app works straight from the repository.
 npm install
 npm test          # unit tests for the engine, catalogue and renderer
 npm run build     # rebuild app/index.html and dist/
-npm run check     # fail if the built files are out of date
+npm run check     # fail if the built files are out of date, or provenance is missing, invalid or does not match the catalogue
+npm run provenance  # the provenance check alone (add --strict to fail on entries past their review date)
 npm run e2e       # all browser suites (needs: pip install playwright==1.63.0 && python3 -m playwright install chromium)
 npm run typecheck # type check engine files marked // @ts-check
 npm run fingerprint         # fail if any screen, score or rule result differs from the committed baseline
 npm run fingerprint:update  # after an intended change: rewrite the baseline and commit it
 ```
 
-Browser tests live in `test/e2e/` (Python Playwright): `standalone.py`, `tracks.py`, `workload_fit.py`, `board.py` and `saves.py`. CI runs them all, then compares the fingerprint (702 evaluations, 1,053 step screens and 840 rules cases across every example library, team standards and scenario) with `test/e2e/fingerprint-baseline.json`. The fingerprint covers the main step screens, not side panels such as Frameworks, Portfolio or AI settings.
+Browser tests live in `test/e2e/` (Python Playwright): `standalone.py`, `tracks.py`, `workload_fit.py`, `board.py`, `saves.py` and `sovereignty.py`. CI runs them all, then compares the fingerprint (702 evaluations, 1,053 step screens and 840 rules cases across every example library, team standards and scenario) with `test/e2e/fingerprint-baseline.json`. The fingerprint covers the main step screens, not side panels such as Frameworks, Portfolio or AI settings.
 
 **Saved designs** carry `schemaVersion` (now 2) and `appVersion`. Products are stored by name as well as position (`pickNames`, and `pn` on canvas nodes), because positions shift when the catalogue changes. Every save passes through `migrateDesign()` when loaded; anything no longer in the catalogue is cleared and the learner sees a note. When the save format changes, raise `SAVE_VERSION`, extend `migrateDesign()` and add a fixture to `test/fixtures/saves/`. Team standards (`team/standards`) are stored with product names too (`standardsForStore` and `standardsFromStore` in `standards.js`); a standard whose product has gone becomes "no standard" and the Canvas says so. See [HANDOFF.md](HANDOFF.md) for project state, settled rules and the backlog.
 
 Edit files in `src/`, never the built files. To add a product, add an option to its building block in `src/engine/catalogue.js` (name, kind, rationale, https link, five scores from 1 to 5, tags); the catalogue tests check its shape. To add a workload rule, add a line to `FIT_RULES` with the threshold stated in its reason.
+
+**Every catalogue entry is dated.** Products, workload-fit rules, the incidents behind drills and reference models each have an entry in `src/data/provenance.json`: `source` (an https link, or `curated` for a judgement whose reason states its basis), `asOf`, `reviewedBy` (`unreviewed` until a person checks it) and `reviewBy`. Adding, renaming or removing a catalogue entry without its provenance fails `npm run check`; a product's source must equal its catalogue link. Entries past `reviewBy` print a warning and show "review due" on screen. The October 2026 entries were backfilled from git history (the date each line last changed); none has been reviewed by a person yet.
+
+**Sovereignty** (`st.sov`: any, region, sovereign, onprem) is a design setting. Its fit rules in `fit-rules.js` use `*` (any block) with `#hosted` or `#saas` tags. Tags record how a product is listed, not whether a self-managed edition exists, so every reason asks the learner to check.
 
 ## How the split was verified
 

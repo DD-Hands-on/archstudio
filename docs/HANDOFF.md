@@ -13,9 +13,9 @@ A practice studio for designing system and enterprise architectures, from a plai
 ## How to work on it
 
 1. Edit `src/` only. Never edit `app/index.html` or `dist/` by hand.
-2. `npm install`, `npm test` (60 unit tests), `npm run typecheck`, `npm run build`, `npm run check`.
-3. `npm run e2e` runs the five browser suites (standalone, tracks, workload fit, board, saves; Python Playwright 1.63.0, Chromium).
-4. `npm run fingerprint` compares 702 evaluations and 1,053 step screens with the committed baseline. After an intended screen or score change, run `npm run fingerprint:update` and commit the baseline in the same commit.
+2. `npm install`, `npm test` (69 unit tests), `npm run typecheck`, `npm run build`, `npm run check` (includes the provenance check).
+3. `npm run e2e` runs the six browser suites (standalone, tracks, workload fit, board, saves, sovereignty; Python Playwright 1.63.0, Chromium).
+4. `npm run fingerprint` compares 702 evaluations, 1,053 step screens and 879 rules cases (libraries, team standards, scenarios, sovereignty) with the committed baseline. After an intended screen or score change, run `npm run fingerprint:update` and commit the baseline in the same commit.
 5. Commit, push to `main` (CI runs unit tests, the build check, all browser suites and the fingerprint), then republish the Claude artifact from `dist/archstudio-claude.html`.
 
 ## Rules that are settled
@@ -51,7 +51,7 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 1. Agentic systems as a first-class design area: agent identity and least privilege, sandboxing, durable execution, approval tiers, MCP and A2A as choices with trade-offs.
 2. AI production patterns: gateway with model routing and tiered fallbacks, semantic cache, time to first token and streaming, AI monitoring, golden-set evaluation, knowledge-graph block, an "AI provider outage" drill. Detail is in the Project doc `reference-system-design-llm-era-alignment.md`.
 3. Real AI cost: cost per query and per user from tokens a day.
-4. Regulation: the EU AI Act drill likely still teaches August 2026 for high-risk duties. A May 2026 provisional deal moves this to December 2027 (August 2028 for AI in products). Confirm final adoption, then update. Date-stamp regulatory content. Add a sovereignty option.
+4. Done in Stage 3: the regulation drill now cites Regulation (EU) 2026/1744 (high-risk duties from 2 December 2027, 2 August 2028 for AI in regulated products), dated Nov 2026. It never taught August 2026; it was only vague. Sovereignty option added.
 5. New steps: API contracts and data model.
 6. Exports: C4 or Structurizr, ArchiMate exchange, decision records, fitness functions.
 7. Platform engineering and supply-chain blocks.
@@ -61,7 +61,7 @@ Journey with chevrons; two lenses (system first, enterprise portfolio first); th
 2. Done in Stage 1: browser tests and fingerprint run in CI.
 2a. Done in Stage 2: team standards stored by product name.
 2b. **Team mode has no screen.** Its view model (work in flight, pattern library, bench) is computed in `teamVals()` but no template renders it, since the first commit. Team standards can only come from stored data. Decide: build the screen or remove the code (ties to the product decision).
-3. Catalogue as dated data: source, "as of" date and reviewer per entry.
+3. Done in Stage 3: every product, fit rule, incident and reference model has source, as-of, reviewer and review date in `src/data/provenance.json`, validated against a JSON Schema and the catalogue. All are `unreviewed`; a person should review them, starting with the AI and regulation entries.
 4. Practise the AI patterns taught: versioned prompts, schema-checked replies, golden-set tests for the brief reader and board, a usage meter.
 5. One engine, three shells: web app, command line, MCP server.
 6. Decide: static learning tool or team product (accounts, shared storage, opt-in usage data).

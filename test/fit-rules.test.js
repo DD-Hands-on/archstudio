@@ -11,8 +11,11 @@ const N = over => Object.assign({}, base, over);
 
 test('every rule targets a block and product that exist', () => {
   for (const [c, name, , d] of FIT_RULES) {
-    assert.ok(D.cat[c], 'unknown block ' + c);
-    if (name !== '*hosted') assert.ok(D.cat[c].o.some(o => o.n.indexOf(name) === 0), c + ': no product starting ' + name);
+    assert.ok(c === '*' || D.cat[c], 'unknown block ' + c);
+    const blocks = c === '*' ? Object.keys(D.cat) : [c];
+    const hosted = ['saas', 'aws', 'azure', 'gcp'];
+    const match = o => name === '*hosted' ? true : name === '#hosted' ? hosted.some(t => o.t.includes(t)) : name === '#saas' ? o.t.includes('saas') : o.n.indexOf(name) === 0;
+    assert.ok(blocks.some(b => D.cat[b].o.some(match)), c + ': no product matches ' + name);
     for (const k of Object.keys(d)) assert.ok(+k >= 0 && +k <= 4 && d[k] !== 0, 'dimension and change are valid');
   }
 });

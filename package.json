@@ -6,14 +6,17 @@
   "type": "module",
   "scripts": {
     "build": "node build/build.mjs",
-    "check": "node build/build.mjs --check",
+    "check": "node build/build.mjs --check && node build/provenance-check.mjs",
     "test": "node --test test/*.test.js",
     "e2e": "python3 test/e2e/run_all.py",
     "fingerprint": "python3 test/e2e/fingerprint_check.py",
     "fingerprint:update": "python3 test/e2e/fingerprint_check.py --update",
-    "typecheck": "tsc -p ."
+    "typecheck": "tsc -p .",
+    "provenance": "node build/provenance-check.mjs"
   },
   "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "esbuild": "0.28.2",
     "typescript": "5.9.3"
   },

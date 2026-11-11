@@ -76,6 +76,13 @@ async () => {
     } catch (e) { v = 'ERR ' + e.message; }
     res.rules[key] = h(v);
   }
+  // 4. sovereignty: adjusted product scores for every block of every reference model at each setting
+  for (const app of apps) for (const sov of ['region', 'sovereign', 'onprem']) {
+    reset({ app, sov, ai: 'native', level: 'advanced', guided: false });
+    let v;
+    try { v = strip(I.comps().map(c => [c, I.fitOpts(c).map(o => [o.n, o.s, (o.fit || []).map(f => [f.d, f.v, f.why])])])); } catch (e) { v = 'ERR ' + e.message; }
+    res.rules['sov|' + app + '|' + sov] = h(v);
+  }
   return res;
 }
 """

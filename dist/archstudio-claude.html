@@ -629,7 +629,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <span style="font-size: 13px; font-weight: 600">{{g.label}}</span>
 <div style="display: flex; flex-wrap: wrap; gap: 6px">
 <sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3">
-<button type="button" onClick="{{o.pick}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
 </sc-for>
 </div>
 </div>
@@ -744,7 +744,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <span style="font-size: 12px; color: var(--ink-3)">{{f.blk}}</span>
 </div>
 <span style="font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: {{f.cbg}}; color: {{f.cfg}}">{{f.chg}}</span>
-<span style="flex: 1 1 280px; font-size: 13px; color: var(--ink-2)">{{f.why}}</span>
+<span style="flex: 1 1 280px; font-size: 13px; color: var(--ink-2)">{{f.why}} <span style="font-size: 12px; color: var(--ink-3)">{{f.asOf}}</span></span>
 </div>
 </sc-for>
 </div>
@@ -910,7 +910,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <sc-for list="{{sig}}" as="p" hint-placeholder-count="4">
 <div style="flex: 1 1 240px; border: 1px solid var(--ink-2); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 6px">
 <span style="font-weight: 600">{{p.t}}</span>
-<span style="font-size: 13px; color: var(--hair)">{{p.d}}</span>
+<span style="font-size: 13px; color: var(--on-inverse)">{{p.d}}</span>
 <a href="{{p.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--on-inverse-accent)">Source</a>
 </div>
 </sc-for>
@@ -1037,6 +1037,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 </button>
 <div style="padding: 0 14px 12px">
 <a href="{{o.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px">Read more</a>
+<span style="font-size: 12px; color: var(--ink-3)"> · {{o.asOf}}</span>
 </div>
 </div>
 </sc-for>
@@ -1356,8 +1357,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div style="background: var(--inverse); color: var(--on-accent); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
 <span style="font-family: var(--mono); font-size: 11px; color: var(--on-inverse-2); text-transform: uppercase">{{incident.k}}</span>
 <span style="font-weight: 700">{{incident.t}}</span>
-<span style="font-size: 14px; color: var(--hair)">{{incident.d}}</span>
-<a href="{{incident.u}}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--on-inverse-accent)">Read the source</a>
+<span style="font-size: 14px; color: var(--on-inverse)">{{incident.d}}</span>
+<span style="font-size: 13px"><a href="{{incident.u}}" target="_blank" rel="noopener noreferrer" style="color: var(--on-inverse-accent)">Read the source</a> <span style="color: var(--on-inverse-2)">· {{incident.asOf}}</span></span>
 </div>
 <div style="background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 8px">
 <h2 style="margin: 0; font-size: 16px; color: var(--accent-ink)">How a senior architect responds</h2>
@@ -2047,6 +2048,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   var fmtGBW = (g) => g >= 1e3 ? fmtW(g / 1e3) + " TB" : Math.round(g) + " GB";
 
   // src/engine/fit-rules.js
+  var HOSTED = ["saas", "aws", "azure", "gcp"];
   var FIT_RULES = [
     ["db", "PostgreSQL", (N) => N.writeRps > 2e4, { 0: -2 }, (N) => "One primary takes every write; " + fmtW(N.writeRps) + " writes/s means sharding (Citus or similar)."],
     ["db", "PostgreSQL", (N) => N.writeRps > 5e3 && N.writeRps <= 2e4, { 0: -1 }, (N) => fmtW(N.writeRps) + " writes/s is near what one primary handles comfortably (about 5k); plan partitioning early."],
@@ -2091,21 +2093,33 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     ["geo", "Amazon Location Service", (N) => N.peakRps > 1e3, { 1: -1 }, (N) => "Charged per request at " + fmtW(N.peakRps) + "/s at peak."],
     ["tsdb", "TimescaleDB", (N) => N.writeRps > 5e4, { 0: -1 }, (N) => "Single-primary writes at " + fmtW(N.writeRps) + "/s; consider multi-node or a purpose-built store."],
     ["ingest", "AWS IoT Core", (N) => N.writeRps > 5e4, { 1: -1 }, (N) => "Per-message pricing at " + fmtW(N.writeRps) + " messages/s."],
-    ["ingest", "Azure IoT Hub", (N) => N.writeRps > 5e4, { 1: -1 }, (N) => "Priced in units of messages a day; " + fmtW(N.writeRps) + " messages/s needs many units."]
+    ["ingest", "Azure IoT Hub", (N) => N.writeRps > 5e4, { 1: -1 }, (N) => "Priced in units of messages a day; " + fmtW(N.writeRps) + " messages/s needs many units."],
+    // Sovereignty: where data and models may run (N.sov). Tags say how a product is listed, not whether a
+    // self-managed edition exists, so the reasons ask the learner to check. * matches any block; #hosted
+    // matches products listed as vendor-hosted or public-cloud services, #saas only vendor-hosted ones.
+    ["*", "#hosted", (N) => N.sov === "onprem", { 3: -2 }, () => "Listed as a vendor-hosted or public-cloud service, so it does not run in your own data centre as listed. Check whether a self-managed edition exists."],
+    ["*", "#hosted", (N) => N.sov === "sovereign", { 3: -1 }, () => "Check where it stores and processes data, which country's law the provider is subject to, and whether a sovereign-cloud option exists."],
+    ["llm", "#hosted", (N) => N.sov === "sovereign", { 3: -1 }, () => "A hosted model API processes prompts and outputs on the provider's side. Look for a sovereign or in-country endpoint, or self-host open-weight models."],
+    ["*", "#saas", (N) => N.sov === "region", { 3: -1 }, () => "Vendor-hosted: confirm it can keep your data in your region before you rely on it."],
+    ["llm", "#hosted", (N) => N.sov === "region", { 3: -1 }, () => "Confirm the provider processes prompts and outputs in your region, not only stores them there."]
   ];
   function fitFor(cid, o, N) {
     const notes = [];
     if (!N) return notes;
+    const seen = {};
     FIT_RULES.forEach(([c, name, test, d, why]) => {
-      if (c !== cid) return;
-      const hit = name === "*hosted" ? o.t.indexOf("gpu") < 0 : o.n.indexOf(name) === 0;
+      const base = c + "/" + name;
+      seen[base] = (seen[base] || 0) + 1;
+      const key = base + "#" + seen[base];
+      if (c !== cid && c !== "*") return;
+      const hit = name === "*hosted" ? o.t.indexOf("gpu") < 0 : name === "#hosted" ? HOSTED.some((t) => o.t.indexOf(t) >= 0) : name === "#saas" ? o.t.indexOf("saas") >= 0 : o.n.indexOf(name) === 0;
       if (!hit) return;
       let ok = false;
       try {
         ok = !!test(N);
       } catch (e) {
       }
-      if (ok) Object.keys(d).forEach((k) => notes.push({ d: +k, v: d[k], why: why(N) }));
+      if (ok) Object.keys(d).forEach((k) => notes.push({ d: +k, v: d[+k], why: why(N), key }));
     });
     return notes;
   }
@@ -2815,7 +2829,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     glossary.littles = ["Little's law", "Items in a system = arrival rate × time each spends there. It sizes queues, pools and concurrency.", "people in a coffee shop = arrivals per minute × minutes each stays."];
     glossary.pacelc = ["CAP and PACELC", "When the network splits, choose consistency or availability; when it does not, choose consistency or low latency.", "two branch tills that lose their phone line: stop selling, or sell and reconcile later."];
     incidents.exit = ["SAP ECC end of mainstream maintenance", "In 2020 SAP set 2027 as the end of mainstream maintenance for its ECC business suite, with optional extended maintenance to 2030. Thousands of firms now run their migrations against that fixed date.", "https://news.sap.com/2020/02/sap-s4hana-maintenance-2040-clarity-choice-sap-business-suite-7/", "Real deadline"];
-    incidents.regulation = ["EU AI Act, in force August 2024", "The EU AI Act entered into force on 1 August 2024, with obligations phasing in over the following years, including duties for high-risk AI uses and general-purpose models.", "https://eur-lex.europa.eu/eli/reg/2024/1689/oj", "Real regulation"];
+    incidents.regulation = ["EU AI Act, amended July 2026", "The EU AI Act has applied in stages since August 2024: bans on prohibited uses from February 2025, duties for general-purpose models from August 2025. The Digital Omnibus on AI (Regulation (EU) 2026/1744, in force 27 July 2026) moved high-risk duties to 2 December 2027, and to 2 August 2028 for AI built into regulated products.", "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601744", "Real regulation"];
     incidents.storm = ["CrowdStrike update outage, July 2024", "A faulty security software update crashed about 8.5 million Windows devices worldwide, according to Microsoft. Service desks were flooded, and many fixes needed hands-on work at each machine.", "https://techcrunch.com/2024/07/20/microsoft-says-8-5m-windows-devices-were-affected-by-crowdstrike-outage/", "Real incident"];
     stepTerms.workload = ["rps", "latency", "littles", "pacelc", "cache", "queue", "shard"];
     stepTerms.blueprint = stepTerms.blueprint.concat(["aiops"]);
@@ -3026,7 +3040,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       inflight: peakRps * W.lat / 1e3,
       inst: Math.ceil(peakRps / 400) + 1,
       tokensDay,
-      key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join("|")
+      sov: st.sov || "any",
+      key: [st.app, st.scale, st.ai, W.actions, W.ratio, W.lat, W.cons, W.peak, W.growth, W.pattern].join("|") + (st.sov && st.sov !== "any" ? "|" + st.sov : "")
     };
   }
 
@@ -3411,6 +3426,1428 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     return { rows, count, plateaus };
   }
 
+  // src/data/provenance.json
+  var provenance_default = {
+    $schema: "./provenance.schema.json",
+    products: {
+      "ui/Next.js (React)": {
+        source: "https://nextjs.org/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ui/Angular": {
+        source: "https://angular.dev",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ui/Flutter": {
+        source: "https://docs.flutter.dev",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "bi/Apache Superset": {
+        source: "https://superset.apache.org/docs/intro",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "bi/Microsoft Power BI": {
+        source: "https://learn.microsoft.com/power-bi/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "bi/Tableau": {
+        source: "https://help.tableau.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "edge/Cloudflare": {
+        source: "https://developers.cloudflare.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "edge/AWS CloudFront + WAF": {
+        source: "https://docs.aws.amazon.com/cloudfront/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "edge/Azure Front Door": {
+        source: "https://learn.microsoft.com/azure/frontdoor/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lb/NGINX": {
+        source: "https://nginx.org/en/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lb/Envoy": {
+        source: "https://www.envoyproxy.io/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lb/AWS Application Load Balancer": {
+        source: "https://docs.aws.amazon.com/elasticloadbalancing/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "gw/Kong Gateway": {
+        source: "https://docs.konghq.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "gw/Amazon API Gateway": {
+        source: "https://docs.aws.amazon.com/apigateway/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "gw/Azure API Management": {
+        source: "https://learn.microsoft.com/azure/api-management/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "app/Kubernetes": {
+        source: "https://kubernetes.io/docs/home/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "app/AWS Lambda": {
+        source: "https://docs.aws.amazon.com/lambda/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "app/Azure Container Apps": {
+        source: "https://learn.microsoft.com/azure/container-apps/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "orch/LangGraph": {
+        source: "https://langchain-ai.github.io/langgraph/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "orch/LlamaIndex": {
+        source: "https://docs.llamaindex.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "orch/Haystack": {
+        source: "https://docs.haystack.deepset.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "agents/LangGraph": {
+        source: "https://langchain-ai.github.io/langgraph/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "agents/CrewAI": {
+        source: "https://docs.crewai.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "agents/Claude Agent SDK": {
+        source: "https://docs.claude.com/en/api/agent-sdk/overview",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tools/Model Context Protocol (MCP)": {
+        source: "https://modelcontextprotocol.io",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tools/Agent2Agent (A2A) protocol": {
+        source: "https://github.com/a2aproject/A2A",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tools/OpenAPI tool adapters": {
+        source: "https://swagger.io/specification/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/vLLM + Hugging Face models": {
+        source: "https://docs.vllm.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/Claude via API": {
+        source: "https://docs.claude.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/Amazon Bedrock": {
+        source: "https://docs.aws.amazon.com/bedrock/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/Azure OpenAI Service": {
+        source: "https://learn.microsoft.com/azure/ai-services/openai/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/Gemini on Vertex AI": {
+        source: "https://cloud.google.com/vertex-ai/generative-ai/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "llm/OpenAI API": {
+        source: "https://platform.openai.com/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "guard/NeMo Guardrails": {
+        source: "https://docs.nvidia.com/nemo/guardrails/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "guard/Langfuse": {
+        source: "https://langfuse.com/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "guard/Azure AI Content Safety": {
+        source: "https://learn.microsoft.com/azure/ai-services/content-safety/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "media/FFmpeg + Shaka Packager": {
+        source: "https://ffmpeg.org/documentation.html",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "media/AWS Elemental MediaConvert": {
+        source: "https://docs.aws.amazon.com/mediaconvert/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "media/Mux": {
+        source: "https://docs.mux.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "reco/Feast + PyTorch": {
+        source: "https://docs.feast.dev",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "reco/Amazon Personalize": {
+        source: "https://docs.aws.amazon.com/personalize/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "reco/Google Vertex AI": {
+        source: "https://cloud.google.com/vertex-ai/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ingest/EMQX": {
+        source: "https://docs.emqx.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ingest/AWS IoT Core": {
+        source: "https://docs.aws.amazon.com/iot/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ingest/Azure IoT Hub": {
+        source: "https://learn.microsoft.com/azure/iot-hub/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "stream/Apache Flink": {
+        source: "https://nightlies.apache.org/flink/flink-docs-stable/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "stream/Spark Structured Streaming": {
+        source: "https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "stream/Amazon Managed Flink": {
+        source: "https://docs.aws.amazon.com/managed-flink/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "integ/Airbyte": {
+        source: "https://docs.airbyte.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "integ/Fivetran": {
+        source: "https://fivetran.com/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "integ/MuleSoft Anypoint": {
+        source: "https://docs.mulesoft.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "db/PostgreSQL": {
+        source: "https://www.postgresql.org/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "db/Amazon Aurora PostgreSQL": {
+        source: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "db/MongoDB Atlas": {
+        source: "https://www.mongodb.com/docs/atlas/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "nosql/Apache Cassandra": {
+        source: "https://cassandra.apache.org/doc/latest/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "nosql/Amazon DynamoDB": {
+        source: "https://docs.aws.amazon.com/dynamodb/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "nosql/Azure Cosmos DB": {
+        source: "https://learn.microsoft.com/azure/cosmos-db/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "cache/Valkey (Redis-compatible)": {
+        source: "https://valkey.io/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "cache/Amazon ElastiCache": {
+        source: "https://docs.aws.amazon.com/elasticache/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "cache/Memcached": {
+        source: "https://memcached.org",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "geo/H3 + PostGIS": {
+        source: "https://h3geo.org/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "geo/Valkey geo commands": {
+        source: "https://valkey.io/commands/geoadd/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "geo/Amazon Location Service": {
+        source: "https://docs.aws.amazon.com/location/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "search/OpenSearch": {
+        source: "https://opensearch.org/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "search/Elastic Cloud": {
+        source: "https://www.elastic.co/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "search/Algolia": {
+        source: "https://www.algolia.com/doc/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mq/Apache Kafka": {
+        source: "https://kafka.apache.org/documentation/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mq/RabbitMQ": {
+        source: "https://www.rabbitmq.com/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mq/Confluent Cloud": {
+        source: "https://docs.confluent.io/cloud/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "vec/pgvector": {
+        source: "https://github.com/pgvector/pgvector",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "vec/Qdrant": {
+        source: "https://qdrant.tech/documentation/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "vec/Pinecone": {
+        source: "https://docs.pinecone.io",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mem/LangGraph checkpointer on Postgres": {
+        source: "https://langchain-ai.github.io/langgraph/concepts/persistence/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mem/Mem0": {
+        source: "https://docs.mem0.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mem/Letta": {
+        source: "https://docs.letta.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tsdb/TimescaleDB": {
+        source: "https://docs.timescale.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tsdb/InfluxDB": {
+        source: "https://docs.influxdata.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "tsdb/Azure Data Explorer": {
+        source: "https://learn.microsoft.com/azure/data-explorer/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lake/Apache Iceberg + Spark": {
+        source: "https://iceberg.apache.org/docs/latest/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lake/Databricks": {
+        source: "https://docs.databricks.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "lake/Snowflake": {
+        source: "https://docs.snowflake.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "catalog/OpenMetadata": {
+        source: "https://docs.open-metadata.org",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "catalog/DataHub": {
+        source: "https://datahubproject.io/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "catalog/Collibra": {
+        source: "https://www.collibra.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mesh/Istio": {
+        source: "https://istio.io/latest/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mesh/Linkerd": {
+        source: "https://linkerd.io/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mesh/Google Cloud Service Mesh": {
+        source: "https://cloud.google.com/service-mesh/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigw/LiteLLM": {
+        source: "https://docs.litellm.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigw/Portkey": {
+        source: "https://portkey.ai/docs",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigw/Azure API Management AI gateway": {
+        source: "https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigov/MLflow": {
+        source: "https://mlflow.org/docs/latest/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigov/IBM watsonx.governance": {
+        source: "https://www.ibm.com/docs/en/watsonx/saas",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aigov/Credo AI": {
+        source: "https://www.credo.ai",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "embai/SAP Joule": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "embai/Salesforce Agentforce": {
+        source: "https://architect.salesforce.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "embai/ServiceNow Now Assist": {
+        source: "https://www.servicenow.com/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "embai/Microsoft Copilot Studio": {
+        source: "https://learn.microsoft.com/microsoft-copilot-studio/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aiops/ServiceNow Event Management": {
+        source: "https://www.servicenow.com/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aiops/BigPanda": {
+        source: "https://docs.bigpanda.io",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "aiops/Keep": {
+        source: "https://docs.keephq.dev",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "runbook/Ansible": {
+        source: "https://docs.ansible.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "runbook/Rundeck": {
+        source: "https://docs.rundeck.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "runbook/Azure Automation": {
+        source: "https://learn.microsoft.com/azure/automation/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "runbook/AWS Systems Manager Automation": {
+        source: "https://docs.aws.amazon.com/systems-manager/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ux/SAP Fiori launchpad": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ux/Microsoft Teams apps": {
+        source: "https://learn.microsoft.com/microsoftteams/platform/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ux/Custom React portal": {
+        source: "https://react.dev",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "erpcore/SAP S/4HANA Cloud, private edition (RISE)": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "erpcore/SAP S/4HANA Cloud, public edition": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "erpcore/Oracle Fusion Cloud ERP": {
+        source: "https://docs.oracle.com/en/cloud/saas/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "erpcore/Odoo": {
+        source: "https://www.odoo.com/documentation/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ext/SAP BTP": {
+        source: "https://discovery-center.cloud.sap",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ext/Microsoft Power Platform": {
+        source: "https://learn.microsoft.com/power-platform/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ext/Custom services on Kubernetes": {
+        source: "https://kubernetes.io/docs/home/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ipaas/SAP Integration Suite": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ipaas/MuleSoft Anypoint": {
+        source: "https://docs.mulesoft.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "ipaas/Apache Camel": {
+        source: "https://camel.apache.org/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mdm/SAP Master Data Governance": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mdm/Informatica MDM": {
+        source: "https://docs.informatica.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "mdm/Reltio": {
+        source: "https://docs.reltio.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "migr/SAP S/4HANA Migration Cockpit": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "migr/Syniti": {
+        source: "https://www.syniti.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "migr/dbt + Python pipelines": {
+        source: "https://docs.getdbt.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "proc/SAP Signavio": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "proc/Celonis": {
+        source: "https://docs.celonis.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "proc/PM4Py": {
+        source: "https://pm4py.fit.fraunhofer.de",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "alm/SAP Cloud ALM": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "alm/Tricentis Tosca": {
+        source: "https://documentation.tricentis.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "alm/Playwright": {
+        source: "https://playwright.dev/docs/intro",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "grc/SAP GRC Access Control": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "grc/Saviynt": {
+        source: "https://docs.saviyntcloud.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "grc/SailPoint": {
+        source: "https://documentation.sailpoint.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "hcm/Workday HCM": {
+        source: "https://www.workday.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "hcm/SAP SuccessFactors Employee Central": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "hcm/OrangeHRM": {
+        source: "https://www.orangehrm.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "payroll/SAP SuccessFactors Employee Central Payroll": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "payroll/Workday Payroll": {
+        source: "https://www.workday.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "payroll/ADP": {
+        source: "https://www.adp.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "talent/Cornerstone": {
+        source: "https://www.cornerstoneondemand.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "talent/SAP SuccessFactors Learning": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "talent/Moodle": {
+        source: "https://docs.moodle.org",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "crmcore/Salesforce Sales and Service Cloud": {
+        source: "https://architect.salesforce.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "crmcore/Microsoft Dynamics 365": {
+        source: "https://learn.microsoft.com/dynamics365/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "crmcore/SuiteCRM": {
+        source: "https://docs.suitecrm.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "itsm/ServiceNow ITSM": {
+        source: "https://www.servicenow.com/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "itsm/Jira Service Management": {
+        source: "https://support.atlassian.com/jira-service-management-cloud/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "itsm/GLPI": {
+        source: "https://glpi-project.org",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "p2p/SAP Ariba": {
+        source: "https://learning.sap.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "p2p/Coupa": {
+        source: "https://compass.coupa.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "p2p/Oracle Procurement Cloud": {
+        source: "https://docs.oracle.com/en/cloud/saas/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "idp/Keycloak": {
+        source: "https://www.keycloak.org/documentation",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "idp/Okta": {
+        source: "https://developer.okta.com/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "idp/Microsoft Entra ID": {
+        source: "https://learn.microsoft.com/entra/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "obs/OpenTelemetry + Grafana": {
+        source: "https://opentelemetry.io/docs/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "obs/Datadog": {
+        source: "https://docs.datadoghq.com",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      "obs/Azure Monitor": {
+        source: "https://learn.microsoft.com/azure/azure-monitor/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      }
+    },
+    fitRules: {
+      "db/PostgreSQL#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "db/PostgreSQL#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "db/PostgreSQL#3": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "db/Amazon Aurora PostgreSQL#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "db/Amazon Aurora PostgreSQL#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "db/MongoDB Atlas#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "nosql/Apache Cassandra#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "nosql/Amazon DynamoDB#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "nosql/Azure Cosmos DB#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "search/Algolia#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "search/Algolia#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "search/Algolia#3": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "search/OpenSearch#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "search/Elastic Cloud#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "mq/RabbitMQ#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "mq/RabbitMQ#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "mq/Apache Kafka#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "mq/Confluent Cloud#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "gw/Amazon API Gateway#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "gw/Amazon API Gateway#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "gw/Amazon API Gateway#3": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "gw/Azure API Management#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "app/AWS Lambda#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "app/AWS Lambda#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "app/AWS Lambda#3": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "app/AWS Lambda#4": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "app/Kubernetes#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "llm/vLLM#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "llm/vLLM#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "llm/*hosted#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "stream/Spark Structured Streaming#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "lake/Apache Iceberg#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "lake/Snowflake#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "lake/Databricks#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "obs/Datadog#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "obs/Datadog#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "idp/Okta#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "idp/Okta#2": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "idp/Microsoft Entra ID#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "idp/Keycloak#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "geo/Amazon Location Service#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "tsdb/TimescaleDB#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "ingest/AWS IoT Core#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "ingest/Azure IoT Hub#1": {
+        source: "curated",
+        asOf: "2026-10-28",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-28"
+      },
+      "*/#hosted#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-11-11",
+        note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      },
+      "*/#hosted#2": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-11-11",
+        note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      },
+      "llm/#hosted#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-11-11",
+        note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      },
+      "*/#saas#1": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-11-11",
+        note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      },
+      "llm/#hosted#2": {
+        source: "curated",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-11-11",
+        note: "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+      }
+    },
+    incidents: {
+      surge: {
+        source: "https://cloud.google.com/blog/products/containers-kubernetes/bringing-pokemon-go-to-life-on-google-cloud",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      outage: {
+        source: "https://aws.amazon.com/message/41926/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      audit: {
+        source: "https://curia.europa.eu/jcms/upload/docs/application/pdf/2020-07/cp200091en.pdf",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      price: {
+        source: "https://redis.io/blog/redis-adopts-dual-source-available-licensing/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      cutover: {
+        source: "https://www.consultancy.uk/news/18243/lidl-cancels-sap-introduction-having-sunk-500-million-into-it",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      model: {
+        source: "https://docs.claude.com/en/docs/about-claude/model-deprecations",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      inject: {
+        source: "https://aibusiness.com/nlp/air-canada-held-responsible-for-chatbot-s-hallucinations-",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      },
+      exit: {
+        source: "https://news.sap.com/2020/02/sap-s4hana-maintenance-2040-clarity-choice-sap-business-suite-7/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      regulation: {
+        source: "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601744",
+        asOf: "2026-11-11",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-05-11",
+        note: "Dates checked on 11 Nov 2026 against Regulation (EU) 2026/1744 (OJ L, 24 July 2026) and Regulation (EU) 2024/1689. Not yet reviewed by a person."
+      },
+      storm: {
+        source: "https://techcrunch.com/2024/07/20/microsoft-says-8-5m-windows-devices-were-affected-by-crowdstrike-outage/",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2028-10-23"
+      }
+    },
+    referenceModels: {
+      ecom: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      genai: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      iot: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      data: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      stream: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      retail: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      agents: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      ride: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      sap: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      hr: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      crm: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      itsm: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      },
+      procure: {
+        source: "curated",
+        asOf: "2026-10-23",
+        reviewedBy: "unreviewed",
+        reviewBy: "2027-10-23"
+      }
+    }
+  };
+
+  // src/engine/provenance.js
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function provenanceOf(section, key) {
+    const s = (
+      /** @type {Record<string, Provenance>} */
+      provenance_default[section]
+    );
+    return s && s[key] || null;
+  }
+  function monthYear(iso) {
+    const [y, m] = iso.split("-");
+    return MONTHS[Number(m) - 1] + " " + y;
+  }
+  function asOfLabel(p, today) {
+    if (!p) return "";
+    return "As of " + monthYear(p.asOf) + (p.reviewBy < today ? " · review due" : "");
+  }
+
+  // src/engine/sovereignty.js
+  var SOV_OPTIONS = [["any", "Anywhere"], ["region", "In our region"], ["sovereign", "Sovereign cloud"], ["onprem", "On premises"]];
+  var SOV_PHRASE = (
+    /** @type {Record<Sov, string>} */
+    { any: "anywhere", region: "in our region", sovereign: "in a sovereign cloud", onprem: "on premises" }
+  );
+  function sovOf(v) {
+    return v === "region" || v === "sovereign" || v === "onprem" ? v : "any";
+  }
+  function sovFromText(text) {
+    const t = " " + String(text || "").toLowerCase() + " ";
+    if (/on-prem|on prem|own data ?cent(?:re|er)|air-gapped|air gapped/.test(t)) return "onprem";
+    if (/sovereign/.test(t)) return "sovereign";
+    if (/data residency|in-region|in region|data localisation|data localization|(?:stay|remain|kept|keep it|stored) (?:with)?in (?:the )?(?:eu|uk|us|india|country|region)\b/.test(t)) return "region";
+    return null;
+  }
+
   // src/app/board-roles.js
   var BOARD_ROLES = [
     ["SRE lead", "Reliability and operations", "failure modes, the availability chain, observability, on-call load and recovery targets, tested against the Drill results and the Workload numbers"],
@@ -3684,6 +5121,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       scale: "1M",
       reg: false,
       cloud: "aws",
+      sov: "any",
       field: "green",
       lens: "system",
       avail: "99.95",
@@ -3920,7 +5358,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const models = Object.keys(D.apps).map((k) => "- " + k + ": " + D.apps[k].n + ". " + D.apps[k].d).join("\n");
       const comps = Object.keys(D.cat).map((k) => "- " + k + ": " + D.cat[k].l + ". " + D.cat[k].need).join("\n");
       const convo = chat.slice(-10).map((m) => m.role === "user" ? "User: " + m.text : m.role === "studio" ? "Studio (your earlier reading): " + m.summary : "").filter(Boolean).join("\n");
-      return "You are the brief interpreter inside an architecture design studio used by aspiring and practising architects. Read the conversation and turn the user's latest intent into a design brief that uses ONLY the studio catalogue below. Accept any kind of input: a product idea, a company or style to emulate, an enterprise implementation (ERP, HR, CRM, ITSM, procurement), a business problem, or a refinement of the earlier reading. If the user refines, keep everything from the earlier reading that they did not change.\n\n" + (this.state.lens === "enterprise" ? "The user works enterprise portfolio first: read the brief in terms of business capabilities, the existing application estate, systems to retire and enterprise standards, and ask clarifying questions about those rather than about load or latency.\n\n" : "The user works system first: read the brief in terms of one system, its users, load, data and building blocks, and ask clarifying questions about those.\n\n") + 'REFERENCE MODELS (choose the closest as base, or "custom"):\n' + models + "\n\nCOMPONENT CATALOGUE (use only these ids):\n" + comps + "\n\nCONVERSATION (oldest first):\n" + convo + '\n\nReply with only one JSON object in this shape:\n{"title": "short name, max 8 words", "understanding": "2 or 3 plain sentences restating what they want to build and why", "base": "one reference model id or custom", "components": ["5 to 16 catalogue ids the design needs; omit generic AI ids unless AI is central, the studio adds AI parts from the posture"], "settings": {"ai": "none|enabled|native", "reg": true, "field": "green|brown", "scale": "10k|1M|50M", "cloud": "aws|azure|multi", "avail": "99.9|99.95|99.99"}, "request": "one typical user journey, lower case, e.g. a buyer posts a purchase order", "flows": [{"from": "id", "to": "id", "type": "sync|async|batch", "label": "2 to 4 words"}], "assumptions": ["up to 3 short assumptions"], "notCovered": ["parts of the brief the catalogue cannot represent"], "questions": ["up to 2 short clarifying questions that would most change the design"]}\nInclude in settings only what the conversation implies. Give up to 14 flows for the most important interactions. Use British spelling. Do not use em dashes.';
+      return "You are the brief interpreter inside an architecture design studio used by aspiring and practising architects. Read the conversation and turn the user's latest intent into a design brief that uses ONLY the studio catalogue below. Accept any kind of input: a product idea, a company or style to emulate, an enterprise implementation (ERP, HR, CRM, ITSM, procurement), a business problem, or a refinement of the earlier reading. If the user refines, keep everything from the earlier reading that they did not change.\n\n" + (this.state.lens === "enterprise" ? "The user works enterprise portfolio first: read the brief in terms of business capabilities, the existing application estate, systems to retire and enterprise standards, and ask clarifying questions about those rather than about load or latency.\n\n" : "The user works system first: read the brief in terms of one system, its users, load, data and building blocks, and ask clarifying questions about those.\n\n") + 'REFERENCE MODELS (choose the closest as base, or "custom"):\n' + models + "\n\nCOMPONENT CATALOGUE (use only these ids):\n" + comps + "\n\nCONVERSATION (oldest first):\n" + convo + '\n\nReply with only one JSON object in this shape:\n{"title": "short name, max 8 words", "understanding": "2 or 3 plain sentences restating what they want to build and why", "base": "one reference model id or custom", "components": ["5 to 16 catalogue ids the design needs; omit generic AI ids unless AI is central, the studio adds AI parts from the posture"], "settings": {"ai": "none|enabled|native", "reg": true, "field": "green|brown", "scale": "10k|1M|50M", "cloud": "aws|azure|multi", "sov": "any|region|sovereign|onprem (where data and models may run; any unless the brief says)", "avail": "99.9|99.95|99.99"}, "request": "one typical user journey, lower case, e.g. a buyer posts a purchase order", "flows": [{"from": "id", "to": "id", "type": "sync|async|batch", "label": "2 to 4 words"}], "assumptions": ["up to 3 short assumptions"], "notCovered": ["parts of the brief the catalogue cannot represent"], "questions": ["up to 2 short clarifying questions that would most change the design"]}\nInclude in settings only what the conversation implies. Give up to 14 flows for the most important interactions. Use British spelling. Do not use em dashes.';
     }
     async send(raw) {
       const text = String(raw != null ? raw : this.state.text).trim();
@@ -3988,6 +5426,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       pick("scale", ["10k", "1M", "50M"], (v) => v + " users");
       pick("cloud", ["aws", "azure", "multi"], (v) => ({ aws: "AWS first", azure: "Azure first", multi: "multi-cloud" })[v]);
       pick("avail", ["99.9", "99.95", "99.99"], (v) => v + "% availability");
+      pick("sov", ["any", "region", "sovereign", "onprem"], (v) => "data and models " + SOV_PHRASE[v]);
       const lastUser = chat.filter((m) => m.role === "user").slice(-1)[0];
       const title = String(r.title || (lastUser ? lastUser.text : "Custom design")).slice(0, 70);
       const custom = Object.assign({}, base, { n: title, d: "Interpreted by " + this.aiName() + " from your brief.", c, flows, req: r.request ? String(r.request).slice(0, 90) : base.req });
@@ -4257,6 +5696,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       } else if (/ai-enabled|ai enabled|copilot|genai|[^a-z]ai[^a-z]|[^a-z]llm/.test(t)) {
         flags.ai = "enabled";
         applied.push("AI-enabled posture");
+      }
+      const sv = sovFromText(t);
+      if (sv) {
+        flags.sov = sv;
+        applied.push("data and models " + SOV_PHRASE[sv]);
       }
       let base, c, baseName;
       if (best) {
@@ -4920,7 +6364,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const quads = qDef.map(([pw, it, l, bg, fg]) => ({ l, bg, fg, empty: !stake.some((x) => x[1] === pw && x[2] === it), items: stake.map((s, i) => ({ s, i })).filter((x) => x.s[1] === pw && x.s[2] === it).map((x) => ({ n: x.s[0], on: st.stake === x.i ? "true" : "false", bd: st.stake === x.i ? "var(--accent)" : "var(--hair)", pick: () => this.setState({ stake: st.stake === x.i ? null : x.i }) })) }));
       const scaleWord = { "10k": "thousands of", "1M": "a million", "50M": "tens of millions of" }[st.scale] || "many";
       const lc = (t) => /^[A-Z]{2}/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
-      const statement = sc ? "Success means " + sc.goals.slice(0, -1).map(lc).join(", ") + " and " + lc(sc.goals[sc.goals.length - 1]) + ". The target is built on " + A.n + " and must meet " + (st.reg ? "regulatory obligations" : "enterprise standards") + " and a " + st.avail + "% availability target." : "Deliver the " + A.n + " for " + scaleWord + " users on " + { aws: "AWS", azure: "Azure", multi: "a hybrid or multi-cloud estate" }[st.cloud] + ", " + (st.field === "brown" ? "replacing parts of an existing estate" : "built new") + ", " + (st.reg ? "with regulated data" : "with standard data") + " and a " + st.avail + "% availability target.";
+      const statement = sc ? "Success means " + sc.goals.slice(0, -1).map(lc).join(", ") + " and " + lc(sc.goals[sc.goals.length - 1]) + ". The target is built on " + A.n + " and must meet " + (st.reg ? "regulatory obligations" : "enterprise standards") + " and a " + st.avail + "% availability target." : "Deliver the " + A.n + " for " + scaleWord + " users on " + { aws: "AWS", azure: "Azure", multi: "a hybrid or multi-cloud estate" }[st.cloud] + ", " + (st.field === "brown" ? "replacing parts of an existing estate" : "built new") + ", " + (st.reg ? "with regulated data" : "with standard data") + (sovOf(st.sov) !== "any" ? ", with data and models " + SOV_PHRASE[sovOf(st.sov)] : "") + " and a " + st.avail + "% availability target.";
       const L = (h, items, m, c) => ({ h, m, c, items: items.map((t) => ({ t })) });
       const vision = {
         title: sc ? sc.n : "Architecture vision: " + A.n,
@@ -5033,7 +6477,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       const lines = [];
       lines.push("DESIGN: " + (sc ? sc.n : A.n) + ". Template: " + A.n + ". " + A.d);
       if (sc) lines.push("SITUATION: " + sc.sit);
-      lines.push("CONSTRAINTS: " + ({ "10k": "thousands of", "1M": "about a million", "50M": "tens of millions of" }[st.scale] || st.scale) + " users; availability target " + st.avail + "%; cloud " + st.cloud + "; " + (st.reg ? "regulated data" : "no regulated data") + "; " + (st.field === "brown" ? "brownfield" : "greenfield") + "; AI posture " + st.ai + ".");
+      lines.push("CONSTRAINTS: " + ({ "10k": "thousands of", "1M": "about a million", "50M": "tens of millions of" }[st.scale] || st.scale) + " users; availability target " + st.avail + "%; cloud " + st.cloud + "; " + (st.reg ? "regulated data" : "no regulated data") + "; " + (st.field === "brown" ? "brownfield" : "greenfield") + "; AI posture " + st.ai + (sovOf(st.sov) !== "any" ? "; data and models must run " + SOV_PHRASE[sovOf(st.sov)] : "") + ".");
       if (sc) {
         lines.push("DRIVERS: " + sc.drivers.join("; "));
         lines.push("GOALS: " + sc.goals.join("; "));
@@ -5319,7 +6763,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         stage: stageOverride || (mine && mine.stage === "review" ? "review" : this.liveStage(r)),
         savedAt: now,
         createdAt: mine && mine.createdAt || now,
-        settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, avail: st.avail },
+        settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, sov: sovOf(st.sov), avail: st.avail },
         comps: ds.comps,
         picks,
         pickNames: pickNamesFor(picks, cat),
@@ -5371,6 +6815,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         if (s[k] != null) patch[k] = s[k];
       });
       if (s.reg != null) patch.reg = !!s.reg;
+      patch.sov = sovOf(s.sov);
       this.setState(patch);
     }
     async deleteDesign(id) {
@@ -5794,13 +7239,14 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const tourIntro = (nums[tourSteps.length] || tourSteps.length).toString().replace(/^./, (ch) => ch.toUpperCase()) + " short steps through the model you have chosen. Pick a different template or describe your own in the Brief, and this walkthrough follows it.";
       const apps = D.baseKeys.map((k) => Object.assign({ n: D.apps[k].n, d: D.apps[k].d, count: D.apps[k].c.length + " components at Advanced", pick: () => this.setState({ app: k, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null }) }, sel(st.app === k)));
       const implApps = D.implKeys.map((k) => Object.assign({ n: D.apps[k].n, d: D.apps[k].d, count: D.apps[k].c.length + " components at Advanced", pick: () => this.setState({ app: k, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null }) }, sel(st.app === k)));
-      const grp = (label, key, opts) => ({ label, opts: opts.map(([v, l]) => Object.assign({ l, pick: () => this.setState({ [key]: v }) }, sel(st[key] === v))) });
+      const grp = (label, key, opts) => ({ label, opts: opts.map(([v, l]) => Object.assign({ l, on: st[key] === v ? "true" : "false", pick: () => this.setState({ [key]: v }) }, sel(st[key] === v))) });
       const ctx = [
         grp("AI posture", "ai", [["none", "No AI"], ["enabled", "AI-enabled (copilots assist people)"], ["native", "AI-native (agents do the work, people supervise)"]]),
         grp("Expected scale", "scale", [["10k", "10k users"], ["1M", "1M users"], ["50M", "50M users"]]),
         grp("Data sensitivity", "reg", [[false, "Standard"], [true, "Regulated (GxP, PII)"]]),
         grp("Availability target", "avail", [["99.9", "99.9%"], ["99.95", "99.95%"], ["99.99", "99.99%"]]),
         grp("Cloud posture", "cloud", [["aws", "AWS first"], ["azure", "Azure first"], ["multi", "Multi-cloud or hybrid"]]),
+        grp("Where data and models may run", "sov", SOV_OPTIONS),
         grp("Starting point", "field", [["green", "Greenfield"], ["brown", "Brownfield (replace or extend legacy)"]])
       ];
       const rps = { "10k": "200", "1M": "8,000", "50M": "250,000" }[st.scale];
@@ -6037,6 +7483,10 @@ Give the board's decision. Each member's concern must be resolved in the answers
           up: o.fit.every((f) => f.v > 0),
           chg: o.fit.map((f) => wDimN[f.d] + " " + (f.v > 0 ? "+" : "−") + Math.abs(f.v)).filter((x, k, a) => a.indexOf(x) === k).join(" · "),
           why: o.fit.map((f) => f.why).filter((x, k, a) => a.indexOf(x) === k).join(" "),
+          asOf: (() => {
+            const ds = o.fit.map((f) => provenanceOf("fitRules", f.key)).filter(Boolean).map((p) => p.asOf).sort();
+            return ds.length ? "Rule as of " + monthYear(ds[ds.length - 1]) : "";
+          })(),
           cbg: o.fit.every((f) => f.v > 0) ? "var(--good-soft)" : "var(--warn-soft)",
           cfg: o.fit.every((f) => f.v > 0) ? "var(--good)" : "var(--warn)"
         });
@@ -6286,6 +7736,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
         { l: "Data", v: st.reg ? "Regulated (GxP, PII)" : "Standard" },
         { l: "Availability", v: st.avail + "%" },
         { l: "Cloud", v: { aws: "AWS first", azure: "Azure first", multi: "Multi-cloud or hybrid" }[st.cloud] },
+        { l: "Data and models", v: SOV_OPTIONS.find((o) => o[0] === sovOf(st.sov))[1] },
         { l: "Starting point", v: st.field === "brown" ? "Brownfield" : "Greenfield" }
       ];
       const outs = this.getOuts();
@@ -6311,6 +7762,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const dimNames = ["Scale", "Cost", "Ops ease", "Portability", "Speed"];
       const focus = st.focus && st.focus.outcome === active && comps.indexOf(st.focus.cid) >= 0 ? st.focus : null;
       const stdM = this.stdMap();
+      const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
       const card = (cid) => {
         const cc = C[cid];
         const cur = outs[active].picks[cid];
@@ -6332,6 +7784,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
               k: o.k,
               w: o.w,
               u: o.u,
+              asOf: asOfLabel(provenanceOf("products", cid + "/" + o.n), today),
               sel: on,
               signal,
               hasSignal: !!signal,
@@ -6488,7 +7941,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       }) }));
       const ce = evals[chosenIdx];
       const eaName = "Outcome " + (chosenIdx + 1);
-      const ctxLine = "Brief: " + A.n + ", " + st.scale + " users, " + (st.reg ? "regulated data" : "standard data") + ", " + st.avail + "% availability, " + cname[st.cloud] + " cloud posture, " + { none: "no AI", enabled: "AI-enabled", native: "AI-native" }[st.ai] + ".";
+      const ctxLine = "Brief: " + A.n + ", " + st.scale + " users, " + (st.reg ? "regulated data" : "standard data") + ", " + st.avail + "% availability, " + cname[st.cloud] + " cloud posture, " + { none: "no AI", enabled: "AI-enabled", native: "AI-native" }[st.ai] + (sovOf(st.sov) !== "any" ? ", data and models " + SOV_PHRASE[sovOf(st.sov)] : "") + ".";
       const adrs = ce.picks.map((q, i) => {
         const alts = C[q.c].o.filter((x) => x.n !== q.p.n);
         const weak = q.p.s.map((v, d) => v <= 2 ? dimNames[d] + " " + v + "/5" : null).filter(Boolean);
@@ -6622,7 +8075,7 @@ Give the board's decision. Each member's concern must be resolved in the answers
       const hold = drillRows.filter((r) => r.ok).length;
       const drillSummary = drillRows.length ? S.l + ": " + hold + " hold, " + (drillRows.length - hold) + " need attention" : "Choose components in Outcomes first.";
       const inc = D.incidents[drillKey];
-      const incident = { t: inc[0], d: inc[1], u: inc[2], k: inc[3] || "Real incident" };
+      const incident = { t: inc[0], d: inc[1], u: inc[2], k: inc[3] || "Real incident", asOf: asOfLabel(provenanceOf("incidents", drillKey), (/* @__PURE__ */ new Date()).toISOString().slice(0, 10)) };
       const has = (c) => ce.picks.some((q) => q.c === c);
       const nm = (c) => {
         const q = ce.picks.find((x) => x.c === c);

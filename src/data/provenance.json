@@ -1,0 +1,1385 @@
+{
+ "$schema": "./provenance.schema.json",
+ "products": {
+  "ui/Next.js (React)": {
+   "source": "https://nextjs.org/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ui/Angular": {
+   "source": "https://angular.dev",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ui/Flutter": {
+   "source": "https://docs.flutter.dev",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "bi/Apache Superset": {
+   "source": "https://superset.apache.org/docs/intro",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "bi/Microsoft Power BI": {
+   "source": "https://learn.microsoft.com/power-bi/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "bi/Tableau": {
+   "source": "https://help.tableau.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "edge/Cloudflare": {
+   "source": "https://developers.cloudflare.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "edge/AWS CloudFront + WAF": {
+   "source": "https://docs.aws.amazon.com/cloudfront/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "edge/Azure Front Door": {
+   "source": "https://learn.microsoft.com/azure/frontdoor/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lb/NGINX": {
+   "source": "https://nginx.org/en/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lb/Envoy": {
+   "source": "https://www.envoyproxy.io/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lb/AWS Application Load Balancer": {
+   "source": "https://docs.aws.amazon.com/elasticloadbalancing/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "gw/Kong Gateway": {
+   "source": "https://docs.konghq.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "gw/Amazon API Gateway": {
+   "source": "https://docs.aws.amazon.com/apigateway/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "gw/Azure API Management": {
+   "source": "https://learn.microsoft.com/azure/api-management/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "app/Kubernetes": {
+   "source": "https://kubernetes.io/docs/home/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "app/AWS Lambda": {
+   "source": "https://docs.aws.amazon.com/lambda/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "app/Azure Container Apps": {
+   "source": "https://learn.microsoft.com/azure/container-apps/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "orch/LangGraph": {
+   "source": "https://langchain-ai.github.io/langgraph/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "orch/LlamaIndex": {
+   "source": "https://docs.llamaindex.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "orch/Haystack": {
+   "source": "https://docs.haystack.deepset.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "agents/LangGraph": {
+   "source": "https://langchain-ai.github.io/langgraph/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "agents/CrewAI": {
+   "source": "https://docs.crewai.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "agents/Claude Agent SDK": {
+   "source": "https://docs.claude.com/en/api/agent-sdk/overview",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tools/Model Context Protocol (MCP)": {
+   "source": "https://modelcontextprotocol.io",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tools/Agent2Agent (A2A) protocol": {
+   "source": "https://github.com/a2aproject/A2A",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tools/OpenAPI tool adapters": {
+   "source": "https://swagger.io/specification/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/vLLM + Hugging Face models": {
+   "source": "https://docs.vllm.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/Claude via API": {
+   "source": "https://docs.claude.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/Amazon Bedrock": {
+   "source": "https://docs.aws.amazon.com/bedrock/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/Azure OpenAI Service": {
+   "source": "https://learn.microsoft.com/azure/ai-services/openai/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/Gemini on Vertex AI": {
+   "source": "https://cloud.google.com/vertex-ai/generative-ai/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "llm/OpenAI API": {
+   "source": "https://platform.openai.com/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "guard/NeMo Guardrails": {
+   "source": "https://docs.nvidia.com/nemo/guardrails/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "guard/Langfuse": {
+   "source": "https://langfuse.com/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "guard/Azure AI Content Safety": {
+   "source": "https://learn.microsoft.com/azure/ai-services/content-safety/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "media/FFmpeg + Shaka Packager": {
+   "source": "https://ffmpeg.org/documentation.html",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "media/AWS Elemental MediaConvert": {
+   "source": "https://docs.aws.amazon.com/mediaconvert/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "media/Mux": {
+   "source": "https://docs.mux.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "reco/Feast + PyTorch": {
+   "source": "https://docs.feast.dev",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "reco/Amazon Personalize": {
+   "source": "https://docs.aws.amazon.com/personalize/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "reco/Google Vertex AI": {
+   "source": "https://cloud.google.com/vertex-ai/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ingest/EMQX": {
+   "source": "https://docs.emqx.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ingest/AWS IoT Core": {
+   "source": "https://docs.aws.amazon.com/iot/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ingest/Azure IoT Hub": {
+   "source": "https://learn.microsoft.com/azure/iot-hub/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "stream/Apache Flink": {
+   "source": "https://nightlies.apache.org/flink/flink-docs-stable/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "stream/Spark Structured Streaming": {
+   "source": "https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "stream/Amazon Managed Flink": {
+   "source": "https://docs.aws.amazon.com/managed-flink/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "integ/Airbyte": {
+   "source": "https://docs.airbyte.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "integ/Fivetran": {
+   "source": "https://fivetran.com/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "integ/MuleSoft Anypoint": {
+   "source": "https://docs.mulesoft.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "db/PostgreSQL": {
+   "source": "https://www.postgresql.org/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "db/Amazon Aurora PostgreSQL": {
+   "source": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "db/MongoDB Atlas": {
+   "source": "https://www.mongodb.com/docs/atlas/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "nosql/Apache Cassandra": {
+   "source": "https://cassandra.apache.org/doc/latest/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "nosql/Amazon DynamoDB": {
+   "source": "https://docs.aws.amazon.com/dynamodb/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "nosql/Azure Cosmos DB": {
+   "source": "https://learn.microsoft.com/azure/cosmos-db/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "cache/Valkey (Redis-compatible)": {
+   "source": "https://valkey.io/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "cache/Amazon ElastiCache": {
+   "source": "https://docs.aws.amazon.com/elasticache/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "cache/Memcached": {
+   "source": "https://memcached.org",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "geo/H3 + PostGIS": {
+   "source": "https://h3geo.org/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "geo/Valkey geo commands": {
+   "source": "https://valkey.io/commands/geoadd/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "geo/Amazon Location Service": {
+   "source": "https://docs.aws.amazon.com/location/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "search/OpenSearch": {
+   "source": "https://opensearch.org/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "search/Elastic Cloud": {
+   "source": "https://www.elastic.co/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "search/Algolia": {
+   "source": "https://www.algolia.com/doc/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mq/Apache Kafka": {
+   "source": "https://kafka.apache.org/documentation/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mq/RabbitMQ": {
+   "source": "https://www.rabbitmq.com/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mq/Confluent Cloud": {
+   "source": "https://docs.confluent.io/cloud/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "vec/pgvector": {
+   "source": "https://github.com/pgvector/pgvector",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "vec/Qdrant": {
+   "source": "https://qdrant.tech/documentation/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "vec/Pinecone": {
+   "source": "https://docs.pinecone.io",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mem/LangGraph checkpointer on Postgres": {
+   "source": "https://langchain-ai.github.io/langgraph/concepts/persistence/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mem/Mem0": {
+   "source": "https://docs.mem0.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mem/Letta": {
+   "source": "https://docs.letta.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tsdb/TimescaleDB": {
+   "source": "https://docs.timescale.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tsdb/InfluxDB": {
+   "source": "https://docs.influxdata.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "tsdb/Azure Data Explorer": {
+   "source": "https://learn.microsoft.com/azure/data-explorer/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lake/Apache Iceberg + Spark": {
+   "source": "https://iceberg.apache.org/docs/latest/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lake/Databricks": {
+   "source": "https://docs.databricks.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "lake/Snowflake": {
+   "source": "https://docs.snowflake.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "catalog/OpenMetadata": {
+   "source": "https://docs.open-metadata.org",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "catalog/DataHub": {
+   "source": "https://datahubproject.io/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "catalog/Collibra": {
+   "source": "https://www.collibra.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mesh/Istio": {
+   "source": "https://istio.io/latest/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mesh/Linkerd": {
+   "source": "https://linkerd.io/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mesh/Google Cloud Service Mesh": {
+   "source": "https://cloud.google.com/service-mesh/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigw/LiteLLM": {
+   "source": "https://docs.litellm.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigw/Portkey": {
+   "source": "https://portkey.ai/docs",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigw/Azure API Management AI gateway": {
+   "source": "https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigov/MLflow": {
+   "source": "https://mlflow.org/docs/latest/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigov/IBM watsonx.governance": {
+   "source": "https://www.ibm.com/docs/en/watsonx/saas",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aigov/Credo AI": {
+   "source": "https://www.credo.ai",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "embai/SAP Joule": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "embai/Salesforce Agentforce": {
+   "source": "https://architect.salesforce.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "embai/ServiceNow Now Assist": {
+   "source": "https://www.servicenow.com/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "embai/Microsoft Copilot Studio": {
+   "source": "https://learn.microsoft.com/microsoft-copilot-studio/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aiops/ServiceNow Event Management": {
+   "source": "https://www.servicenow.com/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aiops/BigPanda": {
+   "source": "https://docs.bigpanda.io",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "aiops/Keep": {
+   "source": "https://docs.keephq.dev",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "runbook/Ansible": {
+   "source": "https://docs.ansible.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "runbook/Rundeck": {
+   "source": "https://docs.rundeck.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "runbook/Azure Automation": {
+   "source": "https://learn.microsoft.com/azure/automation/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "runbook/AWS Systems Manager Automation": {
+   "source": "https://docs.aws.amazon.com/systems-manager/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ux/SAP Fiori launchpad": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ux/Microsoft Teams apps": {
+   "source": "https://learn.microsoft.com/microsoftteams/platform/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ux/Custom React portal": {
+   "source": "https://react.dev",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "erpcore/SAP S/4HANA Cloud, private edition (RISE)": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "erpcore/SAP S/4HANA Cloud, public edition": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "erpcore/Oracle Fusion Cloud ERP": {
+   "source": "https://docs.oracle.com/en/cloud/saas/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "erpcore/Odoo": {
+   "source": "https://www.odoo.com/documentation/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ext/SAP BTP": {
+   "source": "https://discovery-center.cloud.sap",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ext/Microsoft Power Platform": {
+   "source": "https://learn.microsoft.com/power-platform/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ext/Custom services on Kubernetes": {
+   "source": "https://kubernetes.io/docs/home/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ipaas/SAP Integration Suite": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ipaas/MuleSoft Anypoint": {
+   "source": "https://docs.mulesoft.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ipaas/Apache Camel": {
+   "source": "https://camel.apache.org/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mdm/SAP Master Data Governance": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mdm/Informatica MDM": {
+   "source": "https://docs.informatica.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "mdm/Reltio": {
+   "source": "https://docs.reltio.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "migr/SAP S/4HANA Migration Cockpit": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "migr/Syniti": {
+   "source": "https://www.syniti.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "migr/dbt + Python pipelines": {
+   "source": "https://docs.getdbt.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "proc/SAP Signavio": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "proc/Celonis": {
+   "source": "https://docs.celonis.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "proc/PM4Py": {
+   "source": "https://pm4py.fit.fraunhofer.de",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "alm/SAP Cloud ALM": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "alm/Tricentis Tosca": {
+   "source": "https://documentation.tricentis.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "alm/Playwright": {
+   "source": "https://playwright.dev/docs/intro",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "grc/SAP GRC Access Control": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "grc/Saviynt": {
+   "source": "https://docs.saviyntcloud.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "grc/SailPoint": {
+   "source": "https://documentation.sailpoint.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "hcm/Workday HCM": {
+   "source": "https://www.workday.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "hcm/SAP SuccessFactors Employee Central": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "hcm/OrangeHRM": {
+   "source": "https://www.orangehrm.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "payroll/SAP SuccessFactors Employee Central Payroll": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "payroll/Workday Payroll": {
+   "source": "https://www.workday.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "payroll/ADP": {
+   "source": "https://www.adp.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "talent/Cornerstone": {
+   "source": "https://www.cornerstoneondemand.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "talent/SAP SuccessFactors Learning": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "talent/Moodle": {
+   "source": "https://docs.moodle.org",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "crmcore/Salesforce Sales and Service Cloud": {
+   "source": "https://architect.salesforce.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "crmcore/Microsoft Dynamics 365": {
+   "source": "https://learn.microsoft.com/dynamics365/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "crmcore/SuiteCRM": {
+   "source": "https://docs.suitecrm.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "itsm/ServiceNow ITSM": {
+   "source": "https://www.servicenow.com/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "itsm/Jira Service Management": {
+   "source": "https://support.atlassian.com/jira-service-management-cloud/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "itsm/GLPI": {
+   "source": "https://glpi-project.org",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "p2p/SAP Ariba": {
+   "source": "https://learning.sap.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "p2p/Coupa": {
+   "source": "https://compass.coupa.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "p2p/Oracle Procurement Cloud": {
+   "source": "https://docs.oracle.com/en/cloud/saas/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "idp/Keycloak": {
+   "source": "https://www.keycloak.org/documentation",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "idp/Okta": {
+   "source": "https://developer.okta.com/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "idp/Microsoft Entra ID": {
+   "source": "https://learn.microsoft.com/entra/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "obs/OpenTelemetry + Grafana": {
+   "source": "https://opentelemetry.io/docs/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "obs/Datadog": {
+   "source": "https://docs.datadoghq.com",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "obs/Azure Monitor": {
+   "source": "https://learn.microsoft.com/azure/azure-monitor/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  }
+ },
+ "fitRules": {
+  "db/PostgreSQL#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "db/PostgreSQL#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "db/PostgreSQL#3": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "db/Amazon Aurora PostgreSQL#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "db/Amazon Aurora PostgreSQL#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "db/MongoDB Atlas#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "nosql/Apache Cassandra#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "nosql/Amazon DynamoDB#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "nosql/Azure Cosmos DB#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "search/Algolia#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "search/Algolia#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "search/Algolia#3": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "search/OpenSearch#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "search/Elastic Cloud#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "mq/RabbitMQ#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "mq/RabbitMQ#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "mq/Apache Kafka#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "mq/Confluent Cloud#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "gw/Amazon API Gateway#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "gw/Amazon API Gateway#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "gw/Amazon API Gateway#3": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "gw/Azure API Management#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "app/AWS Lambda#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "app/AWS Lambda#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "app/AWS Lambda#3": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "app/AWS Lambda#4": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "app/Kubernetes#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "llm/vLLM#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "llm/vLLM#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "llm/*hosted#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "stream/Spark Structured Streaming#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "lake/Apache Iceberg#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "lake/Snowflake#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "lake/Databricks#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "obs/Datadog#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "obs/Datadog#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "idp/Okta#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "idp/Okta#2": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "idp/Microsoft Entra ID#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "idp/Keycloak#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "geo/Amazon Location Service#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "tsdb/TimescaleDB#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "ingest/AWS IoT Core#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "ingest/Azure IoT Hub#1": {
+   "source": "curated",
+   "asOf": "2026-10-28",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-28"
+  },
+  "*/#hosted#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-11-11",
+   "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  },
+  "*/#hosted#2": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-11-11",
+   "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  },
+  "llm/#hosted#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-11-11",
+   "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  },
+  "*/#saas#1": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-11-11",
+   "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  },
+  "llm/#hosted#2": {
+   "source": "curated",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-11-11",
+   "note": "Sovereignty rule. Applies by catalogue tag (how the product is listed); the reason asks the learner to check for self-managed or in-region editions."
+  }
+ },
+ "incidents": {
+  "surge": {
+   "source": "https://cloud.google.com/blog/products/containers-kubernetes/bringing-pokemon-go-to-life-on-google-cloud",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "outage": {
+   "source": "https://aws.amazon.com/message/41926/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "audit": {
+   "source": "https://curia.europa.eu/jcms/upload/docs/application/pdf/2020-07/cp200091en.pdf",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "price": {
+   "source": "https://redis.io/blog/redis-adopts-dual-source-available-licensing/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "cutover": {
+   "source": "https://www.consultancy.uk/news/18243/lidl-cancels-sap-introduction-having-sunk-500-million-into-it",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "model": {
+   "source": "https://docs.claude.com/en/docs/about-claude/model-deprecations",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "inject": {
+   "source": "https://aibusiness.com/nlp/air-canada-held-responsible-for-chatbot-s-hallucinations-",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  },
+  "exit": {
+   "source": "https://news.sap.com/2020/02/sap-s4hana-maintenance-2040-clarity-choice-sap-business-suite-7/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "regulation": {
+   "source": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202601744",
+   "asOf": "2026-11-11",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-05-11",
+   "note": "Dates checked on 11 Nov 2026 against Regulation (EU) 2026/1744 (OJ L, 24 July 2026) and Regulation (EU) 2024/1689. Not yet reviewed by a person."
+  },
+  "storm": {
+   "source": "https://techcrunch.com/2024/07/20/microsoft-says-8-5m-windows-devices-were-affected-by-crowdstrike-outage/",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2028-10-23"
+  }
+ },
+ "referenceModels": {
+  "ecom": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "genai": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "iot": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "data": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "stream": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "retail": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "agents": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "ride": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "sap": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "hr": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "crm": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "itsm": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  },
+  "procure": {
+   "source": "curated",
+   "asOf": "2026-10-23",
+   "reviewedBy": "unreviewed",
+   "reviewBy": "2027-10-23"
+  }
+ }
+}

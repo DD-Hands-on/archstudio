@@ -10,6 +10,8 @@ import { SAVE_VERSION, APP_VERSION, pickNamesFor, migrateDesign } from '../engin
 import { platformOf, noStandards, exampleStandards, checkDesign, standardsForStore, standardsFromStore } from '../engine/standards.js';
 import { principleCheck } from '../engine/principles.js';
 import { baselineFor, gapAnalysis } from '../engine/gap.js';
+import { provenanceOf, asOfLabel, monthYear } from '../engine/provenance.js';
+import { SOV_OPTIONS, SOV_PHRASE, sovOf, sovFromText } from '../engine/sovereignty.js';
 import { BOARD_ROLES } from '../app/board-roles.js';
 import { TRACKS } from '../app/tracks.js';
 import { localStore } from '../standalone/local-store.js';
@@ -19,7 +21,7 @@ const DCLogic = window.DCLogic;
 
 export class Component extends DCLogic {
   state = { step: 'tour', level: 'beginner', plain: true, term: null, tourIdx: 0,
-    app: 'ecom', text: '', custom: null, interp: null, interpMiss: false, scale: '1M', reg: false, cloud: 'aws', field: 'green', lens: 'system', avail: '99.95', ai: 'enabled',
+    app: 'ecom', text: '', custom: null, interp: null, interpMiss: false, scale: '1M', reg: false, cloud: 'aws', sov: 'any', field: 'green', lens: 'system', avail: '99.95', ai: 'enabled',
     outcomes: [], outcomesApp: null, active: 0, chosen: null, guided: true, predict: {}, focus: null, work: {},
     reqStep: -1, reqHit: true, off: {}, drill: 'surge', stage: 0, capMat: {}, time: {}, quiz: {},
     chat: [], thinking: false, thinkStarted: false, flowSel: null, showCtx: false, showTpl: false, aiReady: false,
@@ -132,7 +134,7 @@ export class Component extends DCLogic {
       'Reply with only one JSON object in this shape:\n' +
       '{"title": "short name, max 8 words", "understanding": "2 or 3 plain sentences restating what they want to build and why", ' +
       '"base": "one reference model id or custom", "components": ["5 to 16 catalogue ids the design needs; omit generic AI ids unless AI is central, the studio adds AI parts from the posture"], ' +
-      '"settings": {"ai": "none|enabled|native", "reg": true, "field": "green|brown", "scale": "10k|1M|50M", "cloud": "aws|azure|multi", "avail": "99.9|99.95|99.99"}, ' +
+      '"settings": {"ai": "none|enabled|native", "reg": true, "field": "green|brown", "scale": "10k|1M|50M", "cloud": "aws|azure|multi", "sov": "any|region|sovereign|onprem (where data and models may run; any unless the brief says)", "avail": "99.9|99.95|99.99"}, ' +
       '"request": "one typical user journey, lower case, e.g. a buyer posts a purchase order", ' +
       '"flows": [{"from": "id", "to": "id", "type": "sync|async|batch", "label": "2 to 4 words"}], ' +
       '"assumptions": ["up to 3 short assumptions"], "notCovered": ["parts of the brief the catalogue cannot represent"], ' +
@@ -184,6 +186,7 @@ export class Component extends DCLogic {
     pick('scale', ['10k','1M','50M'], v => v + ' users');
     pick('cloud', ['aws','azure','multi'], v => ({ aws: 'AWS first', azure: 'Azure first', multi: 'multi-cloud' })[v]);
     pick('avail', ['99.9','99.95','99.99'], v => v + '% availability');
+    pick('sov', ['any','region','sovereign','onprem'], v => 'data and models ' + SOV_PHRASE[v]);
     const lastUser = chat.filter(m => m.role === 'user').slice(-1)[0];
     const title = String(r.title || (lastUser ? lastUser.text : 'Custom design')).slice(0, 70);
     const custom = Object.assign({}, base, { n: title, d: 'Interpreted by ' + this.aiName() + ' from your brief.', c, flows, req: r.request ? String(r.request).slice(0, 90) : base.req });
@@ -336,6 +339,7 @@ export class Component extends DCLogic {
     if (/gxp|pharma|regulated|[^a-z]fda[^a-z]|clinical|hipaa|[^a-z]pii[^a-z]|medical|life science|biotech/.test(t)) { flags.reg = true; applied.push('regulated data (GxP, PII)'); }
     if (/ai-native|ai native|agentic|autonomous agent|agent-first/.test(t)) { flags.ai = 'native'; applied.push('AI-native posture'); }
     else if (/ai-enabled|ai enabled|copilot|genai|[^a-z]ai[^a-z]|[^a-z]llm/.test(t)) { flags.ai = 'enabled'; applied.push('AI-enabled posture'); }
+    const sv = sovFromText(t); if (sv) { flags.sov = sv; applied.push('data and models ' + SOV_PHRASE[sv]); }
     let base, c, baseName;
     if (best) { base = D.apps[best.app]; baseName = base.n; c = base.c.slice(); }
     else {
@@ -698,7 +702,7 @@ export class Component extends DCLogic {
     const scaleWord = { '10k': 'thousands of', '1M': 'a million', '50M': 'tens of millions of' }[st.scale] || 'many';
     const lc = t => /^[A-Z]{2}/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
     const statement = sc ? 'Success means ' + sc.goals.slice(0, -1).map(lc).join(', ') + ' and ' + lc(sc.goals[sc.goals.length - 1]) + '. The target is built on ' + A.n + ' and must meet ' + (st.reg ? 'regulatory obligations' : 'enterprise standards') + ' and a ' + st.avail + '% availability target.'
-      : 'Deliver the ' + A.n + ' for ' + scaleWord + ' users on ' + ({ aws: 'AWS', azure: 'Azure', multi: 'a hybrid or multi-cloud estate' }[st.cloud]) + ', ' + (st.field === 'brown' ? 'replacing parts of an existing estate' : 'built new') + ', ' + (st.reg ? 'with regulated data' : 'with standard data') + ' and a ' + st.avail + '% availability target.';
+      : 'Deliver the ' + A.n + ' for ' + scaleWord + ' users on ' + ({ aws: 'AWS', azure: 'Azure', multi: 'a hybrid or multi-cloud estate' }[st.cloud]) + ', ' + (st.field === 'brown' ? 'replacing parts of an existing estate' : 'built new') + ', ' + (st.reg ? 'with regulated data' : 'with standard data') + (sovOf(st.sov) !== 'any' ? ', with data and models ' + SOV_PHRASE[sovOf(st.sov)] : '') + ' and a ' + st.avail + '% availability target.';
     const L = (h, items, m, c) => ({ h, m, c, items: items.map(t => ({ t })) });
     const vision = { title: sc ? sc.n : 'Architecture vision: ' + A.n, hasScen: !!sc, scenName: sc ? sc.n : '', sit: sc ? sc.sit : '', statement,
       lists: [L('Business drivers', sc ? sc.drivers : [A.d], '›', 'var(--accent)'), L('Goals and measures', sc ? sc.goals : ['Meet the ' + st.avail + '% availability target', 'Stay within the approved pattern library', 'Pass the architecture review board'], '✓', 'var(--good)'), L('In scope', sc ? sc.scopeIn : (A.caps || []).slice(0, 4), '+', 'var(--accent)'), L('Out of scope', sc ? sc.scopeOut : ['Systems outside this design', 'Organisation and process redesign'], '−', 'var(--warn)')],
@@ -756,7 +760,7 @@ export class Component extends DCLogic {
     const lines = [];
     lines.push('DESIGN: ' + (sc ? sc.n : A.n) + '. Template: ' + A.n + '. ' + A.d);
     if (sc) lines.push('SITUATION: ' + sc.sit);
-    lines.push('CONSTRAINTS: ' + ({ '10k': 'thousands of', '1M': 'about a million', '50M': 'tens of millions of' }[st.scale] || st.scale) + ' users; availability target ' + st.avail + '%; cloud ' + st.cloud + '; ' + (st.reg ? 'regulated data' : 'no regulated data') + '; ' + (st.field === 'brown' ? 'brownfield' : 'greenfield') + '; AI posture ' + st.ai + '.');
+    lines.push('CONSTRAINTS: ' + ({ '10k': 'thousands of', '1M': 'about a million', '50M': 'tens of millions of' }[st.scale] || st.scale) + ' users; availability target ' + st.avail + '%; cloud ' + st.cloud + '; ' + (st.reg ? 'regulated data' : 'no regulated data') + '; ' + (st.field === 'brown' ? 'brownfield' : 'greenfield') + '; AI posture ' + st.ai + (sovOf(st.sov) !== 'any' ? '; data and models must run ' + SOV_PHRASE[sovOf(st.sov)] : '') + '.');
     if (sc) { lines.push('DRIVERS: ' + sc.drivers.join('; ')); lines.push('GOALS: ' + sc.goals.join('; ')); lines.push('IN SCOPE: ' + sc.scopeIn.join('; ') + '. OUT OF SCOPE: ' + sc.scopeOut.join('; ')); }
     const stake = sc ? sc.stake.map(s => s[0] + ' (concern: ' + s[3] + ')') : ['Executive sponsor', 'Security office', 'Operations and support', 'Finance'];
     lines.push('STAKEHOLDERS: ' + stake.join('; '));
@@ -934,7 +938,7 @@ export class Component extends DCLogic {
     const picks = {}; Object.keys(ds.picks).forEach(k => { if (ds.picks[k] != null) picks[k] = ds.picks[k]; });
     const body = { schemaVersion: SAVE_VERSION, appVersion: APP_VERSION, ownerId: st.uid || null, title: sc ? sc.n : A.n, app: st.app, scenario: st.scenario || null, step: st.step, level: st.level,
       stage: stageOverride || (mine && mine.stage === 'review' ? 'review' : this.liveStage(r)), savedAt: now, createdAt: (mine && mine.createdAt) || now,
-      settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, avail: st.avail }, comps: ds.comps, picks, pickNames: pickNamesFor(picks, cat), canvas,
+      settings: { ai: st.ai, reg: !!st.reg, field: st.field, scale: st.scale, cloud: st.cloud, sov: sovOf(st.sov), avail: st.avail }, comps: ds.comps, picks, pickNames: pickNamesFor(picks, cat), canvas,
       principles: this.prinOn(), contract: !!(st.contractSigned || stageOverride === 'review'), aiBoard: st.boardVerdict ? { decision: st.boardVerdict.decision, conditions: st.boardVerdict.conditions, summary: st.boardVerdict.summary, at: st.boardVerdict.at } : null, custom: st.app === 'custom' && st.custom ? st.custom : null };
     this.setState({ portMsg: 'Saving...', portErr: false });
     try {
@@ -952,7 +956,7 @@ export class Component extends DCLogic {
       principles: d.principles || null, contractSigned: !!d.contract, board: null, boardVerdict: d.aiBoard || null, savedId: d.ownerId && d.ownerId === this.state.uid ? d.id : null, openCard: null,
       portMsg: [d.ownerId && d.ownerId === this.state.uid ? '' : 'Opened a copy. Saving creates a new design in your portfolio.'].concat(d._notes || []).filter(Boolean).join(' '), portErr: d._notes && d._notes.length ? 'warn' : false };
     if (d.app === 'custom' && d.custom) patch.custom = d.custom;
-    ['ai', 'field', 'scale', 'cloud', 'avail'].forEach(k => { if (s[k] != null) patch[k] = s[k]; }); if (s.reg != null) patch.reg = !!s.reg;
+    ['ai', 'field', 'scale', 'cloud', 'avail'].forEach(k => { if (s[k] != null) patch[k] = s[k]; }); if (s.reg != null) patch.reg = !!s.reg; patch.sov = sovOf(s.sov);
     this.setState(patch);
   }
 
@@ -1212,13 +1216,14 @@ export class Component extends DCLogic {
 
     const apps = D.baseKeys.map(k => Object.assign({ n: D.apps[k].n, d: D.apps[k].d, count: D.apps[k].c.length + ' components at Advanced', pick: () => this.setState({ app: k, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null }) }, sel(st.app === k)));
     const implApps = D.implKeys.map(k => Object.assign({ n: D.apps[k].n, d: D.apps[k].d, count: D.apps[k].c.length + ' components at Advanced', pick: () => this.setState({ app: k, active: 0, chosen: null, capMat: {}, time: {}, off: {}, reqStep: -1, predict: {}, focus: null }) }, sel(st.app === k)));
-    const grp = (label, key, opts) => ({ label, opts: opts.map(([v, l]) => Object.assign({ l, pick: () => this.setState({ [key]: v }) }, sel(st[key] === v))) });
+    const grp = (label, key, opts) => ({ label, opts: opts.map(([v, l]) => Object.assign({ l, on: st[key] === v ? 'true' : 'false', pick: () => this.setState({ [key]: v }) }, sel(st[key] === v))) });
     const ctx = [
       grp('AI posture', 'ai', [['none','No AI'],['enabled','AI-enabled (copilots assist people)'],['native','AI-native (agents do the work, people supervise)']]),
       grp('Expected scale', 'scale', [['10k','10k users'],['1M','1M users'],['50M','50M users']]),
       grp('Data sensitivity', 'reg', [[false,'Standard'],[true,'Regulated (GxP, PII)']]),
       grp('Availability target', 'avail', [['99.9','99.9%'],['99.95','99.95%'],['99.99','99.99%']]),
       grp('Cloud posture', 'cloud', [['aws','AWS first'],['azure','Azure first'],['multi','Multi-cloud or hybrid']]),
+      grp('Where data and models may run', 'sov', SOV_OPTIONS),
       grp('Starting point', 'field', [['green','Greenfield'],['brown','Brownfield (replace or extend legacy)']])
     ];
     const rps = { '10k': '200', '1M': '8,000', '50M': '250,000' }[st.scale];
@@ -1368,7 +1373,7 @@ export class Component extends DCLogic {
     const wFit = [];
     comps.forEach(cid => this.fitOpts(cid).forEach(o => { if (o.fit) wFit.push({ n: o.n, blk: C[cid].l, up: o.fit.every(f => f.v > 0),
       chg: o.fit.map(f => wDimN[f.d] + ' ' + (f.v > 0 ? '+' : '−') + Math.abs(f.v)).filter((x, k, a) => a.indexOf(x) === k).join(' · '),
-      why: o.fit.map(f => f.why).filter((x, k, a) => a.indexOf(x) === k).join(' '), cbg: o.fit.every(f => f.v > 0) ? 'var(--good-soft)' : 'var(--warn-soft)', cfg: o.fit.every(f => f.v > 0) ? 'var(--good)' : 'var(--warn)' }); }));
+      why: o.fit.map(f => f.why).filter((x, k, a) => a.indexOf(x) === k).join(' '), asOf: (() => { const ds = o.fit.map(f => provenanceOf('fitRules', f.key)).filter(Boolean).map(p => p.asOf).sort(); return ds.length ? 'Rule as of ' + monthYear(ds[ds.length - 1]) : ''; })(), cbg: o.fit.every(f => f.v > 0) ? 'var(--good-soft)' : 'var(--warn-soft)', cfg: o.fit.every(f => f.v > 0) ? 'var(--good)' : 'var(--warn)' }); }));
     const wFitNone = !wFit.length;
     const wSummary = wMis ? wMis + ' mismatch' + (wMis === 1 ? '' : 'es') + ' between the numbers and the blueprint' : 'The blueprint matches what the numbers need';
     const wLaws = [
@@ -1485,7 +1490,7 @@ export class Component extends DCLogic {
     const glance = [
       { l: 'Lens', v: ent ? 'Enterprise portfolio first' : 'System first' }, { l: 'Building', v: A.n }, { l: 'AI posture', v: { none: 'No AI', enabled: 'AI-enabled', native: 'AI-native' }[st.ai] }, { l: 'Scale', v: st.scale + ' users' },
       { l: 'Data', v: st.reg ? 'Regulated (GxP, PII)' : 'Standard' }, { l: 'Availability', v: st.avail + '%' },
-      { l: 'Cloud', v: { aws: 'AWS first', azure: 'Azure first', multi: 'Multi-cloud or hybrid' }[st.cloud] }, { l: 'Starting point', v: st.field === 'brown' ? 'Brownfield' : 'Greenfield' }
+      { l: 'Cloud', v: { aws: 'AWS first', azure: 'Azure first', multi: 'Multi-cloud or hybrid' }[st.cloud] }, { l: 'Data and models', v: SOV_OPTIONS.find(o => o[0] === sovOf(st.sov))[1] }, { l: 'Starting point', v: st.field === 'brown' ? 'Brownfield' : 'Greenfield' }
     ];
 
     // Outcomes
@@ -1500,14 +1505,14 @@ export class Component extends DCLogic {
     const fills = [['Open source first','oss'],['Managed on ' + cname[st.cloud],'managed'],['Maximum scale','scale'],['Clear','clear']].map(([l, k]) => ({ l, go: () => { const n = this.cloneOuts(); n[active].picks = this.build(k); this.setOuts(n); } }));
     const dimNames = ['Scale','Cost','Ops ease','Portability','Speed'];
     const focus = st.focus && st.focus.outcome === active && comps.indexOf(st.focus.cid) >= 0 ? st.focus : null;
-    const stdM = this.stdMap();
+    const stdM = this.stdMap(); const today = new Date().toISOString().slice(0, 10);
     const card = cid => {
       const cc = C[cid]; const cur = outs[active].picks[cid]; const isFocus = focus && focus.cid === cid;
       return { label: cc.l, layer: D.layerNames[cc.layer], need: cc.need, an: cc.an, showAn: st.plain, cardBorder: isFocus ? '2px solid var(--orange)' : '1px solid ' + LINE,
         opts: this.fitOpts(cid).map((o, j) => {
           const on = cur === j; const signal = D.signals[o.n] || '';
           const sd = stdM[cid]; const isStd = !!sd && sd.status !== 'none' && sd.i >= 0 && sd.i === j;
-          return { n: o.n, k: o.k, w: o.w, u: o.u, sel: on, signal, hasSignal: !!signal, isStd, stdLabel: sd && sd.status === 'approved' ? 'Enterprise standard' : 'Proposed standard, under review', stdBg: sd && sd.status === 'approved' ? 'var(--good-soft)' : 'var(--warn-soft)', stdFg: sd && sd.status === 'approved' ? 'var(--good)' : 'var(--warn)', scoreLine: o.s.map((v, i) => dimNames[i] + ' ' + (o.s0 && o.s0[i] !== v ? o.s0[i] + '→' + v : v)).join(' · '), hasFit: !!o.fit, fitLine: o.fit ? o.fit.map(f => f.why).filter((x, i, a) => a.indexOf(x) === i).join(' ') : '', fitUp: !!o.fit && o.fit.every(f => f.v > 0),
+          return { n: o.n, k: o.k, w: o.w, u: o.u, asOf: asOfLabel(provenanceOf('products', cid + '/' + o.n), today), sel: on, signal, hasSignal: !!signal, isStd, stdLabel: sd && sd.status === 'approved' ? 'Enterprise standard' : 'Proposed standard, under review', stdBg: sd && sd.status === 'approved' ? 'var(--good-soft)' : 'var(--warn-soft)', stdFg: sd && sd.status === 'approved' ? 'var(--good)' : 'var(--warn)', scoreLine: o.s.map((v, i) => dimNames[i] + ' ' + (o.s0 && o.s0[i] !== v ? o.s0[i] + '→' + v : v)).join(' · '), hasFit: !!o.fit, fitLine: o.fit ? o.fit.map(f => f.why).filter((x, i, a) => a.indexOf(x) === i).join(' ') : '', fitUp: !!o.fit && o.fit.every(f => f.v > 0),
             pick: () => { const n = this.cloneOuts(); if (n[active].picks[cid] === j) delete n[active].picks[cid]; else n[active].picks[cid] = j; this.setOuts(n); },
             bg: on ? SOFT : 'var(--surface)', bd: on ? ACC : LINE, ring: on ? '0 0 0 1px ' + ACC : 'none',
             kbg: o.k === 'OSS' ? 'var(--good-soft)' : 'var(--warn-soft)', kfg: o.k === 'OSS' ? 'var(--good)' : 'var(--warn)' };
@@ -1589,7 +1594,7 @@ export class Component extends DCLogic {
     // Decisions
     const ce = evals[chosenIdx];
     const eaName = 'Outcome ' + (chosenIdx + 1);
-    const ctxLine = 'Brief: ' + A.n + ', ' + st.scale + ' users, ' + (st.reg ? 'regulated data' : 'standard data') + ', ' + st.avail + '% availability, ' + cname[st.cloud] + ' cloud posture, ' + { none: 'no AI', enabled: 'AI-enabled', native: 'AI-native' }[st.ai] + '.';
+    const ctxLine = 'Brief: ' + A.n + ', ' + st.scale + ' users, ' + (st.reg ? 'regulated data' : 'standard data') + ', ' + st.avail + '% availability, ' + cname[st.cloud] + ' cloud posture, ' + { none: 'no AI', enabled: 'AI-enabled', native: 'AI-native' }[st.ai] + (sovOf(st.sov) !== 'any' ? ', data and models ' + SOV_PHRASE[sovOf(st.sov)] : '') + '.';
     const adrs = ce.picks.map((q, i) => {
       const alts = C[q.c].o.filter(x => x.n !== q.p.n);
       const weak = q.p.s.map((v, d) => v <= 2 ? dimNames[d] + ' ' + v + '/5' : null).filter(Boolean);
@@ -1703,7 +1708,7 @@ export class Component extends DCLogic {
     const drillRows = ce.picks.map(q => { const r = S.f(q.p, q.c); return { n: q.p.n, c: C[q.c].l, s: r[1], why: r[2], bg: r[0] ? 'var(--good-soft)' : 'var(--warn-soft)', fg: r[0] ? 'var(--good)' : 'var(--warn)', ok: r[0] }; });
     const hold = drillRows.filter(r => r.ok).length;
     const drillSummary = drillRows.length ? S.l + ': ' + hold + ' hold, ' + (drillRows.length - hold) + ' need attention' : 'Choose components in Outcomes first.';
-    const inc = D.incidents[drillKey]; const incident = { t: inc[0], d: inc[1], u: inc[2], k: inc[3] || 'Real incident' };
+    const inc = D.incidents[drillKey]; const incident = { t: inc[0], d: inc[1], u: inc[2], k: inc[3] || 'Real incident', asOf: asOfLabel(provenanceOf('incidents', drillKey), new Date().toISOString().slice(0, 10)) };
     const has = c => ce.picks.some(q => q.c === c);
     const nm = c => { const q = ce.picks.find(x => x.c === c); return q ? q.p.n : null; };
     const threats = [{ b: 'Internet to edge', th: 'Spoofing · Denial of service', m: 'WAF and rate limits at ' + (nm('edge') || nm('gw') || 'the entry point') + '; bot management; TLS everywhere.' },

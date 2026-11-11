@@ -117,7 +117,7 @@
 <span style="font-size: 13px; font-weight: 600">{{g.label}}</span>
 <div style="display: flex; flex-wrap: wrap; gap: 6px">
 <sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3">
-<button type="button" onClick="{{o.pick}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid {{o.bd}}; background: {{o.bg}}; color: {{o.fg}}; font-size: 13px">{{o.l}}</button>
 </sc-for>
 </div>
 </div>
